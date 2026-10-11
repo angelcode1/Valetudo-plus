@@ -1,4 +1,5 @@
 const capabilities = require("./capabilities");
+const X40CleanGeniusResearch = require("./DreameX40CleanGeniusResearch");
 const DreameGen2ValetudoRobot = require("./DreameGen2ValetudoRobot");
 const DreameGen4ValetudoRobot = require("./DreameGen4ValetudoRobot");
 
@@ -343,6 +344,11 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
             this.registerCapability(new capability({robot: this}));
         });
 
+        // Experimental native CleanGenius mode is never enabled by default.
+        this.allowExperimentalCleanGenius = X40CleanGeniusResearch.isEnabled();
+        const experimentalQuirks = this.allowExperimentalCleanGenius ?
+            X40CleanGeniusResearch.createQuirks(this) : [];
+
         this.registerCapability(new QuirksCapability({
             robot: this,
             quirks: [
@@ -364,6 +370,7 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
                 quirkFactory.getQuirk(DreameQuirkFactory.KNOWN_QUIRKS.MULTI_MAP),
                 quirkFactory.getQuirk(DreameQuirkFactory.KNOWN_QUIRKS.INTELLIGENT_MAP_RECOGNITION),
                 quirkFactory.getQuirk(DreameQuirkFactory.KNOWN_QUIRKS.FAN_SPEED_ONE_TIME_TURBO),
+                ...experimentalQuirks,
             ]
         }));
 
