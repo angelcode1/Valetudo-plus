@@ -558,7 +558,7 @@ class DreameGen2ValetudoRobot extends DreameValetudoRobot {
                         case DreameGen2ValetudoRobot.MIOT_SERVICES.VACUUM_2.PROPERTIES.MISC_TUNABLES.PIID: {
                             const deserializedTunables = DreameUtils.DESERIALIZE_MISC_TUNABLES(elem.value);
 
-                            if (deserializedTunables.SmartHost > 0) {
+                            if (deserializedTunables.SmartHost > 0 && !this.allowExperimentalCleanGenius) {
                                 Logger.info("Disabling CleanGenius");
                                 // CleanGenius breaks most controls in Valetudo without any user feedback
                                 // Thus, we just automatically disable it instead of making every functionality aware of it
