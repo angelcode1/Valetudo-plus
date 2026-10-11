@@ -2,7 +2,7 @@
 
 const assert = require("node:assert/strict");
 const test = require("node:test");
-const research = require("../../../lib/robots/dreame/DreameX40CleanGeniusResearch");
+const research = require("../../../../lib/robots/dreame/DreameX40CleanGeniusResearch");
 
 test("experimental feature is opt-in", () => {
     assert.equal(research.isEnabled({}), false);
