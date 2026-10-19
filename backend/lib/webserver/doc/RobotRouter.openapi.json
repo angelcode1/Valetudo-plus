@@ -75,7 +75,21 @@
                     "type": "object",
                     "description": "Only cleanGenius, autoReclean, autoRewash, stainIdentification, hotWash; each has value (integer or null) and state (known interpretation or unknown/unavailable)"
                   },
-                  "nativeMopDirtiness": {"type": "string"}
+                  "nativeMopDirtiness": {"type": "string"},
+                  "dockWashActivity": {
+                    "type": "object",
+                    "description": "Read-only, bounded changes in already-polled MIOT mop-dock status. NOT measured mop dirtiness, water turbidity or proven rewash decisions.",
+                    "properties": {
+                      "source": {"type": "string", "enum": ["miot_mop_dock_status"]},
+                      "dataType": {"type": "string"},
+                      "state": {"type": "string", "enum": ["observed", "stale", "unavailable"]},
+                      "observedAt": {"type": "string", "nullable": true, "format": "date-time"},
+                      "ageMs": {"type": "integer", "nullable": true},
+                      "stale": {"type": "boolean"},
+                      "current": {"type": "object"},
+                      "transitions": {"type": "array", "maxItems": 12, "items": {"type": "object"}}
+                    }
+                  }
                 }
               }
             }
