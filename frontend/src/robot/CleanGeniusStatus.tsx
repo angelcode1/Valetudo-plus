@@ -155,6 +155,44 @@ const CleanGeniusStatus = (): React.ReactElement => {
                                     </Box>
 
                                     <Divider sx={{my: 2}}/>
+                                    <Typography variant="subtitle1">Mop-dock activity</Typography>
+                                    <Typography variant="body2" color="textSecondary" sx={{mb: 1}}>
+                                        From the existing mop-dock status poll, not from water turbidity or
+                                        AI mop-dirtiness messages. History resets when Valetudo restarts.
+                                    </Typography>
+
+                                    {status.dockWashActivity.state !== "observed" && (
+                                        <Alert severity="warning" sx={{my: 1}}>
+                                            Mop-dock activity is {status.dockWashActivity.state}.
+                                            No current wash status can be inferred.
+                                        </Alert>
+                                    )}
+
+                                    <Box sx={{p: 2, border: 1, borderColor: "divider", borderRadius: 1}}>
+                                        <Typography variant="subtitle2">Latest dock state</Typography>
+                                        <Typography>
+                                            {status.dockWashActivity.current.state.replace(/_/g, " ")}
+                                            {status.dockWashActivity.current.raw === null ?
+                                                "" : ` (raw ${status.dockWashActivity.current.raw})`}
+                                        </Typography>
+                                        <Typography variant="body2" color="textSecondary" sx={{mt: 1}}>
+                                            Recent state changes recorded: {status.dockWashActivity.transitions.length}
+                                        </Typography>
+                                        {status.dockWashActivity.transitions.slice().reverse().map((entry, index) => (
+                                            <Typography variant="caption" display="block"
+                                                key={`${entry.at}-${entry.raw}-${index}`}
+                                            >
+                                                {new Date(entry.at).toLocaleString()} — {entry.state.replace(/_/g, " ")}
+                                                {` (raw ${entry.raw})`}
+                                            </Typography>
+                                        ))}
+                                    </Box>
+                                    <Alert severity="info" sx={{mt: 2}}>
+                                        A cleaning state or repeated transitions does not prove an automatic
+                                        rewash, a dirty-mop detection or a CleanGenius decision.
+                                    </Alert>
+
+                                    <Divider sx={{my: 2}}/>
                                     <Typography variant="body2">{policy}</Typography>
                                     <Alert severity="info" sx={{mt: 2}}>
                                         Native mop-dirtiness readings, stain classifications and automatic
