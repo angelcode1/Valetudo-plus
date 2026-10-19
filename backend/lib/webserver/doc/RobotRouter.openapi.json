@@ -67,8 +67,8 @@
                   "readOnly": {"type": "boolean", "enum": [true]},
                   "dataType": {"type": "string", "enum": ["native_settings_not_sensor_measurements"]},
                   "state": {"type": "string", "enum": ["observed", "stale", "unavailable"]},
-                  "observedAt": {"type": ["string", "null"], "format": "date-time"},
-                  "ageMs": {"type": ["integer", "null"]},
+                  "observedAt": {"type": "string", "nullable": true, "format": "date-time"},
+                  "ageMs": {"type": "integer", "nullable": true},
                   "stale": {"type": "boolean"},
                   "valetudoPolicy": {"type": "string"},
                   "settings": {
