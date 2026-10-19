@@ -731,6 +731,24 @@ export interface X40CleanGeniusSetting {
     state: "off" | "on_setting" | "mode_1_unverified" | "mode_2_unverified" | "unknown" | "unavailable";
 }
 
+export interface X40DockWashActivity {
+    source: "miot_mop_dock_status";
+    dataType: "dock_activity_not_dirtiness_or_rewash_reason";
+    state: "observed" | "stale" | "unavailable";
+    observedAt: string | null;
+    ageMs: number | null;
+    stale: boolean;
+    current: {
+        raw: number | null;
+        state: string;
+    };
+    transitions: Array<{
+        raw: number;
+        state: string;
+        at: string;
+    }>;
+}
+
 export interface X40CleanGeniusReadOnlyStatus {
     source: "miot_4_50";
     readOnly: true;
@@ -748,4 +766,5 @@ export interface X40CleanGeniusReadOnlyStatus {
         hotWash: X40CleanGeniusSetting;
     };
     nativeMopDirtiness: "unavailable_no_verified_local_status_interface";
+    dockWashActivity: X40DockWashActivity;
 }
