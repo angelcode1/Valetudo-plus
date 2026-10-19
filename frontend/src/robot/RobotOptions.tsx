@@ -52,6 +52,7 @@ import {
     useObstacleImagesQuery,
     usePetObstacleAvoidanceControlMutation,
     usePetObstacleAvoidanceControlQuery,
+    useRobotInformationQuery,
 } from "../api";
 import React from "react";
 import {ListMenu} from "../components/list_menu/ListMenu";
@@ -77,6 +78,7 @@ import {
     Schema as BehaviourIcon,
     Settings as GeneralIcon,
     Star as QuirksIcon,
+    Insights as CleanGeniusIcon,
     TableBar as MopExtensionFurnitureLegHandlingControlIcon,
     Troubleshoot as CarpetSensorModeIcon,
     Tune as MiscIcon,
@@ -989,6 +991,7 @@ const AutoEmptyDockAutoEmptyDurationControlCapabilitySelectListMenuItem = () => 
 };
 
 const RobotOptions = (): React.ReactElement => {
+    const {data: robotInfo} = useRobotInformationQuery();
     const [
         locateCapabilitySupported,
 
@@ -1268,6 +1271,18 @@ const RobotOptions = (): React.ReactElement => {
             );
         }
 
+        if (robotInfo?.implementation === "DreameX40UltraValetudoRobot") {
+            items.push(
+                <LinkListMenuItem
+                    key="cleanGeniusStatus"
+                    url="/options/robot/clean-genius"
+                    primaryLabel="CleanGenius Status"
+                    secondaryLabel="Read-only native settings; no cleaning controls"
+                    icon={<CleanGeniusIcon/>}
+                />
+            );
+        }
+
         if (quirksCapabilitySupported) {
             items.push(
                 <LinkListMenuItem
@@ -1288,6 +1303,7 @@ const RobotOptions = (): React.ReactElement => {
         doNotDisturbCapabilitySupported,
 
         quirksCapabilitySupported,
+        robotInfo?.implementation,
     ]);
 
     const listItems = React.useMemo(() => {
