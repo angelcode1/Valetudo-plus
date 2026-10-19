@@ -44,6 +44,10 @@ class DreameGen2ValetudoRobot extends DreameValetudoRobot {
             )
         );
 
+        // Default safety policy: Gen2 disables native SmartHost when observed
+        // positive. Only the X40 research implementation may explicitly opt in.
+        this.allowExperimentalCleanGenius = false;
+
         this.highResolutionWaterGrades = !!options.highResolutionWaterGrades;
         this.waterGrades = this.highResolutionWaterGrades ? DreameGen2ValetudoRobot.HIGH_RESOLUTION_WATER_GRADES : DreameValetudoRobot.WATER_GRADES;
 
