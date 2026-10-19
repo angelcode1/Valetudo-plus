@@ -67,6 +67,10 @@ function parseSettings(value) {
 }
 
 function observe(value, observedAtMs = Date.now()) {
+    if (!Number.isSafeInteger(observedAtMs) || observedAtMs < 0 ||
+        observedAtMs > 8640000000000000) {
+        throw new Error("Invalid MIOT observation timestamp");
+    }
     return {
         observedAtMs,
         fields: parseSettings(value)
@@ -75,8 +79,11 @@ function observe(value, observedAtMs = Date.now()) {
 
 function buildStatus(observation, options = {}) {
     const nowMs = options.nowMs ?? Date.now();
-    const ageMs = observation && Number.isFinite(observation.observedAtMs) ?
-        Math.max(0, nowMs - observation.observedAtMs) : null;
+    // A clock that moved backwards or invalid timestamp cannot prove freshness.
+    const validTime = observation && Number.isSafeInteger(observation.observedAtMs) &&
+        observation.observedAtMs >= 0 && observation.observedAtMs <= 8640000000000000 &&
+        Number.isSafeInteger(nowMs) && nowMs >= observation.observedAtMs;
+    const ageMs = validTime ? nowMs - observation.observedAtMs : null;
     const stale = ageMs === null || ageMs > STALE_AFTER_MS;
 
     return {
@@ -91,7 +98,7 @@ function buildStatus(observation, options = {}) {
             "experimental_controls_opted_in" : "auto_disable_smart_host_when_positive",
         // The native controller may have been commanded off after this poll;
         // these are observed settings, not a verified effective cleaning mode.
-        settings: observation?.fields ?? unavailableFields(),
+        settings: ageMs === null ? unavailableFields() : (observation?.fields ?? unavailableFields()),
         nativeMopDirtiness: "unavailable_no_verified_local_status_interface"
     };
 }
