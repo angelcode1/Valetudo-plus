@@ -387,6 +387,20 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
 
     }
 
+    async pollState() {
+        try {
+            return await super.pollState();
+        } catch (err) {
+            // A failed MIOT transport poll must immediately invalidate both
+            // read-only snapshots, rather than leave their former values looking
+            // current during the freshness grace period. Preserve the error
+            // for the existing Valetudo polling/error handling.
+            this.x40CleanGeniusObservation = null;
+            this.x40DockWashObservation = null;
+            throw err;
+        }
+    }
+
     getCleanGeniusReadOnlyStatus(nowMs = Date.now()) {
         return {
             ...X40CleanGeniusReadOnlyStatus.buildStatus(this.x40CleanGeniusObservation, {
