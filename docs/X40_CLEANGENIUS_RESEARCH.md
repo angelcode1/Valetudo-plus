@@ -271,3 +271,20 @@ An X40-only frontend page has been committed to the draft research branch:
 Frontend build dependencies were not installed in the analysis environment; therefore a full `npm run ts-check` or bundled frontend build has **not** run. The code was checked against the actual repository's type, React-query, router and MUI conventions; static integration assertions passed. Before shipping to the robot, run `npm --prefix frontend run ts-check` and `npm --prefix frontend run build` in a working repo clone, and run backend tests. Preserve the running stock Valetudo installation until local smoke tests succeed.
 
 **Native status limitation unchanged:** firmware static evidence strongly suggests the Signal → Lethe `AI_MOP_DIRTY_INFO` path and the wash-stain request path, but no supported read-only external API or verified message schema has been identified. Do not hook native processes or fabricate AVA messages merely to populate this UI.
+
+
+## Read-only dock-wash activity observations (2026-10-19)
+
+**Motivation:** The one-shot firmware analysis established a private Signal → Lethe `AI_MOP_DIRTY_INFO` message path, but did **not** identify a verified external, safe, read-only source for measured dirtiness or for automatic rewash decisions. Rather than hook native processes or fabricate telemetry, the X40 already polls `VACUUM_2.MOP_DOCK_STATUS` as part of its normal state update.
+
+**Added implementation on this draft branch (not deployed):**
+
+- `DreameX40DockWashReadOnlyStatus.js` is a pure, side-effect-free decoder and immutable transition accumulator. It maps the codes using Valetudo's existing `DreameValetudoRobot.MOP_DOCK_STATUS_MAP`: `0=idle`, `1/5/6=cleaning`, `2=drying`, `4=paused`; `3=cleaning_unverified_variant` because upstream itself comments that the proper mapping may be idle. Other signed codes are **unknown**. The words describe a *dock status code*, not actual inferred cleaning actions.
+- The X40 driver captures only the allowlisted status integer from the **already existing** MIOT state polling response. **No extra MIOT requests**; no changes to native AVA services, pump/motor controls, mapping or camera. A failed status read invalidates the cached observation. Identical repeated values update freshness but **do not** create fabricated transitions; out-of-order observations fail closed.
+- An in-memory maximum of **12 transitions** is retained, with timestamps, and discarded on Valetudo restart. The status snapshot is marked `observed`, `stale` (older than 120 seconds) or `unavailable`. No maps, room IDs, locations, firmware strings or credentials are held in this history.
+- The existing **GET-only** `/api/v2/robot/clean-genius/status` now includes `dockWashActivity` with the marker `dock_activity_not_dirtiness_or_rewash_reason`, a current status, and bounded transition history. The X40-specific UI shows these values alongside the five CleanGenius setting observations.
+- Unknown states and current unavailability are explicit. **A cleaning code, a change of code, or repeated cleaning status cannot establish mop dirtiness, turbidity, an additional wash cycle, or a decision made by CleanGenius.** The existing `nativeMopDirtiness=unavailable_no_verified_local_status_interface` remains unchanged and honest.
+
+A dedicated Node test file covers repeated codes, up to 30 code changes, unknown states, failed inputs, staleness and the absence of incidental/raw MIOT vendor data. The pure module passed focused JavaScript checks in the analysis tool harness; no full frontend/backend build, live robot test or CI run was performed. No firmware, raw image, symbols dumps, secrets or proprietary binaries were committed.
+
+**Next evidence needed for true native mop dirtiness:** a proven, naturally occurring read-only public MIOT status or documented, permission-safe native diagnostic interface. Such an interface was **not** established by static ELF string/symbol/call-site findings; do not deploy a private AVA subscriber just to make the UI look complete.
