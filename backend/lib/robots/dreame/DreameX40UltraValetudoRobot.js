@@ -1,6 +1,7 @@
 const capabilities = require("./capabilities");
 const X40CleanGeniusResearch = require("./DreameX40CleanGeniusResearch");
 const X40CleanGeniusReadOnlyStatus = require("./DreameX40CleanGeniusReadOnlyStatus");
+const X40DockWashReadOnlyStatus = require("./DreameX40DockWashReadOnlyStatus");
 const DreameGen2ValetudoRobot = require("./DreameGen2ValetudoRobot");
 const DreameGen4ValetudoRobot = require("./DreameGen4ValetudoRobot");
 
@@ -349,6 +350,7 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
         // Read-only cache populated from the existing Gen4 4:50 state poll.
         // Never causes additional MIOT requests or writes.
         this.x40CleanGeniusObservation = null;
+        this.x40DockWashObservation = null;
         this.allowExperimentalCleanGenius = X40CleanGeniusResearch.isEnabled();
         const experimentalQuirks = this.allowExperimentalCleanGenius ?
             X40CleanGeniusResearch.createQuirks(this) : [];
@@ -386,10 +388,13 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
     }
 
     getCleanGeniusReadOnlyStatus(nowMs = Date.now()) {
-        return X40CleanGeniusReadOnlyStatus.buildStatus(this.x40CleanGeniusObservation, {
-            nowMs,
-            experimentalEnabled: this.allowExperimentalCleanGenius
-        });
+        return {
+            ...X40CleanGeniusReadOnlyStatus.buildStatus(this.x40CleanGeniusObservation, {
+                nowMs,
+                experimentalEnabled: this.allowExperimentalCleanGenius
+            }),
+            dockWashActivity: X40DockWashReadOnlyStatus.buildStatus(this.x40DockWashObservation, nowMs)
+        };
     }
 
     parseAndUpdateState(data) {
@@ -411,6 +416,22 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
             } catch {
                 // Invalid readings must not keep a previous snapshot looking fresh.
                 this.x40CleanGeniusObservation = null;
+            }
+        }
+
+        const mopDock = data.find(e => e?.siid === DreameGen2ValetudoRobot.MIOT_SERVICES.VACUUM_2.SIID &&
+            e?.piid === DreameGen2ValetudoRobot.MIOT_SERVICES.VACUUM_2.PROPERTIES.MOP_DOCK_STATUS.PIID);
+        if (mopDock) {
+            try {
+                if (mopDock.code !== undefined && mopDock.code !== 0) {
+                    throw new Error("MIOT mop-dock status property error");
+                }
+                this.x40DockWashObservation = X40DockWashReadOnlyStatus.observe(
+                    this.x40DockWashObservation, mopDock.value
+                );
+            } catch {
+                // Never represent a failed poll as a fresh valid observation.
+                this.x40DockWashObservation = null;
             }
         }
 
