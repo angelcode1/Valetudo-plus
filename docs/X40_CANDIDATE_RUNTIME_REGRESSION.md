@@ -52,16 +52,16 @@ A verified local comparison dated 2026-10-19 reports:
 
 ## Stage 2: compressed pkg payload comparison (2026-10-19 UTC)
 
-The locally generated \`X40_OFFLINE_PKG_DIFF_V2\` JSON report compares the known-good executable SHA-256
-\`cdc0c8723e2c924176f0d278df4e01899da10c3765acea97f0d3011ef845432d\`
+The locally generated `X40_OFFLINE_PKG_DIFF_V2` JSON report compares the known-good executable SHA-256
+`cdc0c8723e2c924176f0d278df4e01899da10c3765acea97f0d3011ef845432d`
 with the failed candidate SHA-256
-\`45d42b35850e27a3c0d4f57204cd343a9c124aa6d381ad52ac5476a2ffd6fee6\`.
-Both hashes agree with the earlier incident ledger. The report contains no executable or source bytes and reports **no candidate execution, no modifications to the working executable, and only an SSH read of \`/data/valetudo\`**.
+`45d42b35850e27a3c0d4f57204cd343a9c124aa6d381ad52ac5476a2ffd6fee6`.
+Both hashes agree with the earlier incident ledger. The report contains no executable or source bytes and reports **no candidate execution, no modifications to the working executable, and only an SSH read of `/data/valetudo`**.
 
 ### What the package diff proves
 
-- The earlier “Unsupported pkg entry point” diagnostic-tool refusal was overcome by an offline parser supporting \`pkg_brotli_compressed\` snapshots. This does **not** mean the failed application can successfully start.
-- The **packaged** \`backend/index.js\` entrypoint is identical across the working and failed binaries. Both package snapshots are parsed; the working contains **4,199** file records and the failed contains **4,234**.
+- The earlier “Unsupported pkg entry point” diagnostic-tool refusal was overcome by an offline parser supporting `pkg_brotli_compressed` snapshots. This does **not** mean the failed application can successfully start.
+- The **packaged** `backend/index.js` entrypoint is identical across the working and failed binaries. Both package snapshots are parsed; the working contains **4,199** file records and the failed contains **4,234**.
 - Grouped path counts (added and removed are relative to the **failed** package):
 
   | Category | Added | Changed | Removed | Identical |
@@ -71,16 +71,32 @@ Both hashes agree with the earlier incident ledger. The report contains no execu
   | Third-party dependencies | 2 | 0 | 0 | 464 |
   | Other package data | 0 | 1 | 0 | 2,981 |
 
-- Added backend paths include \`DreameX40CleanGeniusReadOnlyStatus.js\`, \`DreameX40CleanGeniusResearch.js\`, \`DreameX40DockWashReadOnlyStatus.js\`, multiple-map and speaker capabilities, MQTT handlers and router modules. The changed-path list includes shared startup-adjacent modules such as \`Configuration.js\`, \`DreameGen2ValetudoRobot.js\`, \`DreameX40UltraValetudoRobot.js\`, \`RobotRouter.js\`, \`WebServer.js\`, and \`Updater.js\`. Missing in the candidate relative to the working package: \`DreameMovaV50UltraValetudoRobot.js\`, \`DreameMovaZ60UltraRollerValetudoRobot.js\`, and \`GithubValetudoNightlyUpdateProvider.js\`.
-- \`.text\`, \`.init\`, \`.data\`, and \`.data.rel.ro\` are identical in the executable comparison. The 7,802,924-byte \`.rodata\` sections differ in **14 bytes across four disjoint runs** (largest contiguous run six bytes). The snapshot roots differ. These observations are not an identified execution fault.
+- Added backend paths include `DreameX40CleanGeniusReadOnlyStatus.js`, `DreameX40CleanGeniusResearch.js`, `DreameX40DockWashReadOnlyStatus.js`, multiple-map and speaker capabilities, MQTT handlers and router modules. The changed-path list includes shared startup-adjacent modules such as `Configuration.js`, `DreameGen2ValetudoRobot.js`, `DreameX40UltraValetudoRobot.js`, `RobotRouter.js`, `WebServer.js`, and `Updater.js`. Missing in the candidate relative to the working package: `DreameMovaV50UltraValetudoRobot.js`, `DreameMovaZ60UltraRollerValetudoRobot.js`, and `GithubValetudoNightlyUpdateProvider.js`.
+- `.text`, `.init`, `.data`, and `.data.rel.ro` are identical in the executable comparison. The 7,802,924-byte `.rodata` sections differ in **14 bytes across four disjoint runs** (largest contiguous run six bytes). The snapshot roots differ. These observations are not an identified execution fault.
 - The report has only changed *filenames* and counts, not the content of changed modules or dependency names. File additions and removals may simply represent a different Valetudo+ version or baseline. The data does **not** isolate CleanGenius as the cause.
 
 ### Next diagnostic gate (no robot replacement or launch)
 
-1. **Provenance:** establish the exact git revision, CI run, build manifest and \`pkg\` settings of the failed candidate; separately attempt to identify the original working executable's build provenance. Do not assume the working package came from this branch merely because paths overlap.
-2. **Host-only package check:** in a deliberately network-isolated local Linux/AArch64 sandbox, verify the two captured executables' package metadata, \`pkg\` virtual-root mappings, bundled transitive imports and asset presence. Keep executable contents off the public repo. Perform any instrumented runtime experiment **only** with network isolation, disposable filesystem/configuration and a clear understanding that robot-specific runtime dependencies may be unavailable. Record sanitized exit status/stderr, never keys/maps/camera contents.
-3. **Classify the failure before fixing:** distinguish \`pkg\` loader failure, unresolved module/resource, synchronous JS initialization error, environment/configuration error, or launcher/process-management failure. A filename diff cannot distinguish these.
+1. **Provenance:** establish the exact git revision, CI run, build manifest and `pkg` settings of the failed candidate; separately attempt to identify the original working executable's build provenance. Do not assume the working package came from this branch merely because paths overlap.
+2. **Host-only package check:** in a deliberately network-isolated local Linux/AArch64 sandbox, verify the two captured executables' package metadata, `pkg` virtual-root mappings, bundled transitive imports and asset presence. Keep executable contents off the public repo. Perform any instrumented runtime experiment **only** with network isolation, disposable filesystem/configuration and a clear understanding that robot-specific runtime dependencies may be unavailable. Record sanitized exit status/stderr, never keys/maps/camera contents.
+3. **Classify the failure before fixing:** distinguish `pkg` loader failure, unresolved module/resource, synchronous JS initialization error, environment/configuration error, or launcher/process-management failure. A filename diff cannot distinguish these.
 4. **Preserve rollback and release block:** no firmware writes, new binary install, process replacement or reboot for this investigation. A successful CI build or sandbox launch alone is **not** X40 runtime validation. The restored executable continues to be the only known-good deployed candidate.
 5. **Only after a discriminating failure is obtained:** prepare a minimal source change with offline tests; defer supervised device deployment until a separate explicit authorization and verified rollback plan.
 
 This is a **diagnostic evidence checkpoint**, not a declaration of working CleanGenius, native dirtiness sensing or automatic rewash functionality.
+
+
+## Stage 3: source-level startup triage and build provenance (2026-10-20 Brisbane)
+
+This is a **source and GitHub Actions audit**, not a runtime validation or identification of the exit cause.
+
+- The successful feature-branch **push** workflow is [run 39252181608](https://github.com/angelcode1/Valetudo-plus/actions/runs/39252181608), head commit \`5be3c3e53c3cb25e8408d23776200c57ddaa5353\`, build job 118058432334. It ran npm install/validation, generated code, built the frontend and the three backend targets, and passed Node tests before publishing \`x40-valetudo-aarch64-ci-candidate\` (artifact ID 12185144962). The build log identifies \`@yao-pkg/pkg 6.6.0\`, \`node22-linuxstatic-arm64\`, Brotli compression and 64 MiB heap setting for the AArch64 output. Its artifact **ZIP** digest was \`9f6445bbe4dd7ae009107c2e5f562c9485fa4ce3e5cfe9fab3bf02635f474d3e\`; this is **not** the embedded ELF SHA-256. Until a local extraction and hash comparison confirms \`45d42b35...\`, the uploaded ZIP is only a **candidate source** for the failed binary, not a cryptographically established match.
+- The parent Valetudo+ example postboot scripts use \`/data/valetudo/valetudo\` with \`VALETUDO_DATA_PATH=/data/valetudo\`, whereas the known-working device process executable was \`/data/valetudo\`. These are *different installation conventions*. The actual X40 launcher and environment are **not yet established** by the example scripts.
+- In \`backend/lib/Configuration.js\`, startup reads a configuration file at \`VALETUDO_DATA_PATH/valetudo_config.json\` (or under \`os.tmpdir()\` when the environment variable is absent). When the configuration version differs it can migrate and **persist** it; if schema parsing/validation fails it may rename the original to a \`.backup\` file and write defaults. This is a concrete reason **not** to launch the failed candidate on the robot or expose the real configuration to an offline trial.
+- In \`backend/lib/Logger.js\`, logging initially writes to \`/dev/null\` on POSIX until the constructor configures a log file. The parent fork example boot scripts additionally redirect stdout/stderr to \`/dev/null\`. A process exit before logger setup can therefore leave little diagnostic evidence, but we have **not** observed any such exit.
+- The X40 status endpoint's Express route uses a simple static \`/clean-genius/status\` path; the X40 read-only decoder modules have no top-level device I/O in the reviewed source. The experimental quirk factories are only called when their environment flag is set. These checks **do not** prove module resolution in the embedded compressed snapshot or successful constructor initialization.
+- The fork currently includes historical Express 5 and dependency-compatibility fixes (e.g. commits \`5ec1f5a\`, \`00c61e3\`, \`0f589c1\`). None establishes the present X40 failure's cause.
+
+**Next safe probe:** a separately distributed Mac-side \`x40_stage3_readonly.py\` kit performs one read-only SSH audit of the *currently working* process's executable path, first argument, allowlisted \`VALETUDO_DATA_PATH\` and \`VALETUDO_LOG_PATH\` values, plus presence-only checks for a short fixed list of launcher script paths. It collects **no full process environment, script contents, device configuration, logfile contents or credentials**. Its local \`--self-test\` passes; no live X40 probe has been run as part of this stage. Inspect the JSON before sharing. The absence of a matched launcher in the fixed path list is not evidence that no launcher exists.
+
+**Still blocked:** failed candidate runtime execution, binary replacement, firmware or config modifications, and experimental CleanGenius writes. A successful Linux/AArch64 sandbox test would be informative but not a real-device startup pass.
