@@ -81,3 +81,16 @@ Static analysis of a user-supplied, limited extraction of the DustBuilder `r2416
 3. Determine whether native AI results (labels/confidences, not images) reach existing local MIOT events or a permitted Valetudo polling path. A service name in a binary alone is not sufficient.
 4. Preserve currently running upstream Valetudo 2026.10.0. Do not merge or deploy the experimental controls while the map is incomplete or the MIOT `SmartAutoMop=-1` sentinel semantics remain unknown.
 5. Keep firmware binaries, model weights, factory credentials, MACs, personal maps and live video **out of this public repository**.
+
+
+## R2416 camera-AI configuration references (2026-10-19)
+
+A user-supplied file listing and **filtered `r2416.conf` lines** from the DustBuilder rootfs confirm the firmware config explicitly references the stain model, rather than merely bundling its binary:
+
+- `/ava/conf/r2416.conf:146` sets `sysModelType` to `dreame.vacuum.r2416`.
+- `/ava/conf/r2416.conf:390` identifies a `camera_ai` configuration block.
+- `/ava/conf/r2416.conf:411-413` references `/ava/conf/ai_models/MR813/dreame_stain1_v1.3.0.mnn` and `dreame_stain1_v1.3.0.json`.
+- The same model configuration references furniture, fused-obstacle, carpet, human, material, room segmentation, and LiDAR furniture AI models.
+- The firmware inventory also includes `/ava/conf/auto_water_ctrl_config.json` and `/ava/conf/turbidity_check_config.json`, plus `node_cmd.so`, `node_iot.so`, `node_msg_cvt.so`, `node_camera_ai.so` and `node_map_divide.so`.
+
+This corroborates **configured model references**, not runtime activation or a demonstrated path from AI inference to CleanGenius/MIOT. A string reference to `AI_WASH_STAIN_CLASSIFICATION_SERVICE` does not establish the request schema or identify its producer/consumer. Follow up by performing a private **offline** key-shape inventory of the water/turbidity configuration and a module-by-module *presence-only* service string cross-reference. Do not transmit internal messages, install hooks, or issue model/cleaning commands on the robot. No raw firmware, credentials, images or maps should be included in Git.
