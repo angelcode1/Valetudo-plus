@@ -150,3 +150,24 @@ Other water/tank flags are similarly redacted and uninterpreted. `auto_water_ctr
 The module string matches corroborate the Stage 4 candidate topology: `node_lethe.so` references `AI_WASH_STAIN_CLASSIFICATION_SERVICE`, `SmartHost`, `SmartAutoMop`, `SmartAutoWash`, `StainIdentify`, and turbidity terms; `node_camera_ai.so` references that service and `ProcessWashStainClassificationRequest`. Dynamic symbol inspection still **did not execute**, because the macOS analysis utility was unavailable. That is a host tool gap, not an ELF finding.
 
 **Engineering decision:** next inspect both libraries' ELF exports/imports offline using a real cross-platform ELF reader, and examine AVA service call sites to establish direction. Do not infer an accessible Valetudo API, active turbidity sensor, measured thresholds or automatic rewash decision from configuration flags alone. Preserve the existing `SmartAutoMop=-1` fail-closed semantics and leave the running Valetudo installation untouched. The map check remains deferred.
+
+
+## Stage 7 ARM64 dynamic ELF evidence — native classification and mop dirtiness (2026-10-19)
+
+The user's sanitized report `x40-r2416-stage7-elf-v1` successfully used `llvm-readelf` and a demangler on the saved `dreame.vacuum.r2416` SquashFS image; unlike previous stages, dynamic symbol analysis is available. The report deliberately lists **only the first 80 filtered matches per module** (matching counts: camera AI 145, Lethe 2833, map divide 223), so absence of an individual symbol from the list is **not** evidence of absence from the binary.
+
+**Named exported functions and types observed:**
+
+| Component | ELF evidence | Limited conclusion |
+| --- | --- | --- |
+| `node_camera_ai.so` | `camera_ai::CameraAINode::ProcessWashStainClassificationRequest(ava_msg_wash_stain_classification*)` | A compiled handler for the wash-stain classification request exists |
+| `node_camera_ai.so` | `camera_ai::CameraAINode::Publish(const camera_ai::ImageWithClassification&)`, `ava::Publisher<ava_ai_result_with_classification_msg>` | Compiled AI result publishing implementation exists |
+| `node_lethe.so` | `ancp::AvaNodeRoute::SignalClassfyProcess(ava_ai_result_with_classification_msg*)` | Compiled route handler for AI classification results exists |
+| `node_lethe.so` | `ava_msg_mop_dirty_info`, `WashStatus`, `WashControlMsg`, `WashData` | Native mop-dirtiness and wash-control message/data types exist |
+| `node_map_divide.so` | `std::function<void(ava_ai_result_with_classification_msg*)>`, `lds_perception::NodeMapDivide` callback types | A map component also has AI result callback support |
+
+**Evidence boundary:** the apparent camera -> AVA classification result -> Lethe route flow is plausible but not proven. The exported types may support different consumers, and wash-stain classification via `ava_msg_wash_stain_classification` is **not necessarily identical** to visual stain detection through `ava_ai_result_with_classification_msg`. The request ABI, mop-dirty payload layout, publisher/subscriber registration and runtime feature enablement remain unknown. Do not send AVA messages or interpose native code.
+
+Stage 7 also contains native Matter-related AVA symbols in `node_lethe.so`, but a published C++ symbol does not establish a running Matter service. Matter research remains a separate workstream.
+
+**Focused next steps (offline only):** enumerate the *untruncated* dynamic symbols using `llvm-nm -D --defined-only --demangle`, identify exact `AvaNodeRoute` and `AsyncDeque` wash/stain/turbidity callbacks, and inspect the specific publisher/subscriber registrations and argument use with Ghidra if appropriate. Favor a read-only existing MIOT/status observation over any custom AVA instrumentation. Keep working Valetudo 2026.10.0 unchanged and experimental CleanGenius PR as draft.
