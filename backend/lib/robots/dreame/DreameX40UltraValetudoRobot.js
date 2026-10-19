@@ -1,5 +1,6 @@
 const capabilities = require("./capabilities");
 const X40CleanGeniusResearch = require("./DreameX40CleanGeniusResearch");
+const X40CleanGeniusReadOnlyStatus = require("./DreameX40CleanGeniusReadOnlyStatus");
 const DreameGen2ValetudoRobot = require("./DreameGen2ValetudoRobot");
 const DreameGen4ValetudoRobot = require("./DreameGen4ValetudoRobot");
 
@@ -345,6 +346,9 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
         });
 
         // Experimental native CleanGenius mode is never enabled by default.
+        // Read-only cache populated from the existing Gen4 4:50 state poll.
+        // Never causes additional MIOT requests or writes.
+        this.x40CleanGeniusObservation = null;
         this.allowExperimentalCleanGenius = X40CleanGeniusResearch.isEnabled();
         const experimentalQuirks = this.allowExperimentalCleanGenius ?
             X40CleanGeniusResearch.createQuirks(this) : [];
@@ -381,10 +385,33 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
 
     }
 
+    getCleanGeniusReadOnlyStatus(nowMs = Date.now()) {
+        return X40CleanGeniusReadOnlyStatus.buildStatus(this.x40CleanGeniusObservation, {
+            nowMs,
+            experimentalEnabled: this.allowExperimentalCleanGenius
+        });
+    }
+
     parseAndUpdateState(data) {
         if (!Array.isArray(data)) {
             Logger.error("Received non-array state", data);
             return;
+        }
+
+        // Cache only a known, sanitized allowlist from the EXISTING MIOT 4:50 poll.
+        // Avoid retaining or exposing the raw vendor settings JSON.
+        const misc = data.find(e => e?.siid === DreameGen2ValetudoRobot.MIOT_SERVICES.VACUUM_2.SIID &&
+            e?.piid === DreameGen2ValetudoRobot.MIOT_SERVICES.VACUUM_2.PROPERTIES.MISC_TUNABLES.PIID);
+        if (misc) {
+            try {
+                if (misc.code !== undefined && misc.code !== 0) {
+                    throw new Error("MIOT 4:50 property error");
+                }
+                this.x40CleanGeniusObservation = X40CleanGeniusReadOnlyStatus.observe(misc.value);
+            } catch {
+                // Invalid readings must not keep a previous snapshot looking fresh.
+                this.x40CleanGeniusObservation = null;
+            }
         }
 
         // Filter out everything that might confuse the regular state parsing
