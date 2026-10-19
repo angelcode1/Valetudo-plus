@@ -257,3 +257,17 @@ The user supplied a single screened offline archive containing **34 native ELF/e
 - `node_signal.so`, `node_lethe.so` and `node_camera_ai.so` evidence remains documentation-only. **No native mop dirtiness, rewash decisions, raw water turbidity readings or visual classifications are claimed to be exposed.**
 
 Tests added in `backend/test/lib/robots/dreame/DreameX40CleanGeniusReadOnlyStatus_test.js` for observed X40 `-1` sentinel, invalid payloads, unknown/missing keys, redaction and stale status. Core pure-module checks passed in the tool harness; the full Valetudo backend test suite and integration on an actual X40 have **not** been run. No runtime deployment, public firmware upload or proprietary code commits.
+
+## Frontend read-only CleanGenius status page (2026-10-19)
+
+An X40-only frontend page has been committed to the draft research branch:
+
+- **UI:** `Robot Options → Misc → CleanGenius Status`, route `/options/robot/clean-genius`. The menu link is shown **only** if `/api/v2/robot` reports implementation `DreameX40UltraValetudoRobot`. Opening the route directly on an unsupported robot renders a non-actionable message and does not query the endpoint.
+- **GET-only client:** typed request to `/api/v2/robot/clean-genius/status`. A TanStack Query hook is enabled only on the X40 and refreshes the **backend cache** every 15 seconds. This does not trigger more MIOT requests. A manual refresh button only refreshes the cached GET.
+- **Read-only display:** SmartHost, SmartAutoMop, SmartAutoWash, StainIdentify and HotWash settings with their original allowlisted signed integer values and explanatory labels. Unknown sentinels like `SmartAutoMop=-1` appear as **Unknown (raw -1)**; numeric modes 1/2 are **unverified**, not interpreted as confirmed X40 behavior.
+- **Freshness:** UI explicitly warns about stale or unavailable observations; network failure suppresses potentially outdated values. Notes normal Valetudo's automatic `SmartHost=0` policy, the effect of experimental opt-in and the distinction between native settings and live dirtiness/rewash events.
+- **Safety:** no toggle/select/command UI, no PUT/POST, no AVA subscriptions, no pump/camera/cleaning interactions, no new raw settings or credentials exposed. The unmerged experimental writable quirks remain separately opt-in and are **not** rendered on the status page.
+
+Frontend build dependencies were not installed in the analysis environment; therefore a full `npm run ts-check` or bundled frontend build has **not** run. The code was checked against the actual repository's type, React-query, router and MUI conventions; static integration assertions passed. Before shipping to the robot, run `npm --prefix frontend run ts-check` and `npm --prefix frontend run build` in a working repo clone, and run backend tests. Preserve the running stock Valetudo installation until local smoke tests succeed.
+
+**Native status limitation unchanged:** firmware static evidence strongly suggests the Signal → Lethe `AI_MOP_DIRTY_INFO` path and the wash-stain request path, but no supported read-only external API or verified message schema has been identified. Do not hook native processes or fabricate AVA messages merely to populate this UI.
