@@ -42,12 +42,15 @@ class RobotRouter {
         // method and therefore do not expose a vendor-specific API here.
         // Uses the existing periodic MIOT 4:50 poll cache, with no robot I/O.
         this.router.get("/clean-genius/status", (req, res) => {
-            if (typeof this.robot.getCleanGeniusReadOnlyStatus !== "function") {
+            // Only the X40 implements this optional, read-only vendor endpoint.
+            /** @type {ValetudoRobot & {getCleanGeniusReadOnlyStatus?: () => object}} */
+            const statusRobot = this.robot;
+            if (typeof statusRobot.getCleanGeniusReadOnlyStatus !== "function") {
                 return res.sendStatus(404);
             }
 
             res.set("Cache-Control", "no-store");
-            res.json(this.robot.getCleanGeniusReadOnlyStatus());
+            res.json(statusRobot.getCleanGeniusReadOnlyStatus());
         });
 
         this.router.get("/state", async (req, res) => {
