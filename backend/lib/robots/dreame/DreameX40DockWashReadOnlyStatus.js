@@ -34,7 +34,8 @@ function decode(raw) {
  * observation timestamp but do not create fake activity transitions.
  */
 function observe(previous, raw, observedAtMs = Date.now()) {
-    if (!Number.isSafeInteger(raw) || !Number.isFinite(observedAtMs) || observedAtMs < 0) {
+    if (!Number.isSafeInteger(raw) || !Number.isSafeInteger(observedAtMs) ||
+        observedAtMs < 0 || observedAtMs > 8640000000000000) {
         throw new Error("Invalid MIOT mop-dock observation");
     }
     if (previous && observedAtMs < previous.observedAtMs) {
@@ -59,8 +60,11 @@ function observe(previous, raw, observedAtMs = Date.now()) {
 }
 
 function buildStatus(observation, nowMs = Date.now()) {
-    const ageMs = observation && Number.isFinite(observation.observedAtMs) ?
-        Math.max(0, nowMs - observation.observedAtMs) : null;
+    // System-clock regressions invalidate freshness; they are not age zero.
+    const validTime = observation && Number.isSafeInteger(observation.observedAtMs) &&
+        observation.observedAtMs >= 0 && observation.observedAtMs <= 8640000000000000 &&
+        Number.isSafeInteger(nowMs) && nowMs >= observation.observedAtMs;
+    const ageMs = validTime ? nowMs - observation.observedAtMs : null;
     const stale = ageMs === null || ageMs > STALE_AFTER_MS;
 
     return {
@@ -70,10 +74,11 @@ function buildStatus(observation, nowMs = Date.now()) {
         observedAt: ageMs === null ? null : new Date(observation.observedAtMs).toISOString(),
         ageMs,
         stale,
-        current: observation?.value ?? {raw: null, state: "unavailable"},
+        current: ageMs === null ? {raw: null, state: "unavailable"} :
+            (observation?.value ?? {raw: null, state: "unavailable"}),
         // Bounded to 12 entries since this Valetudo process started.
         // A transition is only a changed native status code, not a proven cycle.
-        transitions: (observation?.transitions ?? []).map(e => ({
+        transitions: (ageMs === null ? [] : (observation?.transitions ?? [])).map(e => ({
             raw: e.raw,
             state: e.state,
             at: new Date(e.atMs).toISOString()
