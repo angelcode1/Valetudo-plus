@@ -720,3 +720,51 @@ export interface AutoEmptyDockAutoEmptyDurationPayload {
 export interface AutoEmptyDockAutoEmptyDurationControlProperties {
     supportedDurations: Array<AutoEmptyDockAutoEmptyDuration>,
 }
+
+
+/**
+ * X40 Ultra only. These MIOT 4:50 observations are vendor SETTINGS,
+ * never measured turbidity, AI classifications or actual rewash actions.
+ */
+export interface X40CleanGeniusSetting {
+    value: number | null;
+    state: "off" | "on_setting" | "mode_1_unverified" | "mode_2_unverified" | "unknown" | "unavailable";
+}
+
+export interface X40DockWashActivity {
+    source: "miot_mop_dock_status";
+    dataType: "dock_activity_not_dirtiness_or_rewash_reason";
+    state: "observed" | "stale" | "unavailable";
+    observedAt: string | null;
+    ageMs: number | null;
+    stale: boolean;
+    current: {
+        raw: number | null;
+        state: string;
+    };
+    transitions: Array<{
+        raw: number;
+        state: string;
+        at: string;
+    }>;
+}
+
+export interface X40CleanGeniusReadOnlyStatus {
+    source: "miot_4_50";
+    readOnly: true;
+    dataType: "native_settings_not_sensor_measurements";
+    state: "observed" | "stale" | "unavailable";
+    observedAt: string | null;
+    ageMs: number | null;
+    stale: boolean;
+    valetudoPolicy: "auto_disable_smart_host_when_positive" | "experimental_controls_opted_in";
+    settings: {
+        cleanGenius: X40CleanGeniusSetting;
+        autoReclean: X40CleanGeniusSetting;
+        autoRewash: X40CleanGeniusSetting;
+        stainIdentification: X40CleanGeniusSetting;
+        hotWash: X40CleanGeniusSetting;
+    };
+    nativeMopDirtiness: "unavailable_no_verified_local_status_interface";
+    dockWashActivity: X40DockWashActivity;
+}
