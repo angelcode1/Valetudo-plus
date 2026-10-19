@@ -50,6 +50,41 @@
       }
     }
   },
+  "/api/v2/robot/clean-genius/status": {
+    "get": {
+      "tags": ["Robot"],
+      "summary": "Get cached X40 CleanGenius settings (read-only)",
+      "description": "X40 Ultra only (404 on other models). Uses the normal MIOT 4:50 state poll cache; does not perform an additional robot read or any write. Values represent observed native settings, not live mop dirtiness or wash-water turbidity. Unknown numeric sentinels are preserved as unknown. Stale observations are explicitly marked.",
+      "responses": {
+        "200": {
+          "description": "A redacted allowlisted status observation or unavailable state",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source": {"type": "string", "enum": ["miot_4_50"]},
+                  "readOnly": {"type": "boolean", "enum": [true]},
+                  "dataType": {"type": "string", "enum": ["native_settings_not_sensor_measurements"]},
+                  "state": {"type": "string", "enum": ["observed", "stale", "unavailable"]},
+                  "observedAt": {"type": ["string", "null"], "format": "date-time"},
+                  "ageMs": {"type": ["integer", "null"]},
+                  "stale": {"type": "boolean"},
+                  "valetudoPolicy": {"type": "string"},
+                  "settings": {
+                    "type": "object",
+                    "description": "Only cleanGenius, autoReclean, autoRewash, stainIdentification, hotWash; each has value (integer or null) and state (known interpretation or unknown/unavailable)"
+                  },
+                  "nativeMopDirtiness": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        "404": {"description": "This model does not implement the X40 read-only status endpoint"}
+      }
+    }
+  },
   "/api/v2/robot/properties": {
     "get": {
       "tags": [
