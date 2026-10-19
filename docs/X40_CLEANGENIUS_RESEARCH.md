@@ -114,3 +114,19 @@ The report also confirms that `r2416.conf` has key paths `nodes.[].auto_water_co
 **Next investigation:** read-only, offline extraction of **only the R2416** runtime flag values (safe Boolean/0/1), the water/turbidity config *key shapes* (no numeric thresholds), and dynamic symbol/relationship hints for `node_lethe.so` vs `node_camera_ai.so`. Then trace AVA service producer/consumer references using offline reverse engineering. No robot commands or privileged injection are needed.
 
 Separate third-party code (`malard/node-dreame`, `src/spec/feature-config.ts`) describes `-1` as a disabled-state sentinel for some multi-mode keys including `SmartAutoMop`. Treat this as an **unverified external interpretation**, not license to coerce the X40's observed `SmartAutoMop=-1` to `0` or enable experimental setters; keep the current fail-closed behavior until model-specific readback/behavior evidence exists.
+
+
+## Stage 5 R2416 firmware results — turbidity flags and native CleanGenius (2026-10-19)
+
+The user's `stage5-r2416-sanitized-summary.json` comes from an **offline** SquashFS extraction. It confirms the following facts for `dreame.vacuum.r2416`:
+
+- `dconf_runtime.json` contains `RUNTIME_TURBIDITY_DETECTION`, `RUNTIME_SELF_CLEANING_WASH_PLATE`, `RUNTIME_AUTO_WATER_FILLING_MACHINE`, tank-position/level checks and drainage entries. The report marks their values `kind: str`, `redacted_or_uninterpreted`. **Presence is not proof of enabled state**. They may require interpreting literal string booleans.
+- `turbidity_check_config.json` parses and exposes a top-level `turbidity_check_config` entry whose **type is Boolean**. Its actual value was not included. Even `true` in the saved image would be a configuration clue, not evidence of live turbidity measurements.
+- `auto_water_ctrl_config.json` includes a `default` branch and several *other-model* `wash_id` entries, but the sanitized results do not establish any R2416-specific entry. Do not infer a missing capability; the firmware may fall back to a default.
+- `r2416.conf` contains 30 nodes, with `bsp`, `camera_ai`, `cmd`, `iot`, and `msg_cvt` recognized in the privacy-filtered scan.
+- `node_lethe.so` static strings include `AI_WASH_STAIN_CLASSIFICATION_SERVICE`, `AI_CLASSIFICATION_RESULT`, `SmartHost`, `SmartAutoMop`, `SmartAutoWash`, `StainIdentify`, `BackWashType` and turbidity names. `node_camera_ai.so` contains the same named classification service plus a `ProcessWashStainClassificationRequest` reference.
+- The optional dynamic ELF-symbol analysis was **unavailable** in this run. This is a tooling gap, **not** evidence that the ELF exports/imports are absent.
+
+**Working hypothesis:** `node_lethe.so` likely participates in cleaning decisions and may consume results from `node_camera_ai.so`, but no cross-reference or runtime message trace establishes producer/consumer direction yet. The AVA service does not automatically expose a Valetudo MIOT status property.
+
+**Next fully offline checks:** (1) read only allowlisted 0/1/true/false/on/off model-specific flag literals and the turbidity config Boolean, (2) recover `greadelf`/LLVM dynamic symbol metadata from `node_lethe.so` and `node_camera_ai.so`, and (3) investigate service-message direction in a standalone disassembler if necessary. Keep the robot's installed Valetudo 2026.10.0 intact. No AVA messages, firmware writes, runtime hooks or synthetic cleaning requests.
