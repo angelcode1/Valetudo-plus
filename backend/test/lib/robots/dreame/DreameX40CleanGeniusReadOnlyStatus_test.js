@@ -56,3 +56,13 @@ test("stale data and Valetudo safety policy are explicit", () => {
     assert.equal(result.valetudoPolicy, "auto_disable_smart_host_when_positive");
     assert.equal(status.buildStatus(observation, {experimentalEnabled: true}).valetudoPolicy, "experimental_controls_opted_in");
 });
+
+
+test("clock regression cannot make an old setting appear fresh", () => {
+    const snapshot = status.observe('[{"k":"SmartHost","v":1}]', 2000);
+    const result = status.buildStatus(snapshot, {nowMs: 1999});
+    assert.equal(result.state, "unavailable");
+    assert.equal(result.ageMs, null);
+    assert.deepEqual(result.settings.cleanGenius, {value: null, state: "unavailable"});
+    assert.throws(() => status.observe("[]", 8640000000000001), /timestamp/);
+});
