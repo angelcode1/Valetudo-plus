@@ -198,3 +198,28 @@ A corrected **offline-only** call-site parser removes `--demangle` when using th
 This verifies that the *compiled camera handler* calls the three classifiers. It does **not** show that `node_lethe.so` publishes actual runtime requests, identify the message ABI or meaning of model input/output, or prove that CleanGenius is active. Do not send AVA messages or enable `SmartHost` from this finding. The corrected audit has not yet been run on the user's locally saved **Lethe** binary, because that binary was not part of the prior limited ZIP; the script must be run privately against the saved `rootfs.img` on the Mac.
 
 Status: working robot Valetudo 2026.10.0 unchanged; experimental PR remains draft; map investigation deferred.
+
+## R2416 Stage 9b — validated call counts, and nearest-symbol label correction (2026-10-19)
+
+The user-supplied `stage9b-r2416-sanitized-callsite.json` correctly disassembles selected ARM64 functions after resolving the Stage 9 LLVM demangle-selector defect. Highlights:
+
+- `camera_ai::CameraAINode::ProcessWashStainClassificationRequest(ava_msg_wash_stain_classification*)`: **2,468 decoded instructions**, 233 direct `bl` and 29 indirect `blr` calls. The binary includes actual **PLT calls** to all three `StainClassificationJob::ClassifyStainByLogisticRegression*` implementations (Dreame202404, Maibo202502Series40, Maibo202502Series50).
+- `ancp::AvaNodeRoute::AiMopDirtyInfoProcess(ava_msg_mop_dirty_info*)`: 5 direct / 6 indirect branches in 96 instructions; Stage 9b prints a candidate `MultAsyncSubscribe<ava_msg_mop_dirty_info,...>` call label.
+- `ancp::AvaNodeRoute::SignalClassfyProcess(ava_ai_result_with_classification_msg*)`: 32 direct / 9 indirect branches; prints a candidate classification subscriber helper.
+- `ancp::AvaNodeRoute::SendAITurbidityValue()`: 125 direct / 40 indirect branches in 1,300 instructions; prints a candidate `WashStatus` cast. `CheckSmartHostClean` has 68 instructions and `CloseSmartHostClean` has 732.
+- None of these compiled paths prove that the live X40 executes them, or reveal AVA payload layouts.
+
+### Critical Stage 9b caveat: objdump's nearest-symbol annotations are not function-entry calls
+
+Independent validation using the previously supplied **offline** `node_camera_ai.so` showed that Stage 9b's `CameraAINode::Publish(ImageWithClassification const&)` seemingly calling `ProcessWashStainClassificationRequest` is **NOT established**. The actual ARM64 branch resolves to the *annotated* label `ProcessWashStainClassificationRequest+0x3e0`, but the ELF dynamic symbol declares a function size of only `0xec`. The target is **outside that function's declared extent**, so the disassembler is attributing code to the nearest exported symbol rather than naming the true target function.
+
+The Stage 9b report's label renderer stripped `+0x...` before exporting matches. Therefore **all Stage 9b named callee labels must be considered candidates until the numeric destination matches the exact symbol entry or its `@plt` stub**. The instruction counts are not invalidated, and the three classifier PLT calls from the wash-stain handler were independently confirmed.
+
+A corrected private **Stage 10 offline inbound-call analysis** now validates target address and ELF function size, distinguishes `exact_entry`, `plt_entry`, `interior_within_function_not_entry`, `nearest_symbol_label_outside_extent`, and `address_mismatch_unverified`, and enumerates callers of the selected functions from streaming ARM64 `.text` disassembly. It passed synthetic unit tests and was validated against the supplied `node_camera_ai.so`. In that camera binary it found:
+
+- one valid PLT call from the wash-stain handler to **each of the three classifiers**;
+- one valid PLT call to `ConvertIntoAIStainResult` from `CameraAINode::Publish(ImageWithObjects const&)`;
+- valid PLT call sites for `Publish(ImageWithClassification const&)` in `camera_ai::Running::Dispatch()` and `camera_ai::Paused::Dispatch()`;
+- multiple disassembler `ProcessWashStainClassificationRequest+offset` labels **outside the symbol's size**; they must not be treated as calls to that handler.
+
+The Stage 10 collector has **not yet** been run against the full user-local `node_lethe.so` because that proprietary binary was not in the limited shared archive. Await its sanitized JSON output before asserting Lethe call-site direction. Do not send AVA messages, patch native libraries, change MIOT 4:50, or enable experimental `SmartHost`. Keep the working Valetudo 2026.10.0 and defer mapping as requested.
