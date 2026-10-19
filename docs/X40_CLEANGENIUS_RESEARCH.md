@@ -130,3 +130,23 @@ The user's `stage5-r2416-sanitized-summary.json` comes from an **offline** Squas
 **Working hypothesis:** `node_lethe.so` likely participates in cleaning decisions and may consume results from `node_camera_ai.so`, but no cross-reference or runtime message trace establishes producer/consumer direction yet. The AVA service does not automatically expose a Valetudo MIOT status property.
 
 **Next fully offline checks:** (1) read only allowlisted 0/1/true/false/on/off model-specific flag literals and the turbidity config Boolean, (2) recover `greadelf`/LLVM dynamic symbol metadata from `node_lethe.so` and `node_camera_ai.so`, and (3) investigate service-message direction in a standalone disassembler if necessary. Keep the robot's installed Valetudo 2026.10.0 intact. No AVA messages, firmware writes, runtime hooks or synthetic cleaning requests.
+
+
+## R2416 Stage 6: runtime configuration literals (2026-10-19)
+
+The user supplied a **read-only offline** JSON report from the saved `4.3.9_1782` SquashFS image. It contains one `dreame.vacuum.r2416` dconf block and confirms:
+
+| Configuration | Offline parsed literal | Scope of claim |
+| --- | --- | --- |
+| `RUNTIME_AUTO_WATER_FILLING_MACHINE` | string `"true"` (interpreted true) | Saved configuration enables this flag |
+| `RUNTIME_AUTO_WATER_SUPPLY_DRAINAGE` | string `"true"` (interpreted true) | Saved configuration enables this flag |
+| `RUNTIME_CLEANING_TRAY_FULL_WATER_DETECTION` | string `"true"` (interpreted true) | Saved configuration enables this flag |
+| top-level `turbidity_check_config` | Boolean `true` | Saved check configuration enabled |
+| `RUNTIME_TURBIDITY_DETECTION` | `unrecognized_redacted` | **Unknown**, not proven enabled or disabled |
+| `RUNTIME_SELF_CLEANING_WASH_PLATE` | `unrecognized_redacted` | **Unknown**, not proven enabled or disabled |
+
+Other water/tank flags are similarly redacted and uninterpreted. `auto_water_ctrl_config.json` has a default branch but no exact `dreame.vacuum.r2416` branch; this does not establish which fallback the running device selects.
+
+The module string matches corroborate the Stage 4 candidate topology: `node_lethe.so` references `AI_WASH_STAIN_CLASSIFICATION_SERVICE`, `SmartHost`, `SmartAutoMop`, `SmartAutoWash`, `StainIdentify`, and turbidity terms; `node_camera_ai.so` references that service and `ProcessWashStainClassificationRequest`. Dynamic symbol inspection still **did not execute**, because the macOS analysis utility was unavailable. That is a host tool gap, not an ELF finding.
+
+**Engineering decision:** next inspect both libraries' ELF exports/imports offline using a real cross-platform ELF reader, and examine AVA service call sites to establish direction. Do not infer an accessible Valetudo API, active turbidity sensor, measured thresholds or automatic rewash decision from configuration flags alone. Preserve the existing `SmartAutoMop=-1` fail-closed semantics and leave the running Valetudo installation untouched. The map check remains deferred.
