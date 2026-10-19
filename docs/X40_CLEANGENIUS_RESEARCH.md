@@ -94,3 +94,23 @@ A user-supplied file listing and **filtered `r2416.conf` lines** from the DustBu
 - The firmware inventory also includes `/ava/conf/auto_water_ctrl_config.json` and `/ava/conf/turbidity_check_config.json`, plus `node_cmd.so`, `node_iot.so`, `node_msg_cvt.so`, `node_camera_ai.so` and `node_map_divide.so`.
 
 This corroborates **configured model references**, not runtime activation or a demonstrated path from AI inference to CleanGenius/MIOT. A string reference to `AI_WASH_STAIN_CLASSIFICATION_SERVICE` does not establish the request schema or identify its producer/consumer. Follow up by performing a private **offline** key-shape inventory of the water/turbidity configuration and a module-by-module *presence-only* service string cross-reference. Do not transmit internal messages, install hooks, or issue model/cleaning commands on the robot. No raw firmware, credentials, images or maps should be included in Git.
+
+
+## R2416 Stage 4 — candidate native CleanGenius decision boundary (2026-10-19)
+
+A privacy-filtered, **offline** SquashFS report (`x40-offline-stain-stage4-v1`) scanned 12 selected AVA native libraries. Important string-occurrence results:
+
+| Native module | Evidence |
+| --- | --- |
+| `node_camera_ai.so` | `AI_WASH_STAIN_CLASSIFICATION_SERVICE` (1), `AI_CLASSIFICATION_RESULT` (1), `StainDetectionJob` (10), `StainClassificationJob` (5), `ProcessWashStainClassificationRequest` (1) |
+| `node_lethe.so` | `AI_WASH_STAIN_CLASSIFICATION_SERVICE` (1), `AI_CLASSIFICATION_RESULT` (1), `SmartHost` (6), `SmartAutoMop` (3), `SmartAutoWash` (3), `StainIdentify` (1), `BackWashType` (9), `Turbidity` (20), `turbidity` (21) |
+| `node_map_divide.so` | `AI_CLASSIFICATION_RESULT` (1), `STAIN_NEED_FILTER` (1), `stubborn_stain` (1) |
+| `node_iot.so`, `node_cmd.so`, `node_msg_cvt.so` | No **matching allowlisted strings** in this scan; this is not proof those nodes never carry associated messages. |
+
+**Inference, not established runtime behavior:** `node_camera_ai.so` likely offers stain inference/classification while `node_lethe.so` is the best candidate for *consuming* an AVA result and making cleaning or rewash decisions, because service and MIOT-key references coexist. A literal string match does not prove publisher/subscriber direction, that a handler is enabled, that a request is issued, or that an external Valetudo API exists. We must not patch/inject AVA messages based on this evidence alone.
+
+The report also confirms that `r2416.conf` has key paths `nodes.[].auto_water_config_file_path`, `nodes.[].turbidity_check_config_file_path`, and `nodes.[].stain.model`; the configuration files `auto_water_ctrl_config.json` and `turbidity_check_config.json` parse as JSON. It reports R2416-specific `RUNTIME_TURBIDITY_DETECTION` and other wash/tank-water key **names** in `dconf_runtime.json`, but not their values. The same file carries hundreds of entries from other Dreame models: never mistake mere cross-model key presence for enabled R2416 hardware.
+
+**Next investigation:** read-only, offline extraction of **only the R2416** runtime flag values (safe Boolean/0/1), the water/turbidity config *key shapes* (no numeric thresholds), and dynamic symbol/relationship hints for `node_lethe.so` vs `node_camera_ai.so`. Then trace AVA service producer/consumer references using offline reverse engineering. No robot commands or privileged injection are needed.
+
+Separate third-party code (`malard/node-dreame`, `src/spec/feature-config.ts`) describes `-1` as a disabled-state sentinel for some multi-mode keys including `SmartAutoMop`. Treat this as an **unverified external interpretation**, not license to coerce the X40's observed `SmartAutoMop=-1` to `0` or enable experimental setters; keep the current fail-closed behavior until model-specific readback/behavior evidence exists.
