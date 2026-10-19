@@ -1,4 +1,5 @@
 import axios from "axios";
+import type {X40CleanGeniusReadOnlyStatus} from "./types";
 import { RawMapData } from "./RawMapData";
 import {PresetSelectionState, PresetValue, RobotAttribute} from "./RawRobotState";
 import {
@@ -1518,4 +1519,15 @@ export const fetchAutoEmptyDockAutoEmptyDurationControlProperties = async (): Pr
         .then(({data}) => {
             return data;
         });
+};
+
+
+/**
+ * Cached X40 Ultra MIOT 4:50 settings only. Never sends a robot command.
+ * This endpoint is unavailable (404) on other robot models.
+ */
+export const fetchX40CleanGeniusStatus = async (): Promise<X40CleanGeniusReadOnlyStatus> => {
+    return valetudoAPI.get<X40CleanGeniusReadOnlyStatus>("/robot/clean-genius/status").then(({data}) => {
+        return data;
+    });
 };
