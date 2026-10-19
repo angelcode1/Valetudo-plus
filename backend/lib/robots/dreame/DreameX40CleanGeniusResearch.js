@@ -112,10 +112,10 @@ function createQuirks(robot) {
 }
 
 module.exports = {
-    EXPERIMENTAL_ENV,
-    SETTINGS,
-    isEnabled,
-    isIdle,
-    decodeValue,
-    createQuirks
+    EXPERIMENTAL_ENV: EXPERIMENTAL_ENV,
+    SETTINGS: SETTINGS,
+    isEnabled: isEnabled,
+    isIdle: isIdle,
+    decodeValue: decodeValue,
+    createQuirks: createQuirks
 };

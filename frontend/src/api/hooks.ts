@@ -831,12 +831,13 @@ export const useAutoEmptyDockManualTriggerMutation = () => {
 
 /**
  * Only called for X40 Ultra. Refetches the backend's cached status, not MIOT.
+ * @param {boolean} enabled Whether the X40 driver is selected
  */
 export const useX40CleanGeniusStatusQuery = (enabled: boolean) => {
     return useQuery({
         queryKey: [QueryKey.X40CleanGeniusStatus],
         queryFn: fetchX40CleanGeniusStatus,
-        enabled,
+        enabled: enabled,
         staleTime: 0,
         refetchInterval: enabled ? 15000 : false,
         retry: false

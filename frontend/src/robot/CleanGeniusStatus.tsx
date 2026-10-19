@@ -84,7 +84,9 @@ const CleanGeniusStatus = (): React.ReactElement => {
                 <DetailPageHeaderRow
                     title="CleanGenius Status"
                     icon={<CleanGeniusIcon/>}
-                    onRefreshClick={supported ? () => { void refetch(); } : undefined}
+                    onRefreshClick={supported ? () => {
+                        void refetch();
+                    } : undefined}
                     isRefreshing={statusFetching}
                 />
 

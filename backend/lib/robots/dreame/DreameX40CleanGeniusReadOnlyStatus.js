@@ -61,7 +61,7 @@ function parseSettings(value) {
         const state = value === null ? "unknown" :
             (Object.prototype.hasOwnProperty.call(definition.known, value) ?
                 definition.known[value] : "unknown");
-        fields[definition.name] = {value, state};
+        fields[definition.name] = {value: value, state: state};
     });
     return fields;
 }
@@ -72,7 +72,7 @@ function observe(value, observedAtMs = Date.now()) {
         throw new Error("Invalid MIOT observation timestamp");
     }
     return {
-        observedAtMs,
+        observedAtMs: observedAtMs,
         fields: parseSettings(value)
     };
 }
@@ -92,8 +92,8 @@ function buildStatus(observation, options = {}) {
         dataType: "native_settings_not_sensor_measurements",
         state: ageMs === null ? "unavailable" : (stale ? "stale" : "observed"),
         observedAt: ageMs === null ? null : new Date(observation.observedAtMs).toISOString(),
-        ageMs,
-        stale,
+        ageMs: ageMs,
+        stale: stale,
         valetudoPolicy: options.experimentalEnabled === true ?
             "experimental_controls_opted_in" : "auto_disable_smart_host_when_positive",
         // The native controller may have been commanded off after this poll;
@@ -104,8 +104,8 @@ function buildStatus(observation, options = {}) {
 }
 
 module.exports = {
-    observe,
-    buildStatus,
-    parseSettings,
-    STALE_AFTER_MS
+    observe: observe,
+    buildStatus: buildStatus,
+    parseSettings: parseSettings,
+    STALE_AFTER_MS: STALE_AFTER_MS
 };

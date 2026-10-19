@@ -30,7 +30,9 @@ test("quirk rejects active cleaning without writing", async () => {
         ephemeralState: {mode: 1, taskStatus: 1},
         miotHelper: {
             readProperty: async () => JSON.stringify([{k: "SmartHost", v: 0}]),
-            writeProperty: async () => { writes++; }
+            writeProperty: async () => {
+                writes++;
+            }
         }
     };
     const [quirk] = research.createQuirks(robot);
@@ -44,7 +46,9 @@ test("quirk uses a single-key update only when idle and supported", async () => 
         ephemeralState: {mode: 0, taskStatus: 0},
         miotHelper: {
             readProperty: async () => JSON.stringify([{k: "SmartHost", v: 0}]),
-            writeProperty: async (...args) => { writes.push(args); }
+            writeProperty: async (...args) => {
+                writes.push(args);
+            }
         }
     };
     const [quirk] = research.createQuirks(robot);
@@ -58,7 +62,9 @@ test("absent setting cannot cause a write", async () => {
         ephemeralState: {mode: 0, taskStatus: 0},
         miotHelper: {
             readProperty: async () => JSON.stringify([{k: "CleanRoute", v: 1}]),
-            writeProperty: async () => { writes++; }
+            writeProperty: async () => {
+                writes++;
+            }
         }
     };
     const [quirk] = research.createQuirks(robot);
@@ -79,7 +85,9 @@ test("R2416 observed 4:50 sentinel values do not cause an accidental write", asy
                 {k: "StainIdentify", v: 1},
                 {k: "MeticulousTwist", v: -7}
             ]),
-            writeProperty: async () => { writes++; }
+            writeProperty: async () => {
+                writes++;
+            }
         }
     };
 

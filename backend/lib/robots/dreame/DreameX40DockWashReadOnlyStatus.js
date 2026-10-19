@@ -26,12 +26,15 @@ function decode(raw) {
     }
     const state = Object.prototype.hasOwnProperty.call(STATES, raw) ?
         STATES[raw] : "unknown";
-    return {raw, state};
+    return {raw: raw, state: state};
 }
 
 /**
  * Pure immutable transition accumulator. Duplicate values refresh the
  * observation timestamp but do not create fake activity transitions.
+ * @param {*} previous Prior observation, or null
+ * @param {number} raw Native mop-dock status code
+ * @param {number} [observedAtMs] Local timestamp in milliseconds
  */
 function observe(previous, raw, observedAtMs = Date.now()) {
     if (!Number.isSafeInteger(raw) || !Number.isSafeInteger(observedAtMs) ||
@@ -53,8 +56,8 @@ function observe(previous, raw, observedAtMs = Date.now()) {
     }
 
     return {
-        value,
-        observedAtMs,
+        value: value,
+        observedAtMs: observedAtMs,
         transitions: transitions.slice(-MAX_TRANSITIONS)
     };
 }
@@ -72,8 +75,8 @@ function buildStatus(observation, nowMs = Date.now()) {
         dataType: "dock_activity_not_dirtiness_or_rewash_reason",
         state: ageMs === null ? "unavailable" : (stale ? "stale" : "observed"),
         observedAt: ageMs === null ? null : new Date(observation.observedAtMs).toISOString(),
-        ageMs,
-        stale,
+        ageMs: ageMs,
+        stale: stale,
         current: ageMs === null ? {raw: null, state: "unavailable"} :
             (observation?.value ?? {raw: null, state: "unavailable"}),
         // Bounded to 12 entries since this Valetudo process started.
@@ -86,4 +89,10 @@ function buildStatus(observation, nowMs = Date.now()) {
     };
 }
 
-module.exports = {decode, observe, buildStatus, MAX_TRANSITIONS, STALE_AFTER_MS};
+module.exports = {
+    decode: decode,
+    observe: observe,
+    buildStatus: buildStatus,
+    MAX_TRANSITIONS: MAX_TRANSITIONS,
+    STALE_AFTER_MS: STALE_AFTER_MS
+};

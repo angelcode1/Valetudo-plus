@@ -404,7 +404,7 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
     getCleanGeniusReadOnlyStatus(nowMs = Date.now()) {
         return {
             ...X40CleanGeniusReadOnlyStatus.buildStatus(this.x40CleanGeniusObservation, {
-                nowMs,
+                nowMs: nowMs,
                 experimentalEnabled: this.allowExperimentalCleanGenius
             }),
             dockWashActivity: X40DockWashReadOnlyStatus.buildStatus(this.x40DockWashObservation, nowMs)
