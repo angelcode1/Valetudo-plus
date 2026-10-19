@@ -61,3 +61,23 @@ The independent X40 report https://github.com/Tasshack/dreame-vacuum/issues/982 
 Keep the existing strict decoding behavior: `SmartAutoMop=-1` causes the experimental Auto Reclean quirk's getter to reject (so Valetudo omits that quirk from the UI), and its setter must reject without issuing `set_properties`. Never coerce `-1` or `-7` into `0`, or overwrite the entire MIOT 4:50 settings blob.
 
 No new cleaning commands, firmware writes, cloud dependencies or production behavior changes are authorized by this observation. Since map validation has been deferred, postpone hardware trials of CleanGenius and auto-reclean until reliable map/dock operation is established. Offline research and fake-helper tests can continue independently.
+
+## Offline R2416 native stain pipeline evidence (2026-10-19)
+
+Static analysis of a user-supplied, limited extraction of the DustBuilder `r2416` rootfs identified the following **compiled capabilities**; this is not proof that the features are enabled or invoked at runtime:
+
+- `/ava/lib/node_camera_ai.so` dynamically exports `camera_ai::StainDetectionJob::Inference`, `camera_ai::CameraAINode::ConvertIntoAIStainResult`, `camera_ai::CameraAINode::ProcessWashStainClassificationRequest(ava_msg_wash_stain_classification*)`, and `camera_ai::StainClassificationJob` classifiers.
+- The binary contains the internal AVA bus/service name `AI_WASH_STAIN_CLASSIFICATION_SERVICE` and other distinct topic names including `AI_CLASSIFICATION_RESULT`. Do **not** equate these internal AVA messages with the external MIOT 4:50 AutoSwitch settings.
+- ARM64 disassembly of the wash-stain request handler shows branch values 1, 2, and 3 selecting the Dreame202404, Maibo202502Series50, and Maibo202502Series40 logistic-regression classifiers respectively; unsupported selector values return a default response. The C++ method consumes numeric inputs and writes a result through a pointer. The message ABI is **not documented or independently validated**; do not send synthetic requests.
+- `/ava/conf/ai_models/MR813/dreame_stain1_v1.3.0.json` specifies a single `stain` category, detection threshold `0.7`, and an image shape `672 x 300`. This is a model configuration, not an observed classification event. The underlying `.mnn` model file was **not** included in this extraction.
+- `/ava/lib/node_map_divide.so` contains `stain`, `STAIN_NEED_FILTER`, and `stubborn_stain` strings, plus AI room/furniture/material handlers. The relationship between these strings and camera stain output is not yet established.
+- `/usr/bin/dreameiot` did not yield stain or SmartHost-related strings in the supplied string scan; absence of strings in this one binary does not imply the local MIOT property is absent. A separate on-device read of MIOT 4:50 has already succeeded.
+- A secondary finding: `/usr/bin/dreame-rvc-app-1.4` contains compiled Matter RVC mode, service-area, commissioning, and operational-state code and refers to `/data/matter/chip_kvs`. Earlier inspection of `/etc/rc.d/matter.sh` found an inert stub, so compiled capability does not demonstrate an active native Matter server. Keep that investigation separate from CleanGenius.
+
+### Next evidence required before enabling controls
+
+1. Inspect the as-built `/ava/conf/r2416.conf` and relevant camera-AI mission configuration **offline**, reporting only service enablement and model references, never secret values or camera imagery.
+2. Identify the intended **producer, consumer and message schema** of the internal wash-stain classification service from benign static analysis. No `LD_PRELOAD` hooks, arbitrary AVA bus publications, or library injection against the running robot at this stage.
+3. Determine whether native AI results (labels/confidences, not images) reach existing local MIOT events or a permitted Valetudo polling path. A service name in a binary alone is not sufficient.
+4. Preserve currently running upstream Valetudo 2026.10.0. Do not merge or deploy the experimental controls while the map is incomplete or the MIOT `SmartAutoMop=-1` sentinel semantics remain unknown.
+5. Keep firmware binaries, model weights, factory credentials, MACs, personal maps and live video **out of this public repository**.
