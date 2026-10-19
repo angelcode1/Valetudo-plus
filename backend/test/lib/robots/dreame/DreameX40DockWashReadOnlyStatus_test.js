@@ -55,3 +55,13 @@ test("output is an allowlist without raw MIOT payloads", () => {
     assert.equal(obj.dataType, "dock_activity_not_dirtiness_or_rewash_reason");
     assert.equal(obj.transitions[0].raw, 5);
 });
+
+
+test("clock regression hides the apparent current dock state and transitions", () => {
+    const snapshot = dock.observe(null, 1, 2000);
+    const result = dock.buildStatus(snapshot, 1999);
+    assert.equal(result.state, "unavailable");
+    assert.deepEqual(result.current, {raw: null, state: "unavailable"});
+    assert.deepEqual(result.transitions, []);
+    assert.throws(() => dock.observe(null, 1, 8640000000000001), /Invalid/);
+});
