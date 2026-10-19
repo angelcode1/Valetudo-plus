@@ -184,3 +184,17 @@ The user's offline report `x40-r2416-stage8-native-symbols-v1` scanned **all dyn
 **Important limitation:** the filtered report describes most Lethe methods as `defined` dynamic symbols, which does **not** establish how a node registers, publishes or consumes an AVA topic; actual call graph and subscription sites require standalone disassembly. `SmartAutoMop=-1` remains a device-observed sentinel/unknown state. No reason to modify the robot, inject native libraries, send synthetic messages, or enable CleanGenius yet.
 
 **Next offline step:** disassemble *only* selected named functions and their static direct-call edges (Lethe wash/mop/turbidity/smart-host controls and Camera AI request handler), explicitly distinguish indirect calls, and map any accessible read-only MIOT status fields. Do not commit proprietary firmware, symbol dumps containing sensitive paths, model weights, camera captures or runtime credentials. Keep mapping deferred.
+
+## Stage 9 call-site audit: false-zero parser failure and offline verification (2026-10-19)
+
+The supplied `stage9-r2416-sanitized-callsite.json` found all 14 named functions but reported `direct_bl_count=0` and `indirect_blr_count=0` for *all* of them. **The zero-call results are invalid, not negative evidence.** We reproduced the tool defect against a user-provided `node_camera_ai.so` binary from an earlier limited firmware extraction.
+
+**Root cause:** Stage 9 invoked `llvm-objdump --demangle --disassemble --disassemble-symbols=<mangled C++ symbol>`. With the tested LLVM 17, passing a mangled selector while enabling `--demangle` prints `failed to disassemble missing symbol` on stderr, but returns exit status **0**. Stage 9 checked only the exit status, then interpreted the header-only/empty disassembly as zero calls.
+
+A corrected **offline-only** call-site parser removes `--demangle` when using the mangled symbol selector, checks stderr for missing-symbol warnings, requires a matching function header and real ARM64 instruction lines before counting, and reports analysis failures explicitly instead of `0`. Its synthetic test passed.
+
+**Grounded positive confirmation:** running the corrected parser directly against the separately supplied `node_camera_ai.so` file decoded 2,468 ARM64 instructions inside `camera_ai::CameraAINode::ProcessWashStainClassificationRequest(ava_msg_wash_stain_classification*)`. It found 233 direct `bl` call instructions and 29 indirect `blr` call instructions, including **direct calls to all three** named `camera_ai::StainClassificationJob` logistic regression functions: `Dreame202404(float,float,float,float,float)`, `Maibo202502Series40(float,float)`, and `Maibo202502Series50(float,float)`. Raw instructions, offsets and firmware binaries were **not** added to Git.
+
+This verifies that the *compiled camera handler* calls the three classifiers. It does **not** show that `node_lethe.so` publishes actual runtime requests, identify the message ABI or meaning of model input/output, or prove that CleanGenius is active. Do not send AVA messages or enable `SmartHost` from this finding. The corrected audit has not yet been run on the user's locally saved **Lethe** binary, because that binary was not part of the prior limited ZIP; the script must be run privately against the saved `rootfs.img` on the Mac.
+
+Status: working robot Valetudo 2026.10.0 unchanged; experimental PR remains draft; map investigation deferred.
