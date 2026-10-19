@@ -33,6 +33,7 @@ import {
     fetchPersistentMapState,
     fetchPresetSelections,
     fetchRobotInformation,
+    fetchX40CleanGeniusStatus,
     fetchSegments,
     fetchSpeakerVolumeState,
     fetchStateAttributes,
@@ -223,6 +224,7 @@ enum QueryKey {
     MultipleMapMaps = "multiple_map_maps",
     PersistentMap = "persistent_map",
     RobotInformation = "robot_information",
+    X40CleanGeniusStatus = "x40_clean_genius_status",
     ValetudoInformation = "valetudo_information",
     ValetudoVersion = "valetudo_version",
     CarpetMode = "carpet_mode",
@@ -824,6 +826,20 @@ export const useAutoEmptyDockManualTriggerMutation = () => {
     return useMutation({
         mutationFn: sendAutoEmptyDockManualTriggerCommand,
         onError: useOnCommandError(Capability.AutoEmptyDockManualTrigger)
+    });
+};
+
+/**
+ * Only called for X40 Ultra. Refetches the backend's cached status, not MIOT.
+ */
+export const useX40CleanGeniusStatusQuery = (enabled: boolean) => {
+    return useQuery({
+        queryKey: [QueryKey.X40CleanGeniusStatus],
+        queryFn: fetchX40CleanGeniusStatus,
+        enabled,
+        staleTime: 0,
+        refetchInterval: enabled ? 15000 : false,
+        retry: false
     });
 };
 
