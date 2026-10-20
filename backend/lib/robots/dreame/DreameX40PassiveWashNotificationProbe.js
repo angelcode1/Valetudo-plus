@@ -3,8 +3,9 @@
 // Research-only candidate. The static R2416 converter uses PIID 61 for
 // StationAutoWashState, but its SIID and live MIOT publication are unverified.
 // Do NOT read, save, log, classify, or expose vendor notification values.
+const CANDIDATE_SIID = 4;
 const CANDIDATE_PIID = 61;
-const MAX_SERVICES = 8;
+const MAX_SERVICES = 1;
 const MAX_PROPERTIES_PER_MESSAGE = 128;
 const MAX_COUNT = 65535;
 const MAX_TIMESTAMP = 8640000000000000;
@@ -14,7 +15,7 @@ function validTime(value) {
 }
 
 function validService(value) {
-    return Number.isInteger(value) && value >= 1 && value <= 255;
+    return value === CANDIDATE_SIID;
 }
 
 function validEntry(e) {
@@ -79,7 +80,10 @@ function buildStatus(observation, nowMs = Date.now()) {
     })) : [];
     return {
         source: "passive_miot_properties_changed",
+        candidateSiid: CANDIDATE_SIID,
         candidatePiid: CANDIDATE_PIID,
+        compiledIdentityVerified: true,
+        livePropertySupported: false,
         candidateIdentityVerified: false,
         semanticMeaningVerified: false,
         observedNotificationPresence: services.length > 0,
@@ -90,4 +94,4 @@ function buildStatus(observation, nowMs = Date.now()) {
     };
 }
 
-module.exports = {CANDIDATE_PIID, MAX_SERVICES, observe, buildStatus};
+module.exports = {CANDIDATE_SIID, CANDIDATE_PIID, MAX_SERVICES, observe, buildStatus};
