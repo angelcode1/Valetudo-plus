@@ -6,6 +6,9 @@ const p = require("../../../../lib/robots/dreame/DreameX40PassiveWashNotificatio
 test("no report means unknown, not a zero wash status", () => {
     assert.deepEqual(p.buildStatus(null).services, []);
     assert.equal(p.buildStatus(null).candidateIdentityVerified, false);
+    assert.equal(p.buildStatus(null).compiledIdentityVerified, true);
+    assert.equal(p.buildStatus(null).candidateSiid, 4);
+    assert.equal(p.buildStatus(null).livePropertySupported, false);
     assert.equal(p.buildStatus(null).semanticMeaningVerified, false);
     assert.equal(p.buildStatus(null).observedNotificationPresence, false);
 });
@@ -13,13 +16,12 @@ test("no report means unknown, not a zero wash status", () => {
 test("only candidate property identifiers are recorded", () => {
     const snapshot = p.observe(null, {method: "properties_changed", params: [
         {siid: 4, piid: 50, value: "DO_NOT_COPY"},
-        {siid: 8, piid: 61, value: {private: "DO_NOT_COPY"}},
-        {siid: 8, piid: 61, value: 12345},
-        {siid: 9, piid: 61, value: -1}
+        {siid: 4, piid: 61, value: {private: "DO_NOT_COPY"}},
+        {siid: 4, piid: 61, value: 12345},
+        {siid: 9, piid: 61, value: -1} // unverified SIID must be ignored
     ]}, 1500);
     assert.deepEqual(p.buildStatus(snapshot, 1600).services, [
-        {siid: 8, count: 2, lastObservedAt: "1970-01-01T00:00:01.500Z"},
-        {siid: 9, count: 1, lastObservedAt: "1970-01-01T00:00:01.500Z"}
+        {siid: 4, count: 2, lastObservedAt: "1970-01-01T00:00:01.500Z"}
     ]);
     assert.equal(JSON.stringify(snapshot).includes("DO_NOT_COPY"), false);
     assert.equal(JSON.stringify(p.buildStatus(snapshot)).includes("12345"), false);
@@ -42,11 +44,12 @@ test("ignores unrelated methods and invalid property identifiers", () => {
 test("bounds distinct services, counts and oversized messages", () => {
     let a = null;
     const entries=Array.from({length:15},(_,i)=>({siid:i+1,piid:61,value:"private"}));
+    assert.equal(p.MAX_SERVICES, 1);
     a=p.observe(a,{method:"properties_changed",params:entries},100);
     assert.equal(a.services.length,p.MAX_SERVICES);
     assert.equal(p.observe(a,{method:"properties_changed",params:Array(129).fill(entries[0])},101),a);
     a.services[0].count=65535;
-    a=p.observe(a,{method:"properties_changed",params:[entries[0]]},102);
+    a=p.observe(a,{method:"properties_changed",params:[entries[3]]},102);
     assert.equal(a.services[0].count,65535);
 });
 
