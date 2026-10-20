@@ -1,0 +1,56 @@
+{
+  "actuator_operation_verified": false,
+  "callback_identity_proven": false,
+  "candidate_indirect_calls_with_both_sp_0x178_and_0x198_must_argument_provenance": 0,
+  "candidate_indirect_calls_with_either_local_must_argument_provenance": 0,
+  "candidate_indirect_stack_offsets": [
+    168,
+    176,
+    184,
+    192,
+    220,
+    224,
+    228,
+    472
+  ],
+  "cfg_worklist_updates": 2990,
+  "conclusion": "STATIC_ARGUMENT_REGISTER_TRIAGE_NOT_CALLBACK_VALUE_PROOF",
+  "full_function_instruction_coverage_verified": 1959,
+  "indirect_branch_call_count": 44,
+  "indirect_call_x0_through_x3_must_stack_address_hits": 32,
+  "indirect_callback_runtime_invocation_observed": false,
+  "indirect_calls_reachable_after_wash_key": 17,
+  "indirect_calls_within_1024_bytes_after_key": 8,
+  "limitations": [
+    "register-only, no stack memory or heap aliases",
+    "all-branch CFG overapproximates branch feasibility",
+    "unrecognized instructions erase caller-saved registers",
+    "blr target type and identity not proven",
+    "presence of stack pointer does not establish object contents"
+  ],
+  "marker": "X40_STAGE46_STACK_REGISTER_MUST_PROVENANCE_V1",
+  "milestone_string_content_forward_proven": false,
+  "no_robot_operations": true,
+  "replace_callsite_count": 6,
+  "replace_callsite_first_four_arg_must_stack_address_hits": 6,
+  "replacement_stack_offsets": [
+    376,
+    408
+  ],
+  "stage47_collection": {
+    "firmware_sha256_prefix_verified": true,
+    "marker": "X40_STAGE47_ONE_ELF_READONLY_COLLECT_AND_ANALYZE_V1",
+    "native_elf_size_bytes": 3899208,
+    "private_binary_in_sanitized_report": false,
+    "private_binary_saved_permanently_by_runner": false,
+    "remote_tar_transfer_bytes": 3900928,
+    "robot_MIOT_or_AVA_requests": false,
+    "robot_file_writes_requested": false,
+    "robot_wash_commands": false,
+    "runtime_callback_delivery_proven": false,
+    "single_fixed_system_library_read": true,
+    "source": "pinned R2416 native ELF read from one fixed on-vacuum path"
+  },
+  "string_value_reaches_wash_contrl_msg_callback_proven": false,
+  "wash_control_key_exact_xrefs": 1
+}
