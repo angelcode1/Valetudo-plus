@@ -1,5 +1,8 @@
 # X40 Stage 19 — passive native wash-status candidate
 
+> **2026-10-20 Stage 22 correction:** Offline analysis of the newly provided R2416 `node_msg_cvt.so` verifies the compiled property identity **MIOT 4:61** (SIID 4 from `MsgClean` → `MsgHandler` constructor, PIID 61 in report/get registration). This *supersedes earlier SIID-unknown statements below*, which are retained as provenance. The deployed device has **not** been polled for 4:61, no live value semantics are verified, and this research branch is not installed. The probe now accepts only 4:61; no property values are read or saved.
+
+
 **Research branch only; not installed or validated on the robot.** Do not use this branch as a firmware or executable update.
 
 ## Evidence
