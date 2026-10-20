@@ -182,3 +182,33 @@ The user performed a **bounded, manually controlled** Stage 7 diagnostic with th
 **Persistent-baseline plan (pending user-side execution):** retain the original `/data/valetudo` executable backup and pristine `/data/valetudo_config.json`; place a **copy of the validated 0.5.0 config** in a dedicated private `/data/valetudo-plus-baseline-0.5.0/` directory. Adjust only the single verified Valetudo launch line in `/data/_root_postboot.sh`, retaining the original `VALETUDO_CONFIG_PATH` variable while adding `VALETUDO_DATA_PATH=/data/valetudo-plus-baseline-0.5.0` and a dedicated `VALETUDO_LOG_PATH`. Pre-stage an exact launcher backup and a verified original binary; reject unexpected script text, missing config or existing process. Boot, wait >100–180 seconds, verify that the **same** official executable remains, TCP port 80 and HTTP 200 persist, and that live environment points to the baseline directory. If unsuccessful, restore both original binary and original launcher from backups without using the original config as the parent's writable test config. No firmware edits or experimental CleanGenius writes.
 
 The exact cause of the custom forked candidate's failed boot remains **unproven**; parent working startup is an important isolation baseline, not automatic proof that the configuration change fixes all custom features.
+
+
+## Stage 9: controlled parent-versus-fork A/B startup result (2026-10-20)
+
+User-executed, **explicitly authorized maintenance** using the Stage 9 scripts, with the production parent baseline and its already validated `VALETUDO_DATA_PATH`. The read-only preflight before downtime reported:
+
+```text
+X40_STAGE9_BASELINE_FINGERPRINT_BEGIN
+PARENT_SHA256_PASS
+CANDIDATE_SHA256_PASS
+BASELINE_AND_ORIGINAL_CONFIG_PRESENT
+RUNNING_PARENT_PATH_PASS
+PORT_80_LISTENING
+HTTP_STATUS=200
+X40_STAGE9_BASELINE_FINGERPRINT_PASS
+```
+
+The working parent `/data/valetudo` has SHA-256 `e0353c4feb141f48e3ab4a6ca6ca55ee6ffe21d7e63a0fc81547104762079e80`; the previous failed X40 candidate was preserved with SHA-256 `45d42b35850e27a3c0d4f57204cd343a9c124aa6d381ad52ac5476a2ffd6fee6`. Config file hashes were also recorded without displaying contents.
+
+The maintenance script verified the parent process, temporarily stopped it, made a *private executable copy* of the existing fork candidate and a *private configuration copy* of the parent baseline, and launched the fork with `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=0`. Observed:
+
+- At 10–70 seconds, the fork was present but there was no port-80 listener. Memory increased ~36–60 MiB, with six threads in most samples.
+- At **80 seconds**, ten threads were observed; **port 80 listened and HTTP GET returned 200**.
+- The fork-specific read-only `GET /api/v2/robot/clean-genius/status` returned **HTTP 200**.
+- Presence-only logs included `Starting Valetudo`, `Autodetected` and `Webserver running on port`. Raw startup logs were **not** shared and must remain private because the application can log credentials.
+- The script emitted `X40_STAGE9_FORK_HTTP_200_PASS` and then `X40_STAGE9_REBOOT_TO_RESTORE_OFFICIAL_BASELINE`. This final marker signifies the **reboot was requested**, **not** that the restored parent has been independently verified following that reboot.
+
+**Conclusion:** Contrary to the original early-reboot inference, the exact previously failed candidate **can start successfully on the X40** with a compatible parent-fork configuration and ~80 seconds initialization. The original nonstartup incident is consistent with an incompatible/missing `VALETUDO_DATA_PATH`, old-config schema handling and/or an observation window shorter than the actual startup time; their individual causal contributions were not isolated. This is a *temporary A/B startup and endpoint reachability pass*, **not** validation of the returned CleanGenius/dock status payload, native dirtiness inference, cleaning features or unattended production startup.
+
+**Next gates:** re-run the read-only parent fingerprint after the reboot and verify a live HTTP 200; separately validate a strictly sanitized X40 status JSON contract during a supervised candidate run with the experiment flag off; validate default SmartHost behaviour, maps and normal controls before considering permanent fork promotion. Keep the original upstream and working parent binaries and both configurations available for rollback. No experimental MIOT writes or device firmware modifications.
