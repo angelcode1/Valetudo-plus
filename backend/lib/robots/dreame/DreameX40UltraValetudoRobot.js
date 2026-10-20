@@ -2,6 +2,7 @@ const capabilities = require("./capabilities");
 const X40CleanGeniusResearch = require("./DreameX40CleanGeniusResearch");
 const X40CleanGeniusReadOnlyStatus = require("./DreameX40CleanGeniusReadOnlyStatus");
 const X40DockWashReadOnlyStatus = require("./DreameX40DockWashReadOnlyStatus");
+const X40PassiveWashNotificationProbe = require("./DreameX40PassiveWashNotificationProbe");
 const DreameGen2ValetudoRobot = require("./DreameGen2ValetudoRobot");
 const DreameGen4ValetudoRobot = require("./DreameGen4ValetudoRobot");
 
@@ -351,6 +352,7 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
         // Never causes additional MIOT requests or writes.
         this.x40CleanGeniusObservation = null;
         this.x40DockWashObservation = null;
+        this.x40NativeWashNotificationObservation = null;
         this.allowExperimentalCleanGenius = X40CleanGeniusResearch.isEnabled();
         const experimentalQuirks = this.allowExperimentalCleanGenius ?
             X40CleanGeniusResearch.createQuirks(this) : [];
@@ -387,6 +389,15 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
 
     }
 
+    // X40 Stage 19 research: passive, value-free candidate-presence check.
+    // Does not send MIOT commands or interfere with the inherited cloud ACK.
+    onIncomingCloudMessage(msg) {
+        this.x40NativeWashNotificationObservation = X40PassiveWashNotificationProbe.observe(
+            this.x40NativeWashNotificationObservation, msg
+        );
+        return super.onIncomingCloudMessage(msg);
+    }
+
     async pollState() {
         try {
             return await super.pollState();
@@ -407,7 +418,10 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
                 nowMs: nowMs,
                 experimentalEnabled: this.allowExperimentalCleanGenius
             }),
-            dockWashActivity: X40DockWashReadOnlyStatus.buildStatus(this.x40DockWashObservation, nowMs)
+            dockWashActivity: X40DockWashReadOnlyStatus.buildStatus(this.x40DockWashObservation, nowMs),
+            nativeWashNotificationCandidate: X40PassiveWashNotificationProbe.buildStatus(
+                this.x40NativeWashNotificationObservation, nowMs
+            )
         };
     }
 
