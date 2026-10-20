@@ -116,3 +116,25 @@ This is a **source and GitHub Actions audit**, not a runtime validation or ident
 - The original sample postboot redirects stdout/stderr to \`/dev/null\`. The source may write a log at \`os.tmpdir()/valetudo.log\`, so use a read-only, sanitized inspection to classify the exit first.
 
 **Safety-gated next step:** Do not delete anything, switch filesystem layouts or deploy our failed candidate. Back up \`/data/valetudo_config.json\` as a separate immutable snapshot; inspect presence-only config files and redacted startup error markers, then test the official 0.5.0 binary using \`VALETUDO_DATA_PATH\` pointing to a *disposable copy* of the saved configuration and an isolated log file, only when safely authorized. If not pursuing this investigation immediately, restore the original verified binary using the existing known-good backup and reboot. If a parent baseline starts with the correct config path, only then plan a reversible launcher change retaining both environment variables. No cause is yet proven for the forked binary, though the same launcher incompatibility is now a plausible common factor.
+
+
+## Stage 5: official 0.5.0 isolated short startup probe (2026-10-20)
+
+The user ran the *official* Valetudo+ 0.5.0 binary, SHA-256 \`e0353c4f...\`, in a **disposable** \`VALETUDO_DATA_PATH=/data/x40-plus-baseline-probe-20261020\` directory containing a copy of the original \`valetudo_config.json\`, and redirected stdout and logger output to private files. The original config, loader and binary backup were not intentionally modified by this test.
+
+Observed script output:
+
+\`\`\`text
+X40_BASELINE_PROBE_BEGIN
+BASELINE_PROCESS_ALIVE_AFTER_10_SECONDS
+BASELINE_HTTP_LISTENER_ABSENT
+BASELINE_PROBE_STOPPED
+=== SANITIZED DIAGNOSTIC MARKERS ===
+X40_BASELINE_PROBE_COMPLETE
+\`\`\`
+
+**Interpretation:** a short-lived process existed at the ten-second check; the simplistic \`netstat -lnt | grep ':80 '\` check did not find a listener; \`SIGTERM\` was followed by a negative \`kill -0\` check after three seconds. This is **not** a confirmed working parent baseline and **not** a demonstrated \`pkg\` crash, because the script intentionally terminated the process. The empty marker list only states that none of eight exact patterns was matched in the two nominated log files. Their existence, sizes and other contents remain unknown; no exit code was captured for the running case. A still-in-progress process, failed/unsupported \`netstat\`, different HTTP port, pre-logger startup stall, or other condition remain possible.
+
+**Source detail:** The 0.5.0 \`WebServer.js\` calls \`server.listen(this.port)\` synchronously during webserver construction (default \`webserver.port=80\`). The \`Valetudo.js\` constructor sets up logger and logs \`Starting Valetudo\` before it constructs the webserver. The optional X40 API and feature are not necessary for official 0.5.0. Importantly, \`MiioValetudoRobot.startup()\` logs \`CloudSecret\` and \`LocalSecret\`; do **not** upload or print raw \`stdio.log\`, \`valetudo.log\`, unredacted config or broad process environment.
+
+**Next diagnostic:** Inspect the existing private probe directory *read-only* for file sizes, config-copy existence/comparison and presence-only markers, plus native \`/proc/net/tcp*\` listening port states. If still ambiguous, repeat a time-bounded observation with process state/elapsed time and safe port checks at intervals longer than 10 seconds, using the existing temporary config and keeping secrets local. Avoid modifying startup files or deploying the known-failed candidate until a verified healthy baseline is established. If service recovery is needed first, use the verified old executable backup and restart. Preserve the original \`/data/valetudo_config.json\`.
