@@ -435,3 +435,18 @@ The offline `x40-stage23-native-wash-audit.zip` contains the exact-symbol analys
 Research-only `research/x40-cleangenius-passive-miot61` branch further clarified that the candidate's `livePropertySupported` is **null (unverified)**, not false (unsupported); its strict incoming-notification filter remains **SIID 4/PIID 61** and deliberately never inspects or saves vendor values. The **pure probe suite 7/7 passed** in an offline local Node 22 mirror with a syntax check; full fork integration build and actual robot validation have *not* run. The branch has **not** been installed, merged, or used to issue any MIOT query.
 
 **Hard boundary still pending:** no trustworthy local read result for 4:61, natural `properties_changed` event, numeric station status semantics, observed native mop dirtiness/turbidity, or automatic rewash decision. Do not interpret the internal setter as permission for external writes. Leave production fork, experimental flags and rollback backups untouched; user postponed physical washing/docking test. Next meaningful data must come from separately authorized *single allowlisted read-only* live 4:61 query or trusted passive natural-notification observation, with privacy filtering, after choosing a device-supported access method. Avoid speculative CLI syntax or AVA injections.
+
+## Stage 24: compiled AVA integer-message path leads to MIOT 4:61 status setter (2026-10-20)
+
+Continued research used **only the saved private R2416 archive**, which passed ZIP CRC integrity and AArch64 ELF identity checks. A standalone Python script `stage24_offline_prop_path.py` passed synthetic parser tests and real offline analysis, `X40_STAGE24_OFFLINE_AVA_PROPERTY_CHAIN_V1`, without connecting to the X40. Its short sanitized report and source are packaged as `x40-stage24-offline-prop-path.zip` outside this repo; no native code, raw disassembly, credentials or maps were added to GitHub.
+
+Exact verified ELF branch chain in `node_msg_cvt.so`:
+
+1. `AvaMsgCvtPropIntProcess(ava_msg_device_prop_int*)` (12-byte ELF extent, 3 instructions): **one exact tail `b` branch** to `PropIntMsgProcess(ava_msg_device_prop_int&)`.
+2. `PropIntMsgProcess` (756 bytes, 188 instructions): **two exact PLT branches** (one `b`, one `bl`) to `SetPropIntMsg(int,int,bool)`.
+3. `SetPropIntMsg` (4,248 bytes, 1,060 instructions): **one exact PLT `b` branch** to `MsgClean::SetStationAutoWashState(int,bool)`.
+4. `SetStationAutoWashState` (48 bytes, 11 decoded instructions) updates the previously verified stored status member (offset `0x2d4`) and references property ID **61**, with SIID **4** established independently in Stage 22.
+
+Separately, `node_lethe.so` defines `ancp::AsyncDeque::_ProcessAsyncPub<ava_msg_device_prop_int>`, a compiled typed publisher facility matching the converter's typed input. This **does not** by itself establish the publisher of **StationAutoWashState specifically**, or live AVA event delivery. No raw vendor property values were extracted, and no public MIOT status-value enum has been established.
+
+**Operational boundary:** The compiled internal path is now well supported, but the robot's local `get_properties(4,61)` support, actual natural notifications, meaning of integers, native dirtiness measurements and decisions to rewash are **all unknown**. The existing stable production Valetudo fork stays installed with `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=0`; original and official parent rollback assets are preserved. The Stage 19 source probe remains research-only, unmerged and undeployed; no new MIOT commands or firmware writes were made. No need to redo the private firmware collection.
