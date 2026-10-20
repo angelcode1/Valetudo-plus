@@ -1,7 +1,7 @@
 "use strict";
 
-// Research-only candidate. The static R2416 converter uses PIID 61 for
-// StationAutoWashState, but its SIID and live MIOT publication are unverified.
+// Research-only. R2416 static disassembly confirms compiled MIOT 4:61
+// for StationAutoWashState; live accessibility and semantics are unverified.
 // Do NOT read, save, log, classify, or expose vendor notification values.
 const CANDIDATE_SIID = 4;
 const CANDIDATE_PIID = 61;
@@ -48,8 +48,8 @@ function observe(prior, message, nowMs = Date.now()) {
         if (!validEntry(e)) {
             continue;
         }
-        // Intentionally NEVER access e.value. A missing verified SIID means
-        // this is only a candidate-presence signal, not a decoded wash event.
+        // Intentionally NEVER access e.value. The compiled SIID/PIID does not
+        // establish runtime support or provide a status-value mapping.
         const previous = fresh.get(e.siid);
         if (!previous && fresh.size >= MAX_SERVICES) {
             continue;
@@ -83,7 +83,7 @@ function buildStatus(observation, nowMs = Date.now()) {
         candidateSiid: CANDIDATE_SIID,
         candidatePiid: CANDIDATE_PIID,
         compiledIdentityVerified: true,
-        livePropertySupported: false,
+        livePropertySupported: null,
         candidateIdentityVerified: false,
         semanticMeaningVerified: false,
         observedNotificationPresence: services.length > 0,
