@@ -36,3 +36,22 @@ It exports **only** an allowlisted JSON summary with bounded member-offset hints
 4. Do not enable experimental SmartHost/SmartAutoWash writes, emit AVA messages, add unreviewed MIOT polling ranges, or alter the running `/data/valetudo` installation. Physical cleaning/docking validation is explicitly deferred by the owner.
 
 The companion Stage 19 branch doc remains [Stage 19 passive MIOT candidate research](X40_STAGE19_PASSIVE_MIOT61_RESEARCH.md). No firmware, private measurements, or sensor values have been committed.
+
+## Stage 22 update — resolved compiled service ID; not live verification (2026-10-20)
+
+The user uploaded the corrected collector archive and its sanitized manifest. The private ZIP contains **106 firmware files; all 106 match the archive's SHA-256 manifest and size declarations**, with ZIP CRC integrity verified. Binary source code and raw configuration remain private.
+
+Static AArch64 disassembly establishes **MIOT service 4, property 61** for `MsgClean::StationAutoWashState`:
+
+1. `MsgClean::MsgClean` puts the immediate SIID **4** in the constructor argument and calls `MsgHandler::MsgHandler(int,...)`.
+2. `MsgHandler::MsgHandler` stores that argument at the instance's service-ID field.
+3. `MsgClean::RptStationAutoWashState` reloads the stored service ID and uses the immediate PIID **61** for the MIOT report.
+4. The `MsgClean` constructor registers **get** and **report** handlers for PIID **61**. `SetStationAutoWashState` is an internal stored-value setter that schedules a report on change; it is *not* evidence of an externally writable API.
+
+This proves the firmware's **compiled 4:61 identity**, superseding the earlier unknown-SIID state. It does **not** establish that local MIOT clients can read this property or which numerical values correspond to wash, extra rewash or dirtiness.
+
+New private firmware modules `liblethe_route_nodes.so`, `liblethe_tactics_tree.so`, and `liblethe_tree.so` were recovered. Verified exact direct PLT branches show that `ChooseWashType` invokes both `ChooseSmartHostWashType` and `ChooseAICheckWashType`; `InitTurbidityCheckInfo` invokes `TurbidityRecleanAndRewashSet`; `WashFloorTubidityCheck` invokes `TurbidityMonitorLogicRunEx`; and `WashStateLogic` has a direct tail branch to `WashRunningPrecess`. The route-nodes module contains `MopDirtyAccumulator::tick` and `StateCurrent::WriteAiMopDirtyData`. These support **compiled wash-decision mechanisms**, not observed live operation.
+
+The exact saved `dreame.vacuum.r2416` runtime configuration contains `RUNTIME_TURBIDITY_DETECTION="Single_Channel"`, `RUNTIME_SELF_CLEANING_WASH_PLATE="Y"`, and the independent `turbidity_check_config=true`. These are **static configured capabilities**, not sensor readings or proof of operation.
+
+The undeployed research-only PIID61 passive observer was subsequently restricted to **SIID 4 / PIID 61**; it still never reads a vendor notification `value`, transmits a MIOT query or enables the experimental CleanGenius modes. CI/full robot testing is outstanding. No changes to the installed X40 fork, Valetudo parent binary, original backups, MIOT state, or AVA services. A sanitized audit is available as a conversation artifact outside Git; do not commit proprietary binaries, model weights or raw runtime data.
