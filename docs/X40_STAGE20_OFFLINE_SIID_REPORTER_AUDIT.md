@@ -128,3 +128,20 @@ To interpret the value conservatively, the existing private `node_msg_cvt.so` ar
 The separately supplied `x40-stage27-default-zero.zip` contains only a Python3 offline AArch64 ELF analyzer, README, synthetic positive/negative self-tests and sanitized output `X40_STAGE27_DEFAULT_ZERO_OFFLINE_V1`. It passed `py_compile`, synthetic tests, exact four-function size/header/instruction-coverage and matching-memory-offset checks against the actual private archived firmware, and ZIP CRC verification. No raw binary or disassembly was published.
 
 **Limitations:** 0 remains a **numeric value with unknown semantics**. No proof that 0 means idle, no auto wash, no dirtiness or disabled; no proof that the live status was never modified since construction; no observed state transition, forced wash, detected turbidity, AI mop dirtiness or automatic rewash. The branch remains undeployed. The native positive runtime read result applies to this owner device, not universally to all model variants. A future natural, independently corroborated state transition or offline code-path mapping is required before surfacing named statuses in Valetudo. Leave the production fork, experimental write disablement and rollback backups untouched.
+
+## Stage 28 — exact native wash-blackboard key cross-references (2026-10-20)
+
+Using only the owner's earlier validated 106-file **private R2416 firmware archive** (no robot connection), a new strict offline analyzer verified the entire `RobotWIFI_Deal::WIFIState_Send::updateStationAutoWashState()` function from `liblethe_tactics_tree.so`: **7,836 bytes, 1,959 consecutive AArch64 instructions** and the exact ELF symbol/header. It found six unique `.rodata` keys referenced by exact **adjacent `ADRP` + `ADD`** address materializations from inside the function (not a mere `strings` hit):
+
+- `station_auto_wash_stage`: **1** exact instruction reference
+- `station_auto_wash_working`: **2**
+- `station_auto_wash_pause`: **3**
+- `station_auto_wash_out_time`: **1**
+- `station_auto_wash_happen_error`: **1**
+- `station_auto_wash_back_home`: **1**
+
+The same function's exact named PLT branches include `BT::Blackboard::get<WashStatus>` **1**, `get<ava_mop_station_msg>` **1**, `get<int>` **3**, `set<bool>` **6**, `set<int>` **1** and `set<int&>` **1**. Counts were verified against the user's actual archive; they establish compiled wash-related **read/write behaviour-tree processing**. They do *not* establish the concrete value flow from those keys to the separate `MsgClean::SetStationAutoWashState` path or live MIOT `4:61`.
+
+Standalone no-SSH/no-network script `stage28_offline_blackboard_audit.py`, synthetic negative parser tests (including truncated disassembly rejection), README and sanitized JSON `X40_STAGE28_BLACKBOARD_KEY_XREF_V1` were packaged into **`x40-stage28-wash-blackboard.zip`** as a private-workstation audit utility. The script and real R2416 firmware audit passed, ZIP CRC verified. The ZIP **contains no** proprietary firmware, disassembly, vendor payloads, maps, raw camera imagery, or secrets. A short binary SHA prefix is included only for local provenance.
+
+**Status semantics boundary:** separately observed `MIOT 4:61=0` is still only a known live integer; Stage 27 proved that zero is also constructor-default but not whether the live value was never changed. The named working/pause/error/timeout/return-stage blackboard fields are *not* a verified numeric mapping for 4:61, nor proof that AI dirtiness/turbidity triggers a rewash. Neither this stage nor its script connected to the robot, queried MIOT, enabled CleanGenius, or changed Valetudo. The research-only passive 4:61 prototype remains unmerged and undeployed; the production fork and parent backups are preserved. Next offline investigation should trace the **specific producer** of `ava_msg_device_prop_int` for the station-auto-wash property, or use independently corroborated natural wash-state transitions to discover semantics (not an induced cleaning cycle).
