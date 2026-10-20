@@ -224,3 +224,26 @@ However the **six original JSON responses** and sanitized `X40_STAGE10_READONLY_
 The next separate `Stage 11` diagnostic is designed to trigger ordinary `GET /state` before reading the status cache, six times, then sanitize output with a stronger **live-data gate**. Its self-test reproduces that Stage 10 samples pass the JSON contract but **fail** actual live-data evidence (`settings_observed_samples=0`, `dock_observed_samples=0`). **Safety qualification:** the state-poll GET may invoke existing automatic SmartHost disabling or water-hookup acknowledgement writes inside Valetudo; it is not a guaranteed firmware-read-only operation despite being an HTTP GET. Experimental CleanGenius writes remain off. It is a supervised, reversible maintenance test, not a new release or automatically approved deployment.
 
 See [Stage 11 diagnostic plan](https://github.com/angelcode1/Valetudo-plus/blob/diagnostics/x40-stage9-parent-fork-ab/docs/X40_STAGE10_11_READONLY_OBSERVATION_GATE.md). The official baseline stays the only approved persistent installation.
+
+## Stage 11: MIOT settings and dock status confirmed from normal state polls (2026-10-20)
+
+The user submitted six individual **read-only status JSON snapshots** and a sanitized report `X40_STAGE11_POLL_CACHE_CONTRACT_V1`, captured in the supervised temporary fork run with the experimental controls disabled. The new diagnostic explicitly requested the normal robot `GET /api/v2/robot/state` endpoint **before** each cached `GET /api/v2/robot/clean-genius/status` read, correcting Stage 10's missing poll. The local files were independently checked on 2026-10-20; no raw logs/configuration, keys, maps, camera data or firmware binaries were committed.
+
+**Verified results:** `sample_count=6`, `contract_pass=true`, `live_data_pass=true`, `settings_observed_samples=6`, `dock_observed_samples=6`. Each source response reported `state=observed`, `stale=false`, `dockWashActivity.state=observed`, `dockWashActivity.stale=false`, and `valetudoPolicy=auto_disable_smart_host_when_positive`. The six settings ages were 176, 98, 86, 102, 81 and 80 milliseconds; corresponding dock ages were 158, 97, 85, 101, 80 and 79 milliseconds, i.e., freshness is verified at the sample times. Successive readings were around 15 seconds apart.
+
+All six sanitized samples agreed on these **settings**, not live cleaning events:
+
+| Native key | Value | Interpretation |
+| --- | ---: | --- |
+| `SmartHost` | `0` | CleanGenius setting off |
+| `SmartAutoMop` | `-1` | Unknown/sentinel; do not coerce or write |
+| `SmartAutoWash` | `0` | Auto Rewash setting off |
+| `StainIdentify` | `1` | Stain Identification setting on; **not** a detection event |
+| `HotWash` | `1` | Hot Wash setting on; **not** a temperature measurement |
+| `MOP_DOCK_STATUS` | `0` | Dock idle in all six samples; one initial idle transition, no observed wash/re-wash event |
+
+All six returned `nativeMopDirtiness=unavailable_no_verified_local_status_interface`; no measured dirtiness, turbidity value, AI stain classification, automatic rewash decision or wash-trigger origin is established. The `SmartAutoMop=-1` observation matches the earlier R2416 device observation and must remain **unknown**, not "off". **Experimental controls were disabled**; do not enable them based on these results.
+
+**Source closure:** `DreameX40UltraValetudoRobot` inherits `DreameGen4ValetudoRobot.getStatePropertiesToPoll()`, which already requests MIOT `4:50`, while the X40 override requests the mop-dock property. X40's parser populates both sanitized caches from a successful normal state response. Therefore **no new MIOT poll or parser fix is required for these two read-only observations**. Its read-only status route does not itself refresh the MIOT cache; the React page currently refreshes only that cached route at 15-second intervals. Without normal robot state traffic, the UI may legitimately show unavailable or stale observations even though the endpoint returns HTTP 200. Assess the UI behaviour separately instead of adding a new background hardware poll blindly.
+
+**Remaining gates before fork promotion:** (1) verify post-maintenance parent baseline and preserved config hashes again (not provided with this Stage 11 upload); (2) validate normal robot state, maps, dock functionality and web UI with the fork under supervision; (3) verify unattended fork boot with explicit `VALETUDO_DATA_PATH`, proper rollback, and the experimental controls absent. Native dirtiness/event telemetry and writable CleanGenius remain **separate, unverified research**. The user has not authorized permanent candidate deployment by merely uploading these results.
