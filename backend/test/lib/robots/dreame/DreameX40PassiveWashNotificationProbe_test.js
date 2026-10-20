@@ -8,7 +8,7 @@ test("no report means unknown, not a zero wash status", () => {
     assert.equal(p.buildStatus(null).candidateIdentityVerified, false);
     assert.equal(p.buildStatus(null).compiledIdentityVerified, true);
     assert.equal(p.buildStatus(null).candidateSiid, 4);
-    assert.equal(p.buildStatus(null).livePropertySupported, false);
+    assert.equal(p.buildStatus(null).livePropertySupported, null);
     assert.equal(p.buildStatus(null).semanticMeaningVerified, false);
     assert.equal(p.buildStatus(null).observedNotificationPresence, false);
 });
