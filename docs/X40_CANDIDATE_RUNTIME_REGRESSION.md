@@ -527,3 +527,22 @@ An additional **offline** disassembly of the already collected R2416 `node_msg_c
 A reproducible **Mac-side offline** verification kit is available as `x40-stage27-default-zero.zip` outside Git, with `stage27_default_zero_audit.py`, synthetic no-network tests, README, and a **sanitized** JSON audit `X40_STAGE27_DEFAULT_ZERO_OFFLINE_V1`. Python syntax, parser tests, private ZIP CRC, exact symbol-disassembly checks, matching member offset and ZIP integrity **passed**. No proprietary firmware, secrets, raw disassembly or camera/map data are included. No X40 network/robot commands were used for this *offline* step; the live integer is from the prior owner-triggered Stage26 read.
 
 **Next evidence gate:** establish actual status-code semantics through independently corroborated natural-state transitions or further specific private offline control-flow analysis, without assuming zero means idle. A physical cleaning/wash retest remains deferred. Preserve the installed production fork, `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=0`, and original/official parent rollback backups. Do not change property `4:61`, inject AVA messages, or enable experimental SmartHost controls to force a transition.
+
+## Stage 28: nine exact station-auto-wash blackboard string references in native R2416 (2026-10-20)
+
+Continued analysis used **only the operator's previously provided, SHA-verified private R2416 firmware archive**; there was no robot access, SSH, MIOT query or firmware modification. A new **offline-only** Python3 audit parsed the actual `liblethe_tactics_tree.so` AArch64 ELF, verified the exact symbol `RobotWIFI_Deal::WIFIState_Send::updateStationAutoWashState()`, its 7836-byte function size, and all **1959 consecutive instructions**. It verified each key is uniquely present in the ELF `.rodata` segment and located exact within-function `ADRP` followed immediately by `ADD` references to the full corresponding address:
+
+| Exact private blackboard key | Verified instruction references |
+|---|---:|
+| `station_auto_wash_stage` | 1 |
+| `station_auto_wash_working` | 2 |
+| `station_auto_wash_pause` | 3 |
+| `station_auto_wash_out_time` | 1 |
+| `station_auto_wash_happen_error` | 1 |
+| `station_auto_wash_back_home` | 1 |
+
+Direct named PLT calls in **that same compiled function**: `BT::Blackboard::get<WashStatus>` **1**, `get<ava_mop_station_msg>` **1**, `get<int>` **3**, `set<bool>` **6**, `set<int>` **1**, `set<int&>` **1**. These counts confirm **compiled internal wash-state blackboard inputs and updates**, beyond a mere binary string match. They are *not* proof of a direct producer-to-MIOT property `4:61` bridge, numeric enumeration, an actual wash, dirtiness or automatic rewash event.
+
+The **separate validated live** `4:61=0` observation remains an unmapped integer. Stage 27 separately verified constructor initialization of that property to 0, not that the runtime value never changed. The Stage28 analyzer reports `COMPILED_WASH_BLACKBOARD_INPUT_OUTPUT_REFERENCES_VERIFIED`, explicitly `blackboard_state_compiled_to_live_miot_value_bridge_verified=false` and `live_miot_value_0_interpreted=false`. Self-test, Python compilation, real offline archive audit, and ZIP CRC **passed**. A privacy-filtered `x40-stage28-wash-blackboard.zip` package includes script, sanitized JSON and instructions **only**, with no raw binaries, full disassembly, private configs or credentials. Full research notes are in the unmerged [CleanGenius research branch](https://github.com/angelcode1/Valetudo-plus/blob/research/x40-cleangenius-passive-miot61/docs/X40_STAGE20_OFFLINE_SIID_REPORTER_AUDIT.md).
+
+No installed executable, experimental write flag or rollback backups changed. The physical wash/dock retest remains deferred. Investigate the **actual typed AVA producer with station state context** or wait for independently observed natural state transitions before assigning labels or exposing the numeric property in production.
