@@ -258,3 +258,28 @@ An independent operator-side `x40-stage12-normal-function.zip` test kit was buil
 The normal endpoint checks are `/api/v2/robot/`, `/api/v2/robot/properties`, `/api/v2/robot/capabilities/`, `/api/v2/robot/state`, `/api/v2/robot/state/attributes` and `/api/v2/robot/state/map`; the fork additionally checks `/api/v2/robot/clean-genius/status`. Responses are discarded; raw state, map, robot information, logs, and credentials are not included in shareable output. **A map HTTP 200 does not prove a nonempty or correct map**, capability endpoint success does not prove cleaning controls, and UI functionality is not validated without a human check. Ordinary state GETs can trigger existing firmware-level safety writes (e.g. SmartHost disable/acknowledgement), despite being HTTP GET methods; experimental writes stay disabled. The test requires idle/docked conditions, explicit maintenance opt-in, working SSH and independent recovery. It does **not** deploy the fork permanently, change the boot script or overwrite either existing config.
 
 **Remaining gates:** actual Stage 12 execution, confirmation of post-maintenance restored parent, existing UI/map state and normal robot features, and separately authorized unattended fork boot/rollback validation. Do **not** claim native stain decisions or rewash telemetry from the existing MIOT setting observations.
+
+## Stage 12: normal-function endpoint success, map payload still needs confirmation (2026-10-20)
+
+The user executed the SHA-guarded Stage 12 maintenance A/B script and independently verified official Algid Valetudo+ 0.5.0 recovery with the fingerprint after reboot. Both before and after the test it reported `PARENT_SHA256_PASS`, `CANDIDATE_SHA256_PASS`, `BASELINE_AND_ORIGINAL_CONFIG_PRESENT`, `RUNNING_PARENT_PATH_PASS`, `PORT_80_LISTENING`, `HTTP_STATUS=200`, unchanged parent config SHA-256 `eca068eef7dfc1e1b6dd26a82aa25b7680a4586f63c892e5a29ab4805548fcb6`, unchanged original config SHA-256 `f594fc798706c538d0d2c89f4be022af6ae8905f3c78d0e06f867e843d422018` and `X40_STAGE9_BASELINE_FINGERPRINT_PASS`. Thus the maintained parent was restored and neither protected config changed.
+
+**Stage 12 parent vs fork HTTP 200 comparison** (all endpoints returned HTTP 200):
+
+| Endpoint | Warm parent bytes | Fresh fork bytes |
+| --- | ---: | ---: |
+| `GET /api/v2/robot/` | 232 | 232 |
+| `GET /api/v2/robot/properties` | 26 | 26 |
+| `GET /api/v2/robot/capabilities/` | 1729 | 1729 |
+| `GET /api/v2/robot/state` | 11441 | 3696 |
+| `GET /api/v2/robot/state/attributes` | 993 | 993 |
+| `GET /api/v2/robot/state/map` | 10378 | 2633 |
+| `GET /` | — | 831 |
+| `GET /api/v2/robot/clean-genius/status` | — | 842 |
+
+The fork became HTTP-ready after 80 seconds. The UI observation window completed and the user reported **"pages seemed to load"**, which is a useful subjective smoke check but does not certify visual map correctness, persisted rooms, all UI interactions, cleaning, docking or streaming. `STAGE12_NORMAL_ENDPOINT_HTTP_PASS`, `STAGE12_UI_WINDOW_COMPLETE`, and `STAGE12_ENDPOINT_GATE_PASS` were emitted before stopping the fork and requesting a reboot.
+
+**Narrowed difference:** The total JSON response-size delta between parent and fork for `/state` equals **7,745 bytes**, precisely the map endpoint delta (10,378 − 2,633 = 7,745; 11,441 − 3,696 = 7,745). This is strong evidence that map payload differences explain the observed state-response size gap, rather than some missing ordinary robot attributes. It does **not** prove either map is correct or that all nonmap state content is equivalent.
+
+The X40/Gen4 implementation seeds state with a `defaultMap:true` placeholder and receives normal map frames asynchronously through firmware map-poll/dummycloud paths. The Gen4 `determineNextMapPollInterval` implementation retries faster for a default map while `process.uptime() < 90` seconds, otherwise falling back to normal intervals. The 80-second fork map sample was therefore captured during an early, potentially cold-map interval. **Do not assert a map regression or claim successful map readiness solely from HTTP 200 or byte counts.**
+
+**Next Stage 13:** Run a Mac-side in-memory JSON map structural classifier against the currently healthy parent, collecting only default-placeholder state, map layer/entity/segment counts and payload size, no coordinates or room labels. Then only with explicit maintenance authorization, temporarily run the SHA-pinned fork using the unchanged Stage12 safety pattern, grant a 240-second map observation window and collect six identical sanitized readings at ~30-second intervals. Visually confirm a nonplaceholder real map in the fork UI, and independently confirm the original parent, SHA pins and config hashes after maintenance. Keep both original and parent rollbacks, existing launcher and experimental-write-disable flag unchanged. Stage 13 is **not** yet user-executed. No production changes authorized by this finding.
