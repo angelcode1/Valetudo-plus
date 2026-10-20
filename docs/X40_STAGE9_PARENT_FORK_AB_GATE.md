@@ -22,3 +22,16 @@ An operator-side Stage 9 kit is prepared for this purpose, with a **read-only fi
 * Preserve `/data/valetudo`, `/data/_root_postboot.sh`, the protected original binary, and the original `/data/valetudo_config.json`.
 * Keep copied config and logs private. Valetudo startup logs can emit `CloudSecret` and `LocalSecret`; neither their values nor raw log files may be uploaded or committed.
 * A successful temporary HTTP 200 is a necessary step but not complete device feature validation; require a successful persistent boot, safe state/status verification, and rollback verification before release.
+
+
+## Stage 9 actual X40 result (2026-10-20)
+
+The operator ran the maintenance A/B kit after `X40_STAGE9_BASELINE_FINGERPRINT_PASS`, recording identical preflight SHA pins for official Valetudo+ and the existing forked CI candidate. During temporary candidate execution, the fork showed no port-80 listener at 10–70 seconds, then at **80 seconds** it showed 10 threads, `FORK_HTTP_STATUS=200`, and `FORK_X40_STATUS_API_HTTP_STATUS=200`. The command printed `X40_STAGE9_FORK_HTTP_200_PASS`, then `X40_STAGE9_REBOOT_TO_RESTORE_OFFICIAL_BASELINE`.
+
+**Limits:** This is a positive temporary startup and endpoint HTTP-reachability test. It is not yet a validated endpoint JSON contract or real CleanGenius/dock-sensor behaviour. The reboot marker means reboot was requested, not that a post-reboot parent fingerprint has been seen. The original no-start impression was confounded by a config-path mismatch and a 10–60-second listener observation window, versus the now-demonstrated ~80-second startup. Neither factor was proven individually causal.
+
+## Stage 10 proposed gate
+
+First obtain a **new** read-only Stage 9 baseline fingerprint after the recovery reboot. Then, only in a new supervised maintenance window, run the separate `x40-stage10-readonly-contract.zip` kit, which verifies the known-good parent, original-binary backup and SHA-pinned candidate before stopping anything; it starts the candidate with the experimental flag explicitly set to zero, checks HTTP 200, captures six **GET-only** `/api/v2/robot/clean-genius/status` responses into a private `/data/x40-stage10-readonly-capture-20261020/` directory, and attempts to reboot into the unchanged parent. The Mac-side Python sanitizer rejects incompatible API contract/policy and emits only allowlisted field **state labels**, observation state and bounded dock transition counts. It never includes raw MIOT values, credentials, map data or native events in its shareable report. The diagnostic itself issues no MIOT write request, but the running Valetudo implementation may perform ordinary poll and SmartHost auto-disable operations; do not claim that all firmware interactions are read-only.
+
+**Final prerequisites for permanent fork promotion:** JSON contract and freshness verified, no regressions in existing robot status/maps/normal controls, unattended startup >120 seconds, parent baseline and original upstream rollback retained, and writable CleanGenius features still disabled. There is no proof of native dirtiness or automatic rewash decision telemetry.
