@@ -69,3 +69,18 @@ The private-archive audit script validates *all four* declared ELF function exte
 **Still unverified:** the source of the dispatcher's incoming runtime values; whether this X40 answers local MIOT `get_properties(4,61)`; whether actual `properties_changed` events are emitted; numeric status meanings; native mop dirtiness, turbidity measurements or automatic rewash decisions. Do not infer numeric enums from the status member offset or dispatch branch. The branch's passive probe remains undeployed and accepts only a naturally incoming **4:61** notification while ignoring its value. The probe now reports `livePropertySupported=null` (unknown), not `false` (absent).
 
 The narrowly modified pure passive-probe source and its updated tests were replicated in a local offline Node 22 test harness: **7/7 pass**, with syntax check. This does *not* replace a full repository CI build and real X40 integration. Preserve `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=0`, parent rollback backups and the deferral of the physical cleaning/docking test.
+
+## Stage 24 — typed AVA property update chain, offline verification (2026-10-20)
+
+The owner requested continued offline CleanGenius research. The same privately collected and archived **R2416** libraries were analyzed without network/robot access. An independent analyzer `stage24_offline_prop_path.py` checked the exact ELF symbol sizes, instruction ranges and branch-to-PLT labels in `node_msg_cvt.so`; its output is sanitized as `X40_STAGE24_OFFLINE_AVA_PROPERTY_CHAIN_V1`.
+
+**Compiled converter chain now directly established:**
+
+1. `AvaMsgCvtPropIntProcess(ava_msg_device_prop_int*)` (12-byte ELF function, 3 decoded instructions) uses **one exact tail branch** to `PropIntMsgProcess(ava_msg_device_prop_int&)`.
+2. `PropIntMsgProcess` (756-byte function, 188 instructions) uses **two exact PLT branches** (one tail `b`, one `bl`) to `AvaNodeMsgCvt::SetPropIntMsg(int,int,bool)`.
+3. `SetPropIntMsg` (4,248-byte function, 1,060 instructions) uses **one exact PLT tail branch** to `MsgClean::SetStationAutoWashState(int,bool)`.
+4. The short station setter reads/writes the same private instance member at `0x2d4` and uses literal **PIID 61**, as established independently in Stage 23. Stage 22 established the instance's **SIID 4** and reporter/getter registration.
+
+`node_lethe.so` **also defines** typed `ancp::AsyncDeque::_ProcessAsyncPub<ava_msg_device_prop_int>` and related type machinery. This is a **compiled potential producer**, not a verified concrete caller producing StationAutoWashState 4:61. Symbol presence and the converter's generic dispatcher do not prove that any matching AVA messages were delivered on the running X40 or reveal integer meanings.
+
+The offline Python script self-test, syntax check, real private ZIP CRC and compiled ARM64 audit passed, returning `COMPILED_AVA_INTEGER_TO_STATION_STATUS`. The code and sanitized report were packaged separately in `x40-stage24-offline-prop-path.zip`; the firmware was **not** packaged or committed. The installed `master` fork and backup copies are **unchanged**. The research-only passive notification prototype is still undeployed. **Next gate:** identify a trustworthy, consented local method to read only MIOT 4:61 (or a naturally emitted passive notification), without querying arbitrary properties, altering AVA, enabling experimental SmartHost controls, or interpreting undocumented values as dirtiness/rewash.
