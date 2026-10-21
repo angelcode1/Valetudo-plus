@@ -1,7 +1,21 @@
 #!/usr/bin/env python3
 """Read-only X40 R2416 post-decision state-branch verification; no device access."""
 import argparse
-from x40_floor_to_threshold_verify import ELF, branch_target
+from x40_turbidity_bt_verify import ELF, PIN
+
+def branch_target(pc, w, kind):
+    if kind == 'BL':
+        if w & 0xfc000000 != 0x94000000: raise ValueError('expected BL')
+        imm=w & 0x3ffffff
+        if imm & (1<<25): imm -= 1<<26
+        return pc + imm*4
+    if kind == 'B.cond':
+        if w & 0xff000010 != 0x54000000: raise ValueError('expected B.cond')
+        imm=(w>>5) & 0x7ffff
+        if imm & (1<<18): imm -= 1<<19
+        return pc + imm*4
+    raise ValueError('unknown branch type')
+
 
 WORDS={
  0x256660:0x97f9c4c4,  # separate B-table re-clean decision
@@ -19,16 +33,16 @@ WORDS={
 }
 STRINGS={0x340c30:b'TubidityResult\0',0x340c78:b'success\0',0x339710:b'fail\0'}
 def check(path):
-    elf=ELF(path)  # requires pinned full-file SHA and AArch64 ELF from prior verifier
+    elf=ELF(path,PIN['tactics'])  # requires pinned full-file SHA and AArch64 ELF from prior verifier
     for a,w in WORDS.items():
-        if elf.word(a)!=w: raise ValueError('opcode mismatch '+hex(a))
+        if elf.w(a)!=w: raise ValueError('opcode mismatch '+hex(a))
     for a,s in STRINGS.items():
         if elf.at(a,len(s))!=s: raise ValueError('literal mismatch '+hex(a))
     for a,kind,dst in ((0x256660,'BL',0xc7970),(0x2568b4,'B.cond',0x256a10),
                         (0x2568e8,'BL',0xc83d0),(0x256a40,'BL',0xc83d0),
                         (0x256934,'BL',0xc8e60),(0x256a8c,'BL',0xc6a80)):
-        if branch_target(elf.word(a),a,kind)!=dst: raise ValueError('branch mismatch '+hex(a))
-    w=elf.word(0x256a90)
+        if branch_target(a,elf.w(a),kind)!=dst: raise ValueError('branch mismatch '+hex(a))
+    w=elf.w(0x256a90)
     if (w&0xfc000000)!=0x14000000:
         raise ValueError('expected B at 0x256a90')
     imm=w&0x3ffffff
@@ -42,7 +56,7 @@ def main():
     a=p.parse_args()
     if a.self_test:
         assert len(WORDS)==23 and len(STRINGS)==3
-        assert branch_target(0x54000aeb,0x2568b4,'B.cond')==0x256a10
+        assert branch_target(0x2568b4,0x54000aeb,'B.cond')==0x256a10
         print('X40_POSTDECISION_REPO_SELFTEST_PASS synthetic_only=true');return
     if not a.elf:p.error('provide --elf')
     try:check(a.elf)
