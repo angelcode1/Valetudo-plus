@@ -9,9 +9,11 @@ In `StationHandle::SweepStationContorl::WashErrorLogicRun(int,int&,int)`, a Blac
 | Value/path | Observed compiled operations |
 | --- | --- |
 | `0` | Branch at `0x2549cc` enters `TurbidityMonitorLogicRun()` at `0x254d44`. The latter has a separate path that prepares numeric state `1` through a Blackboard-associated setter. |
-| `2` | Branch at `0x2549c4` reaches `0x254dc8`: typed `set<TubidityState&>` prepares `0`; `this+0x674` is set to `100`; `this+0x678` is decremented and published to a Blackboard integer; `this+0x648` increments. |
+| `2` | Branch at `0x2549c4` reaches `0x254dc8`: typed `set<TubidityState&>` prepares `0`; `this+0x674` is set to `100`; `this+0x678` is decremented and written under the Blackboard key `max_rewash_cnt`; `this+0x648` increments. |
 | `>2` | Dispatches via `0x254c48`; state `4` has its own comparison path. Do not infer handling of arbitrary integers. |
 | `4` | A-table calculation at `0x254fa0`, counter test at `0x254fac`–`0x254fb0`; the `<=9` path can call `CheckIfNeedReClean()` at `0x254ff4`. The `>9` arm writes state `4` and continues separate bookkeeping. |
+
+At `0x254e7c`–`0x254e9c`, the literal `max_rewash_cnt` is resolved and the decremented value at `this+0x678` is supplied to typed `BT::Blackboard::set<int>`. This is a compiled rewash-budget bookkeeping update, **not** proof of physical rewash actuation.
 
 The `2` arm additionally writes `turbidity_check_failed_times` using the incremented field at `this+0x648`. If that field exceeds `9`, the compiled code prepares the string `"true"` for `TurbidityNeedCheck` before writing the count.
 
@@ -27,6 +29,6 @@ The lowercase `turbidity_reclean_flag` is independently set/erased by conditiona
 
 ## Validation and safety
 
-An offline verifier was run against the unmodified private ELF, checking its complete SHA-256, **44 instruction anchors, four literal keys and eight branch targets**. It passed; a deliberately modified copy was rejected at the hash gate. The standalone verified script and sanitized JSON are available in the accompanying offline research ZIP, without any proprietary binaries.
+An offline verifier was run against the unmodified private ELF, checking its complete SHA-256, **46 instruction anchors, five literal keys and eight branch targets**. It passed; a deliberately modified copy was rejected at the hash gate. The standalone verified script and sanitized JSON are available in the accompanying offline research ZIP, without any proprietary binaries.
 
 No MIOT or AVA writes, firmware changes, network/device access, or Valetudo+ production changes were performed. Preserve `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=0`. No physical rewash causation has been established.
