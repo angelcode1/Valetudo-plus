@@ -93,3 +93,14 @@ The v26–v32 sanitized reports and their SHA-pinned, standard-library-only veri
 - The v32 bounded local parent audit confirms adjacent generated control-parent child attachment for `StationWash.xml` and `RobotDropCharger`, without a generated depth/decorator call between them. The intervening builder helper and enclosing control-parent runtime tick condition remain unresolved.
 - No additional direct literal producer of `special_push_clean_dish` was established in the five primary pinned ELFs. The identified `ProcessModelInfo` producer is gated to other model identifiers, not R2416. Do not treat a negative exact-literal census as proof there is no dynamically generated or inherited key.
 - **Unproven:** live registry/Blackboard identity, normal turbidity causing `TurbidityResultFail` and `r2343_start_rewash`, or any physical second dock wash. Keep `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=0`. Do not enable experimental write controls, change the robot, or commit raw private ELFs/configuration.
+
+## Offline continuation v33–v36 (2026-10-23)
+
+The public v33–v35 summary notes and v36 compact verifier extend the earlier v32 SHA-pinned studies. Complete independent v33–v36 packages are retained privately; no original native ELF or raw device configuration has been committed.
+
+- v33 verifies a balanced generated nested helper and a SequenceStarRoF → Loop → DoWhile construction-depth stack surrounding StationWash.
+- v34 verifies the bounded DoWhile direct-attachment order: StationWash is site 23, followed by RobotDropCharger at site 24. This is a compiled site count, not a live tick.
+- v35 verifies SequenceStarRoF status-dependent advancement, Loop status behavior with num_cycles=-1, and 15 direct root attachments preceding the Loop.
+- v36 names those 15 direct pre-Loop nodes. They include Blackboard initialization, MapLoad, RobotSysInit, StationSysInit, RobotmodeInit, AlwaysSuccess.xml and CountryGet.xml. One robot_power_on literal has a zero-length value, not a proven Boolean. The compact verifier imports the existing v32 hash-pinned loader.
+
+The actual statuses of these initialization nodes, an R2416-compatible special_push_clean_dish producer, a shared effective runtime Blackboard, turbidity-caused rewash requests and any physical second dock wash remain unproven. Keep VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=0, and make no firmware or runtime changes as part of this documentation research.
