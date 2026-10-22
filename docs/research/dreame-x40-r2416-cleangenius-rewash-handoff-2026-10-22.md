@@ -82,3 +82,14 @@ Private local audit chain v3.1–v15; sanitized reports v16 `x40-r2416-v16-turbi
 ## v19–v25 offline continuation (2026-10-22)
 
 See [v25 selector-loader provenance and remaining evidence boundary](./dreame-x40-r2416-v25-selector-provenance-2026-10-22.md) and its independent [offline verifier](../../util/x40_r2416_v25_selector_provenance_verify.py). Follow-on static work verified the `AvaNodeRoute` Blackboard holder passed to several initialization trees, the registered `StationWash` builder, and native `Parameter` YAML-file loading and selector parsing. The actual `/ava/conf/setting.yaml`, effective `RobotNode.xml` selection, R2416-compatible `special_push_clean_dish` producer and physical rewash remain unproven. No live robot access or experimental writes were performed. Keep original firmware and unredacted config out of Git.
+
+
+## Offline continuation v26–v32 (2026-10-23)
+
+The v26–v32 sanitized reports and their SHA-pinned, standard-library-only verifiers are now in `docs/research/` and `util/`. They build on v25 without changing Valetudo+ production code.
+
+- The privately collected effective `setting.yaml` selects `behavior_tree_path: RobotNode` and `tree_lib_path: /tmp/lib/tree_lib//`. All three observed active tree plugins have exact SHA-256 matches to the original native libraries; private configuration and binaries are not published.
+- The compiled `RobotNode` builder includes `SubtreeCondition(subtree_file_path=StationWash.xml)`; the built-in resolver has a registered-builder lookup that can turn the simple basename into `StationWash`, forwarding the Blackboard. The checked route plugin separately registers `SubtreeConditionOpt`, not an automatic override of `SubtreeCondition`.
+- The v32 bounded local parent audit confirms adjacent generated control-parent child attachment for `StationWash.xml` and `RobotDropCharger`, without a generated depth/decorator call between them. The intervening builder helper and enclosing control-parent runtime tick condition remain unresolved.
+- No additional direct literal producer of `special_push_clean_dish` was established in the five primary pinned ELFs. The identified `ProcessModelInfo` producer is gated to other model identifiers, not R2416. Do not treat a negative exact-literal census as proof there is no dynamically generated or inherited key.
+- **Unproven:** live registry/Blackboard identity, normal turbidity causing `TurbidityResultFail` and `r2343_start_rewash`, or any physical second dock wash. Keep `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=0`. Do not enable experimental write controls, change the robot, or commit raw private ELFs/configuration.
