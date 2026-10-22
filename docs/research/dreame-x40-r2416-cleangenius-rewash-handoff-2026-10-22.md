@@ -77,3 +77,8 @@ This resolves method semantics for those implementation vtables and explains the
 Private local audit chain v3.1–v15; sanitized reports v16 `x40-r2416-v16-turbidity-rewash-keyflow.{md,json}`, v17 `x40-r2416-v17-cross-library-rewash-review.{md,json}`. Only summaries and checksums are committed here. Don't publish the original ELF archive.
 
 **Handoff status:** Documentation-only; no firmware changes, no live robot access and no Valetudo+ code changes. This file should be used as the starting point in the next conversation.
+
+
+## v19–v25 offline continuation (2026-10-22)
+
+See [v25 selector-loader provenance and remaining evidence boundary](./dreame-x40-r2416-v25-selector-provenance-2026-10-22.md) and its independent [offline verifier](../../util/x40_r2416_v25_selector_provenance_verify.py). Follow-on static work verified the `AvaNodeRoute` Blackboard holder passed to several initialization trees, the registered `StationWash` builder, and native `Parameter` YAML-file loading and selector parsing. The actual `/ava/conf/setting.yaml`, effective `RobotNode.xml` selection, R2416-compatible `special_push_clean_dish` producer and physical rewash remain unproven. No live robot access or experimental writes were performed. Keep original firmware and unredacted config out of Git.
