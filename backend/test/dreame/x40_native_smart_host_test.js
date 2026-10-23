@@ -101,6 +101,18 @@ test("mode six while drying is not eligible even when physically charging", asyn
     });
 });
 
+test("docked mode six and clear empty error are eligible only with explicit gate", async () => {
+    await withGate(async () => {
+        const robot = makeFakeRobot({mode: 6, task: 0, charge: 1, error: "", dockWash: 0});
+        const status = await SmartHostTest.getFreshPreflight(robot);
+        assert.equal(status.canTestMode1, true);
+        assert.equal(robot.writes.length, 0);
+        const result = await SmartHostTest.writeSmartHostOneKey(robot, 1);
+        assert.equal(result.readbackVerified, true);
+        assert.deepEqual(robot.writes, [{k: "SmartHost", v: 1}]);
+    });
+});
+
 test("non-clear error code is sanitized and blocks activation", async () => {
     await withGate(async () => {
         const robot = makeFakeRobot({mode: 6, error: "68,114"});
