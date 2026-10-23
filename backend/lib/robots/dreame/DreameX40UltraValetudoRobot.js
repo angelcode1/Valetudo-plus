@@ -1,6 +1,8 @@
 const capabilities = require("./capabilities");
 const X40CleanGeniusResearch = require("./DreameX40CleanGeniusResearch");
 const X40CleanGeniusReadOnlyStatus = require("./DreameX40CleanGeniusReadOnlyStatus");
+const X40CleanGeniusPolicy = require("./DreameX40CleanGeniusPolicy");
+const X40NativeSettingsReadOnly = require("./DreameX40NativeSettingsReadOnly");
 const X40DockWashReadOnlyStatus = require("./DreameX40DockWashReadOnlyStatus");
 const DreameGen2ValetudoRobot = require("./DreameGen2ValetudoRobot");
 const DreameGen4ValetudoRobot = require("./DreameGen4ValetudoRobot");
@@ -352,6 +354,7 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
         this.x40CleanGeniusObservation = null;
         this.x40DockWashObservation = null;
         this.allowExperimentalCleanGenius = X40CleanGeniusResearch.isEnabled();
+        this.allowCleanGeniusObserveOnly = X40CleanGeniusPolicy.isObserveOnlyEnabled();
         const experimentalQuirks = this.allowExperimentalCleanGenius ?
             X40CleanGeniusResearch.createQuirks(this) : [];
 
@@ -405,10 +408,15 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
         return {
             ...X40CleanGeniusReadOnlyStatus.buildStatus(this.x40CleanGeniusObservation, {
                 nowMs: nowMs,
-                experimentalEnabled: this.allowExperimentalCleanGenius
+                experimentalEnabled: this.allowExperimentalCleanGenius,
+                observeOnlyEnabled: this.allowCleanGeniusObserveOnly
             }),
             dockWashActivity: X40DockWashReadOnlyStatus.buildStatus(this.x40DockWashObservation, nowMs)
         };
+    }
+
+    async getCleanGeniusNativeSettingsFreshReadOnly() {
+        return X40NativeSettingsReadOnly.readFreshNativeSettings(this);
     }
 
     parseAndUpdateState(data) {

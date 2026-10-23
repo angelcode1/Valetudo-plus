@@ -1,0 +1,14 @@
+{
+  "/api/v2/robot/clean-genius/native-settings": {
+    "get": {
+      "tags": ["Robot"],
+      "summary": "Fresh read-only X40 native CleanGenius settings",
+      "description": "X40 only. Reads MIOT 4:50 once without the regular state parser. Reports an allowlist of configuration values, not measured dirtiness or proven automatic wash events. Does not write CleanGenius settings.",
+      "responses": {
+        "200": {"description": "Sanitized native settings observation"},
+        "404": {"description": "Not an X40 robot"},
+        "502": {"description": "Native property read or payload validation failed"}
+      }
+    }
+  }
+}

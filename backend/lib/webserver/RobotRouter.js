@@ -53,6 +53,24 @@ class RobotRouter {
             res.json(statusRobot.getCleanGeniusReadOnlyStatus());
         });
 
+        // X40-only, fresh MIOT 4:50 read. Bypasses the state parser and its
+        // SmartHost auto-disable write. No raw firmware data is returned.
+        this.router.get("/clean-genius/native-settings", async (req, res) => {
+            /** @type {ValetudoRobot & {getCleanGeniusNativeSettingsFreshReadOnly?: () => Promise<object>}} */
+            const nativeRobot = this.robot;
+            if (typeof nativeRobot.getCleanGeniusNativeSettingsFreshReadOnly !== "function") {
+                return res.sendStatus(404);
+            }
+
+            res.set("Cache-Control", "no-store");
+            try {
+                res.json(await nativeRobot.getCleanGeniusNativeSettingsFreshReadOnly());
+            } catch {
+                // Do not leak private MIOT payloads or firmware error details.
+                res.status(502).json({error: "X40 native settings read failed"});
+            }
+        });
+
         this.router.get("/state", async (req, res) => {
             try {
                 const polledState = await this.robot.pollState();
