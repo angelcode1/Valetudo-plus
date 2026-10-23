@@ -73,8 +73,52 @@ test("preflight is read-only and keeps private data out of response", async () =
     assert.equal(status.idleAndDocked, true);
     assert.equal(status.baselineMatch, true);
     assert.equal(status.settings.autoReclean.value, -1);
+    assert.equal(status.errorCode, "0");
+    assert.equal(status.errorCodeFormatRecognized, true);
     assert.equal(JSON.stringify(status).includes("NEVER_EXPOSE"), false);
     assert.equal(robot.writes.length, 0);
+});
+
+test("mode six is docked, and empty error text is a clear status", async () => {
+    const robot = makeFakeRobot({mode: 6, charge: 1, task: 0, error: "", dockWash: 0});
+    const status = await SmartHostTest.getFreshPreflight(robot);
+    assert.equal(status.idleAndDocked, true);
+    assert.equal(status.errorClear, true);
+    assert.equal(status.errorCode, "");
+    assert.equal(status.writeGateOpen, false);
+    assert.equal(robot.writes.length, 0);
+});
+
+test("mode six while drying is not eligible even when physically charging", async () => {
+    await withGate(async () => {
+        const robot = makeFakeRobot({mode: 6, charge: 1, task: 0, error: "", dockWash: 2});
+        const status = await SmartHostTest.getFreshPreflight(robot);
+        assert.equal(status.errorClear, true);
+        assert.equal(status.idleAndDocked, false);
+        assert.equal(status.canTestMode1, false);
+        await assert.rejects(() => SmartHostTest.writeSmartHostOneKey(robot, 1), /Mode 1 refused/);
+        assert.equal(robot.writes.length, 0);
+    });
+});
+
+test("non-clear error code is sanitized and blocks activation", async () => {
+    await withGate(async () => {
+        const robot = makeFakeRobot({mode: 6, error: "68,114"});
+        const status = await SmartHostTest.getFreshPreflight(robot);
+        assert.equal(status.errorCode, "68,114");
+        assert.equal(status.errorClear, false);
+        assert.equal(status.canTestMode1, false);
+        assert.equal(robot.writes.length, 0);
+    });
+});
+
+test("unsafe error strings are not exposed or treated as clear", async () => {
+    const robot = makeFakeRobot({error: "secret-token\n432"});
+    const status = await SmartHostTest.getFreshPreflight(robot);
+    assert.equal(status.errorCode, null);
+    assert.equal(status.errorCodeFormatRecognized, false);
+    assert.equal(status.errorClear, false);
+    assert.equal(JSON.stringify(status).includes("secret-token"), false);
 });
 
 test("write gate defaults closed and respects both existing safety policies", () => {
@@ -108,6 +152,7 @@ test("mode 1 refuses movement, task, not charging and changed native baseline", 
             {charge: 2},
             {error: 2},
             {dockWash: 1},
+            {mode: 6, dockWash: 2},
             {reclean: 0},
             {rewash: 1},
             {smartHost: 2}

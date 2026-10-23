@@ -35,7 +35,7 @@ function isWriteGateOpen(robot, env = process.env) {
 }
 
 /**
- * Read four native properties WITHOUT invoking pollState or parseAndUpdateState.
+ * Read six native properties WITHOUT invoking pollState or parseAndUpdateState.
  * MIOT response and settings data are sanitized before returning to callers.
  *
  * @param {object} robot
@@ -59,8 +59,21 @@ async function getFreshPreflight(robot) {
     const modeValid = Number.isSafeInteger(mode);
     const taskValid = Number.isSafeInteger(taskStatus);
     const chargingValid = Number.isSafeInteger(chargeCode);
-    const errorValid = errorCode === 0 || errorCode === "0";
+    // The existing Gen2 firmware parser treats an empty string and "0"
+    // as no error. Keep unknown or reminder codes as blockers.
+    const errorValid = errorCode === 0 || errorCode === "0" || errorCode === "";
     const dockWashValid = Number.isSafeInteger(dockWashCode);
+    // Allow only a short numeric/error-list representation. Never echo
+    // arbitrary firmware strings or objects in the read-only response.
+    let safeErrorCode = null;
+    if (errorCode === "") {
+        safeErrorCode = "";
+    } else if (Number.isSafeInteger(errorCode) && errorCode >= 0 && errorCode <= 999999) {
+        safeErrorCode = String(errorCode);
+    } else if (typeof errorCode === "string" && errorCode.length <= 48 &&
+        /^[0-9]{1,6}(,[0-9]{1,6}){0,5}$/.test(errorCode)) {
+        safeErrorCode = errorCode;
+    }
 
     if (!modeValid || !taskValid || !chargingValid || !dockWashValid) {
         throw new SmartHostGateError("Native preflight did not return valid mode, task or dock states", 502);
@@ -73,7 +86,11 @@ async function getFreshPreflight(robot) {
         nativeSettings.stainIdentification.value === 1 &&
         nativeSettings.hotWash.value === 1;
 
-    const idleAndDocked = mode === 0 && taskStatus === 0 && chargeCode === 1 &&
+    // Dreame's existing STATUS_MAP maps 6 to DOCKED and 0 to IDLE.
+    // Charging=1 and task=0 are still mandatory. In particular, a mop
+    // dock that is drying (2) must not silently pass this safety gate.
+    const idleAndDocked = (mode === 0 || mode === 6) &&
+        taskStatus === 0 && chargeCode === 1 &&
         errorValid && dockWashCode === 0;
     return {
         source: "native_miot_direct_preflight",
@@ -82,6 +99,8 @@ async function getFreshPreflight(robot) {
         taskStatus: taskStatus,
         chargeCode: chargeCode,
         errorClear: errorValid,
+        errorCode: safeErrorCode,
+        errorCodeFormatRecognized: safeErrorCode !== null,
         dockWashCode: dockWashCode,
         idleAndDocked: idleAndDocked,
         baselineMatch: baselineMatch,
