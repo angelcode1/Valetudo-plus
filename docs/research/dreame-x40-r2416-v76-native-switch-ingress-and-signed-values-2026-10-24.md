@@ -33,6 +33,13 @@ X40_V76_INSTRUCTION_LITERAL_MUTATIONS_REJECTED count=53
 LIMIT: MIOT 4:50 ingress, shared runtime Blackboard, callback transport and physical rewash not verified
 ```
 
+
+## Extra candidate producer module: `node_msg_cvt.so`
+
+The owner's original AArch64 `node_msg_cvt.so` has SHA-256 `71c55d905e8e68c4d97d6cc108b251b879cf007ce8515d6f90767dd53d7d0da8`. Its exported `avanodemsgcvt::AvaNodeMsgCvt::WritePropInt(enum_write_prop_int,int,int,int)` contains a direct call at VA `0xbdfc4` to `ava::Publisher<ava_msg_write_prop_int>::publishWithLine`, publishing the **same native message type** received by `node_lethe.so`'s `AvaNodeRoute::WritePropIntProcessSUB(ava_msg_write_prop_int*)`.
+
+A candidate upstream `MsgClean::SetSmartWashSwitch(AvaJson&, AvaJson&)` extracts a JSON integer and calls `WritePropInt` at `0x10a2b8` with enum `0x18` (24). **The exact enum meaning, runtime subscription and MIOT 4:50 `SmartAutoWash` relationship are unverified.** The symbol and literal presence must not be promoted into a confirmed MIOT → Blackboard end-to-end path. These additional pinned call sites were reviewed manually; the standalone v76 verifier only tests `node_lethe.so`.
+
 ## Current operational status
 
 The user's tested Valetudo+ v74 remains unchanged: prior `SmartHost: 0 → 1 → 0` readbacks succeeded; after launcher restoration and reboot, `writeGateOpen=false`, `SmartHost=0`, `baselineMatch=true` were confirmed. Auto Mop is still `-1` (unknown), Auto Wash `0`. No new settings write, firmware, launcher edit or reboot is required.
