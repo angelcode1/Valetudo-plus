@@ -122,12 +122,34 @@ test("mode 1 refuses movement, task, not charging and changed native baseline", 
     });
 });
 
-test("rollback can turn SmartHost off without touching any other field", async () => {
+test("rollback only needs fresh 4:50, not other failing MIOT sensors", async () => {
     await withGate(async () => {
         const robot = makeFakeRobot({smartHost: 1, mode: 2, charge: 2});
+        robot.miotHelper.readProperties = async function readProperties() {
+            throw new Error("unrelated native state sensor failed");
+        };
         const result = await SmartHostTest.writeSmartHostOneKey(robot, 0);
         assert.equal(result.observed, 0);
         assert.deepEqual(robot.writes, [{k: "SmartHost", v: 0}]);
+    });
+});
+
+test("restore refuses unknown SmartHost without writing", async () => {
+    await withGate(async () => {
+        const robot = makeFakeRobot({smartHost: -1});
+        await assert.rejects(() => SmartHostTest.writeSmartHostOneKey(robot, 0),
+            /unrecognised current SmartHost value/);
+        assert.equal(robot.writes.length, 0);
+    });
+});
+
+test("restore already at SmartHost zero is a no-op", async () => {
+    await withGate(async () => {
+        const robot = makeFakeRobot();
+        const result = await SmartHostTest.writeSmartHostOneKey(robot, 0);
+        assert.equal(result.changed, false);
+        assert.equal(result.observed, 0);
+        assert.equal(robot.writes.length, 0);
     });
 });
 

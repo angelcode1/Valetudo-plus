@@ -38,7 +38,7 @@ An unexpected, missing or malformed property is an error. A stale Valetudo cache
 
 The backend then writes **only** `{"k":"SmartHost","v":1}` (or `v:0` for restore) to MIOT `4:50`, and reads back `4:50` without changing other native settings deliberately. No native AVA signals or artificial turbidity data are sent. A process-scoped busy guard refuses concurrent test requests. A readback failure means the write's outcome may be uncertain; **never automatically retry**.
 
-A restore to `SmartHost=0` is available through the same explicit opt-in route even if the robot is no longer idle or docked, provided fresh 4:50 and the other preflight reads succeed. This improves recovery capability, but it is not a guarantee of successful rollback after lost connectivity or firmware failure. The original launcher and executable backups remain essential.
+A restore to `SmartHost=0` is available through the same explicit opt-in route even if the robot is no longer idle or docked, provided a fresh, well-formed 4:50 settings read succeeds; unrelated mode, charging, error or dock reports are not necessary for restoring off. This improves recovery capability, but it is not a guarantee of successful rollback after lost connectivity or firmware failure. The original launcher and executable backups remain essential.
 
 ### Safety and verification gate
 

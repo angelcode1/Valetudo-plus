@@ -112,16 +112,29 @@ async function writeSmartHostOneKey(robot, target) {
 
     robot.x40NativeSmartHostTestBusy = true;
     try {
-        const before = await getFreshPreflight(robot);
-        const current = before.settings.cleanGenius.value;
+        let current;
+        if (target === 1) {
+            // Activation requires the complete, fresh safety preflight.
+            const before = await getFreshPreflight(robot);
+            if (!before.canTestMode1) {
+                throw new SmartHostGateError("Mode 1 refused: robot not idle/docked or exact baseline changed");
+            }
+            current = before.settings.cleanGenius.value;
+        } else {
+            // Recovery must not depend on unrelated mode, dock or error sensors:
+            // require only a fresh, validated native SmartHost readback.
+            const raw = await robot.miotHelper.readProperty(
+                MIOT.VACUUM_2.SIID,
+                MIOT.VACUUM_2.PROPERTIES.MISC_TUNABLES.PIID
+            );
+            current = CleanGeniusReadOnlyStatus.parseSettings(raw).cleanGenius.value;
+            if (current !== 0 && current !== 1 && current !== 2) {
+                throw new SmartHostGateError("Restore refused: unrecognised current SmartHost value");
+            }
+        }
+
         if (current === target) {
             return {target: target, observed: current, changed: false, readbackVerified: true};
-        }
-        if (target === 1 && !before.canTestMode1) {
-            throw new SmartHostGateError("Mode 1 refused: robot not idle/docked or exact baseline changed");
-        }
-        if (target === 0 && current !== 1 && current !== 2) {
-            throw new SmartHostGateError("Restore refused: unrecognised current SmartHost value");
         }
 
         const writeValue = JSON.stringify({k: "SmartHost", v: target});
