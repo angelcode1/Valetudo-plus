@@ -8,22 +8,22 @@ const {readFreshNativeSettings} = require("../../lib/robots/dreame/DreameX40Nati
 function fakeRobot(value, options = {}) {
     const calls = [];
     return {
-        calls,
+        calls: calls,
         allowExperimentalCleanGenius: options.experimental === true,
         allowCleanGeniusObserveOnly: options.observeOnly === true,
         miotHelper: {
-            async readProperty(siid, piid) {
+            readProperty: async function readProperty(siid, piid) {
                 calls.push(["read", siid, piid]);
                 return value;
             },
-            async writeProperty() {
+            writeProperty: async function writeProperty() {
                 throw new Error("DO_NOT_WRITE");
             }
         },
-        async pollState() {
+        pollState: async function pollState() {
             throw new Error("DO_NOT_POLL_STATE");
         },
-        parseAndUpdateState() {
+        parseAndUpdateState: function parseAndUpdateState() {
             throw new Error("DO_NOT_PARSE_STATE");
         }
     };
@@ -74,6 +74,8 @@ test("invalid payload or failed transport cannot generate settings", async () =>
     await assert.rejects(() => readFreshNativeSettings(fakeRobot(77)), /not a string/);
     await assert.rejects(() => readFreshNativeSettings(fakeRobot("x".repeat(32769))), /payload length/);
     const robot = fakeRobot(null);
-    robot.miotHelper.readProperty = async () => {throw new Error("robot read failed");};
+    robot.miotHelper.readProperty = async () => {
+        throw new Error("robot read failed");
+    };
     await assert.rejects(() => readFreshNativeSettings(robot), /robot read failed/);
 });

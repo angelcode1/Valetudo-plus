@@ -1,7 +1,7 @@
 "use strict";
 
-const DreameMiotServices = require("./DreameMiotServices");
 const CleanGeniusReadOnlyStatus = require("./DreameX40CleanGeniusReadOnlyStatus");
+const DreameMiotServices = require("./DreameMiotServices");
 
 const MIOT = DreameMiotServices.GEN2.VACUUM_2;
 
@@ -12,6 +12,7 @@ const MIOT = DreameMiotServices.GEN2.VACUUM_2;
  *
  * Never return the raw settings blob or unrecognized keys.
  * Do not call writeProperty(), set_properties or action here.
+ * @param {import("./DreameX40UltraValetudoRobot")} robot
  */
 async function readFreshNativeSettings(robot) {
     const raw = await robot.miotHelper.readProperty(
@@ -38,5 +39,5 @@ async function readFreshNativeSettings(robot) {
 }
 
 module.exports = {
-    readFreshNativeSettings
+    readFreshNativeSettings: readFreshNativeSettings
 };

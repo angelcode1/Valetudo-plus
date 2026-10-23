@@ -14,7 +14,7 @@ function shouldAutoDisableSmartHost(smartHostValue, robot) {
 }
 
 module.exports = {
-    OBSERVE_ONLY_ENV,
-    isObserveOnlyEnabled,
-    shouldAutoDisableSmartHost
+    OBSERVE_ONLY_ENV: OBSERVE_ONLY_ENV,
+    isObserveOnlyEnabled: isObserveOnlyEnabled,
+    shouldAutoDisableSmartHost: shouldAutoDisableSmartHost
 };
