@@ -131,3 +131,14 @@ The individually checked sanitized v37–v48 reports are retained under `docs/re
 Reports and self-contained reproducible verifiers are at `docs/research/dreame-x40-r2416-v49…v57-*.md` and `util/x40_r2416_v49…v57_*.py`. The v57 verifier includes v54–v56 regression assertions; previous version tools remain separately available.
 
 **Unresolved:** a proven R2416-reachable producer of `special_push_clean_dish`; live Blackboard identity, actual callback completion/re-entry, second dock wash actuation, or an end-to-end automatic CleanGenius rewash. Continue to keep `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=0`. No robot or firmware modifications were made; these commits contain no vendor ELF images, credentials, maps, or private runtime configuration.
+
+
+## v58–v60 update (2026-10-23)
+
+v58 traced the second turbidity table’s optional numeric input to Blackboard key \`turbidity_clean_area\`, which is read or defaulted during \`CheckIfNeedReClean()\` and then subject to a conditional erase. The A-table path also reads \`station_info_sub\`.
+
+v59 identified \`switch_mode::MopDirtyAccumulator::tick()\` as a compiled producer: three conditional \`linb::any\` writes carrying a double and one typed float write of the same \`turbidity_clean_area\` key. Writes are guarded; same-name keys do not establish shared Blackboard pointer identity.
+
+v60 verified native numeric type compatibility. Both route \`BT::Blackboard::get<float>()\` and tactics \`CheckIfNeedReClean()\` have RTTI-guarded float and double read branches, with explicit \`fcvt\` double-to-float conversion. This resolves the potential float/double representation mismatch for covered read paths but **does not** prove runtime Blackboard pointer identity, write/read ordering, or successful physical rewash.
+
+Offline read-only reports and verifiers: \`docs/research/dreame-x40-r2416-v58…v60-*.md\` and \`util/x40_r2416_v58…v60_*.py\`. All original SHA pins, runtime equality checks and self-test tamper checks remain enforced. **Still unproven:** R2416-reachable \`special_push_clean_dish\` producer and automatic second physical wash. Maintain \`VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=0\`. No proprietary firmware, credentials or maps have been committed.
