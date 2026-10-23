@@ -3,6 +3,7 @@ const X40CleanGeniusResearch = require("./DreameX40CleanGeniusResearch");
 const X40CleanGeniusReadOnlyStatus = require("./DreameX40CleanGeniusReadOnlyStatus");
 const X40CleanGeniusPolicy = require("./DreameX40CleanGeniusPolicy");
 const X40NativeSettingsReadOnly = require("./DreameX40NativeSettingsReadOnly");
+const X40NativeSmartHostTest = require("./DreameX40NativeSmartHostTest");
 const X40DockWashReadOnlyStatus = require("./DreameX40DockWashReadOnlyStatus");
 const DreameGen2ValetudoRobot = require("./DreameGen2ValetudoRobot");
 const DreameGen4ValetudoRobot = require("./DreameGen4ValetudoRobot");
@@ -417,6 +418,14 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
 
     async getCleanGeniusNativeSettingsFreshReadOnly() {
         return X40NativeSettingsReadOnly.readFreshNativeSettings(this);
+    }
+
+    async getCleanGeniusSmartHostPreflightReadOnly() {
+        return X40NativeSmartHostTest.getFreshPreflight(this);
+    }
+
+    async setCleanGeniusSmartHostOneKey(target) {
+        return X40NativeSmartHostTest.writeSmartHostOneKey(this, target);
     }
 
     parseAndUpdateState(data) {

@@ -71,6 +71,51 @@ class RobotRouter {
             }
         });
 
+        // X40-only native 4:50/4:1/4:7/3:2 preflight. Always read-only.
+        this.router.get("/clean-genius/smart-host-test/preflight", async (req, res) => {
+            /** @type {ValetudoRobot & {getCleanGeniusSmartHostPreflightReadOnly?: () => Promise<object>}} */
+            const x40 = this.robot;
+            if (typeof x40.getCleanGeniusSmartHostPreflightReadOnly !== "function") {
+                return res.sendStatus(404);
+            }
+            res.set("Cache-Control", "no-store");
+            try {
+                res.json(await x40.getCleanGeniusSmartHostPreflightReadOnly());
+            } catch {
+                res.status(502).json({error: "Native X40 preflight read failed"});
+            }
+        });
+
+        // Requires a separate, explicit opt-in env flag and strict body/header
+        // confirmation. Never enabled merely by observe-only mode.
+        this.router.post("/clean-genius/smart-host-test", async (req, res) => {
+            /** @type {ValetudoRobot & {setCleanGeniusSmartHostOneKey?: (target: number) => Promise<object>}} */
+            const x40 = this.robot;
+            if (typeof x40.setCleanGeniusSmartHostOneKey !== "function") {
+                return res.sendStatus(404);
+            }
+            res.set("Cache-Control", "no-store");
+            const body = req.body;
+            if (req.get("X-X40-Native-Test") !== "one-key-only" ||
+                !req.is("application/json") || !body || Array.isArray(body) ||
+                typeof body !== "object" ||
+                Object.keys(body).sort().join(",") !== "confirm,target" ||
+                (body.target !== 0 && body.target !== 1) ||
+                body.confirm !== (body.target === 1 ?
+                    "I_ACCEPT_UNVERIFIED_X40_SMARTHOST_1" :
+                    "RESTORE_X40_SMARTHOST_0")) {
+                return res.status(400).json({error: "Explicit single-key X40 confirmation required"});
+            }
+            try {
+                res.json(await x40.setCleanGeniusSmartHostOneKey(body.target));
+            } catch (err) {
+                const httpStatus = [400, 403, 409, 502].includes(err.statusCode) ?
+                    err.statusCode : 502;
+                // Firmware errors and raw MIOT payloads must never be echoed.
+                res.status(httpStatus).json({error: "X40 single-key SmartHost test refused or failed"});
+            }
+        });
+
         this.router.get("/state", async (req, res) => {
             try {
                 const polledState = await this.robot.pollState();
