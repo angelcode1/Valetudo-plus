@@ -52,8 +52,29 @@ Therefore **native SmartHost=1 was accepted and read back, and SmartHost=0 was a
 ## Deployment maintenance issue
 
 The temporary launcher-gate management script was uploaded at
-`/tmp/x40_v74_smart_host_temporary_gate.sh`. A manual reboot cleared `/tmp`, so follow-up `--check` and `--revert` commands returned `No such file or directory`. This is not evidence of launcher backup loss; the script's backup path is `/data/_root_postboot.sh.pre-smart-host-test-20261024`. The running Valetudo gate was observed as enabled before the first POST. **The operator has not yet provided evidence of launcher disarm and subsequent boot with writeGateOpen=false.**
+`/tmp/x40_v74_smart_host_temporary_gate.sh`. A manual reboot cleared `/tmp`, so initial `--check` and `--revert` calls returned `No such file or directory`. This was transient storage loss, not a failed settings rollback.
 
-Recovery plan: re-upload the identical guarded shell script into /tmp; run `--check`, `--revert`, check staged=false, then separately reboot and verify the process's `VALETUDO_X40_NATIVE_SMARTHOST_TEST` is no longer 1, preflight `writeGateOpen=false`, and fresh `SmartHost=0`. Do not repeat a native write. Keep pre-existing v70/v73 rollback copies, original/parent backups and configs protected.
+**Recovery and disarm subsequently verified by the operator:** after re-uploading the *same* script to `/tmp`, the guard returned:
+
+```text
+X40_V74_GATE_CHECK_PASS running_gate=1 launcher_staged=1 backup_exists=yes
+NO_NATIVE_WRITES NO_RESTARTS
+X40_V74_GATE_REVERTED_PASS active_process_unchanged=true
+X40_V74_GATE_CHECK_PASS running_gate=1 launcher_staged=0 backup_exists=yes
+NO_NATIVE_WRITES NO_RESTARTS
+```
+
+Following a separate manual `sync; reboot`, the operator executed the firmware-backed native preflight and supplied the following exact printed result:
+
+```text
+writeGateOpen: False
+SmartHost: 0
+baselineMatch: True
+X40_SMARTHOST_TEST_SAFELY_DISARMED
+```
+
+**Disposition: final restoration and disarm PASS.** The launcher was restored, the restarted Valetudo process has a closed native writer gate according to preflight, and native `SmartHost=0` and the exact baseline were confirmed again. No further setting write, rollback or restart is necessary. Retain the v70/v73 recovery copies, original/parent backup binaries, launcher backup and configuration.
+
+No evidence yet establishes retention of `SmartHost=1` during extended normal background polling, native dirt/stain triggers, automatic reclean, or a physical additional wash.
 
 No original vendor binaries, device secrets, maps or raw native payloads have been committed.
