@@ -104,3 +104,16 @@ The public v33–v35 summary notes and v36 compact verifier extend the earlier v
 - v36 names those 15 direct pre-Loop nodes. They include Blackboard initialization, MapLoad, RobotSysInit, StationSysInit, RobotmodeInit, AlwaysSuccess.xml and CountryGet.xml. One robot_power_on literal has a zero-length value, not a proven Boolean. The compact verifier imports the existing v32 hash-pinned loader.
 
 The actual statuses of these initialization nodes, an R2416-compatible special_push_clean_dish producer, a shared effective runtime Blackboard, turbidity-caused rewash requests and any physical second dock wash remain unproven. Keep VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=0, and make no firmware or runtime changes as part of this documentation research.
+
+
+## Offline continuation v37–v48 (2026-10-23)
+
+The individually checked sanitized v37–v48 reports are retained under `docs/research/`, and their offline Python verifiers under `util/`. v37–v47 use the full v36 verifier dependency (also retained in `util/`); v48 is self-contained. All use the previously collected, full-SHA-pinned private archives and do not change firmware, production Valetudo+ or robot state.
+
+- v37–v40: the pre-Loop child gates were narrowed. CountryGet uses ForceSuccess but preserves running status; MapLoad, RobotSysInit and StationSysInit start under SequenceStarRoF and RobotmodeInit uses IfThenElseStarRoF. These are compiled control-flow observations, not successful runtime initialization claims.
+- v41–v43: there are multiple compiled Start_Map_Load setters using distinct Blackboard access patterns. `AvaNodeRoute+0x30` is forwarded into several tree-build paths, but matching member offsets across classes and key literals do not establish all runtime Blackboard pointers coincide.
+- v44: the direct factory call at `0x355058` creates auxiliary `FollowWallModeDeal`, not the configured main tree; the `buildTreeFromText` path at `0x3552c8` creates a wrapper from the selected `behavior_tree_path: RobotNode` and uses `AvaNodeRoute+0x30`.
+- v45–v47: the configured tree root is retained at `AvaNodeRoute+0xf48`. `ProcessEveryTick()` is a no-op, but the odometry subscription dispatch has a compiled retained-root `executeTick()` call. Three upstream branch detours have conditional rejoin paths; a null pre-tick callback enters an exception path. Static reachability does not establish successful live ticks.
+- **v48:** both checked native libraries have a one-instruction `ret` default `route_nodes::GlobalHook` callback, installed through verified `std::function` manager/invoker relocations. `OdomProcessSUB()` invokes the callback immediately before the root tick. **The active callback may be replaced at runtime**; no immutable callback or successful tick claim is made.
+
+**Still unproven:** any R2416-compatible producer of `special_push_clean_dish`, normal turbidity threshold leading to `r2343_start_rewash`, runtime Blackboard identity throughout the wash subtree, or a second physical dock wash. Maintain `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=0`; do not publish original vendor ELFs, private settings, identifiers or complete disassembly.
