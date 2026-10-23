@@ -117,3 +117,17 @@ The individually checked sanitized v37–v48 reports are retained under `docs/re
 - **v48:** both checked native libraries have a one-instruction `ret` default `route_nodes::GlobalHook` callback, installed through verified `std::function` manager/invoker relocations. `OdomProcessSUB()` invokes the callback immediately before the root tick. **The active callback may be replaced at runtime**; no immutable callback or successful tick claim is made.
 
 **Still unproven:** any R2416-compatible producer of `special_push_clean_dish`, normal turbidity threshold leading to `r2343_start_rewash`, runtime Blackboard identity throughout the wash subtree, or a second physical dock wash. Maintain `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=0`; do not publish original vendor ELFs, private settings, identifiers or complete disassembly.
+
+
+## Offline v49–v57 continuation (2026-10-23)
+
+- **v49**: `route_bt_nodes_plugin::RegisterNodes()` replaces the default GlobalHook no-op callback with `odomProcessHook`, which delegates to `GlobalDispatcher`. Registration success on the live device was not observed.
+- **v50–v53**: characterized dispatcher callback gating and Blackboard retention, located seven edge-detection listeners, and established the whole-library *direct insertion call* census for that specific listener map. Indirect and other-library registrations remain possible; no rewash-key writer was found there.
+- **v54**: `WashDonePrecess()` attempts `erase(TurbidityResultFail)` before both the wash-enable check and `contains(special_push_clean_dish)`, then can conditionally set `r2343_start_rewash=1`. A consume-without-request path exists in compiled code.
+- **v55**: two numeric `TubidityState=2` paths reset the state to zero and republish `TurbidityResultFail="true"`; both update distinct failure-count and remaining-rewash fields. Re-entry after failed eligibility remains unobserved.
+- **v56**: two signed threshold comparisons generate `TubidityState=2`; this tactics ELF has 13 direct calls to the specialized state setter (0=2, 2=2, 3=7, 4=2). The +0x648 failure counter >9 alternatives write state 4.
+- **v57**: `TurbidityMonitorGetAByTable(int,bool)` branches to distinct A/C lookup families depending on boolean. Counter-eligible `CheckIfNeedReClean()` uses `TurbidityMonitorGetBByTable`, with a default index 20 (helper returns 1.0 for >19) or a clamped dynamic index and additional threshold comparison. This is a compiled conditional decision layer, not a measured retry schedule.
+
+Reports and self-contained reproducible verifiers are at `docs/research/dreame-x40-r2416-v49…v57-*.md` and `util/x40_r2416_v49…v57_*.py`. The v57 verifier includes v54–v56 regression assertions; previous version tools remain separately available.
+
+**Unresolved:** a proven R2416-reachable producer of `special_push_clean_dish`; live Blackboard identity, actual callback completion/re-entry, second dock wash actuation, or an end-to-end automatic CleanGenius rewash. Continue to keep `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=0`. No robot or firmware modifications were made; these commits contain no vendor ELF images, credentials, maps, or private runtime configuration.
