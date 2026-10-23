@@ -142,3 +142,12 @@ v59 identified \`switch_mode::MopDirtyAccumulator::tick()\` as a compiled produc
 v60 verified native numeric type compatibility. Both route \`BT::Blackboard::get<float>()\` and tactics \`CheckIfNeedReClean()\` have RTTI-guarded float and double read branches, with explicit \`fcvt\` double-to-float conversion. This resolves the potential float/double representation mismatch for covered read paths but **does not** prove runtime Blackboard pointer identity, write/read ordering, or successful physical rewash.
 
 Offline read-only reports and verifiers: \`docs/research/dreame-x40-r2416-v58…v60-*.md\` and \`util/x40_r2416_v58…v60_*.py\`. All original SHA pins, runtime equality checks and self-test tamper checks remain enforced. **Still unproven:** R2416-reachable \`special_push_clean_dish\` producer and automatic second physical wash. Maintain \`VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=0\`. No proprietary firmware, credentials or maps have been committed.
+
+
+## 2026-10-23 — v61–v62 bounded Blackboard provenance update
+
+- **v61:** The native `CleanSelectedAreas` and `FindNearbyMovablePoint` builders each instantiate a `MopDirtyAccumulator`; native builders retain their incoming `shared_ptr<BT::Blackboard>` reference; producer and tactics consumer both use `TreeNode::blackboard()` through per-node slot handles. Live pointer equality remains unproven.
+- **v62:** The configured `RobotNode` text wrapper forwards the route Blackboard into `XMLParser`. `SubtreeCondition` has distinct file/native resolver paths that explicitly forward the owning wrapper node's Blackboard; a cached-root branch can attach an existing root without a fresh visible rebind. This cannot be treated as proven shared-instance identity across cleaning and station-wash subtrees.
+- The R2416 `special_push_clean_dish` eligibility gate and physical automatic rewash are **still unresolved**; experimental CleanGenius remains disabled.
+
+Reports: `dreame-x40-r2416-v61-blackboard-builder-provenance-2026-10-23.md` and `dreame-x40-r2416-v62-subtree-blackboard-handoff-2026-10-23.md`. Verifiers: `util/x40_r2416_v61_blackboard_builder_provenance_verify.py` and `util/x40_r2416_v62_subtree_blackboard_handoff_verify.py`.
