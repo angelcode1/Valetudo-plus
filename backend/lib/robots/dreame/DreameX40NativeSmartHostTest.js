@@ -10,6 +10,8 @@ const FIELDS = Object.freeze([
     Object.freeze({siid: MIOT.VACUUM_2.SIID, piid: MIOT.VACUUM_2.PROPERTIES.MODE.PIID}),
     Object.freeze({siid: MIOT.VACUUM_2.SIID, piid: MIOT.VACUUM_2.PROPERTIES.TASK_STATUS.PIID}),
     Object.freeze({siid: MIOT.BATTERY.SIID, piid: MIOT.BATTERY.PROPERTIES.CHARGING.PIID}),
+    Object.freeze({siid: MIOT.VACUUM_2.SIID, piid: MIOT.VACUUM_2.PROPERTIES.ERROR_CODE.PIID}),
+    Object.freeze({siid: MIOT.VACUUM_2.SIID, piid: MIOT.VACUUM_2.PROPERTIES.MOP_DOCK_STATUS.PIID}),
     Object.freeze({siid: MIOT.VACUUM_2.SIID, piid: MIOT.VACUUM_2.PROPERTIES.MISC_TUNABLES.PIID})
 ]);
 
@@ -50,14 +52,18 @@ async function getFreshPreflight(robot) {
     const mode = response[0].value;
     const taskStatus = response[1].value;
     const chargeCode = response[2].value;
-    const nativeSettings = CleanGeniusReadOnlyStatus.parseSettings(response[3].value);
+    const errorCode = response[3].value;
+    const dockWashCode = response[4].value;
+    const nativeSettings = CleanGeniusReadOnlyStatus.parseSettings(response[5].value);
 
     const modeValid = Number.isSafeInteger(mode);
     const taskValid = Number.isSafeInteger(taskStatus);
     const chargingValid = Number.isSafeInteger(chargeCode);
+    const errorValid = errorCode === 0 || errorCode === "0";
+    const dockWashValid = Number.isSafeInteger(dockWashCode);
 
-    if (!modeValid || !taskValid || !chargingValid) {
-        throw new SmartHostGateError("Native preflight did not return numeric mode, task and dock state", 502);
+    if (!modeValid || !taskValid || !chargingValid || !dockWashValid) {
+        throw new SmartHostGateError("Native preflight did not return valid mode, task or dock states", 502);
     }
 
     // R2416 exact baseline currently observed by the operator.
@@ -67,13 +73,16 @@ async function getFreshPreflight(robot) {
         nativeSettings.stainIdentification.value === 1 &&
         nativeSettings.hotWash.value === 1;
 
-    const idleAndDocked = mode === 0 && taskStatus === 0 && chargeCode === 1;
+    const idleAndDocked = mode === 0 && taskStatus === 0 && chargeCode === 1 &&
+        errorValid && dockWashCode === 0;
     return {
         source: "native_miot_direct_preflight",
         readOnly: true,
         mode: mode,
         taskStatus: taskStatus,
         chargeCode: chargeCode,
+        errorClear: errorValid,
+        dockWashCode: dockWashCode,
         idleAndDocked: idleAndDocked,
         baselineMatch: baselineMatch,
         writeGateOpen: isWriteGateOpen(robot),

@@ -18,11 +18,11 @@ The new component `DreameX40NativeSmartHostTest` is **off by default**, and the 
 
 ### Read-only preflight (v73 only)
 
-`GET /api/v2/robot/clean-genius/smart-host-test/preflight` reads the firmware properties `4:1` (mode), `4:7` (task), `3:2` (dock/charging state), and `4:50` (native settings), with **no call** to `pollState` or `parseAndUpdateState` and no writes. It returns allowlisted values and booleans, not the raw settings payload.
+`GET /api/v2/robot/clean-genius/smart-host-test/preflight` reads the firmware properties `4:1` (mode), `4:7` (task), `3:2` (dock/charging state), `4:18` (error), `4:25` (mop dock activity) and `4:50` (native settings), with **no call** to `pollState` or `parseAndUpdateState` and no writes. It returns allowlisted values and booleans, not the raw settings payload.
 
 For this specific R2416 baseline, enabling mode 1 refuses unless all of the following hold on a fresh preflight:
 
-- Firmware mode `0`, task `0`, charger `1` (idle, no active task, docked).
+- Firmware mode `0`, task `0`, charger `1`, error `0` (integer or string), and mop-dock activity `0` (idle, no active task, docked/charging, no reported error or dock wash).
 - Native settings `SmartHost=0`, `SmartAutoMop=-1`, `SmartAutoWash=0`, `StainIdentify=1`, `HotWash=1`, exactly matching the operator's observed baseline.
 - Observe-only suppression enabled, broad experimental writers disabled, and the **new separate v73 gate** explicitly enabled.
 
