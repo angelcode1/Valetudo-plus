@@ -1,0 +1,43 @@
+{
+  "schema": "X40_R2416_V122_REGEX_MODEL_BOUND_1",
+  "source": "node_lethe.so",
+  "exact_model": "dreame.vacuum.r2416",
+  "original_elf_sha256_pins_passed": 10,
+  "strict_exact_foreign_model_comparisons_pruned": 293,
+  "native_regex_match_direct_conditional_sites": 14,
+  "matching_model": 2,
+  "nonmatching_model": 12,
+  "direct_writer_candidates_v119": 20,
+  "direct_writer_candidates_v122": 17,
+  "newly_excluded_direct_writer_sites": [
+    "0x4785c4",
+    "0x47869c",
+    "0x478720"
+  ],
+  "remaining_direct_writer_sites": [
+    "0x4703fc",
+    "0x471a90",
+    "0x474500",
+    "0x474578",
+    "0x474958",
+    "0x474cd0",
+    "0x475bc4",
+    "0x4761c4",
+    "0x476598",
+    "0x476798",
+    "0x4773dc",
+    "0x4774d8",
+    "0x4775a4",
+    "0x4776b4",
+    "0x47776c",
+    "0x478160",
+    "0x47826c"
+  ],
+  "source_mutations_rejected_without_hash_shortcut": 36,
+  "native_enable_turbidity_eligibility_proven": false,
+  "actual_second_physical_wash_proven": false,
+  "actual_R2416_downloaded_app_plugin_available": false,
+  "original_source_binaries_committed": false,
+  "robot_modified": false,
+  "limitation": "Only 14 source-proven immediate regex result to ANDS/TST low-byte and B.eq branches. Other regex results, aliases, indirect writes and runtime state unmodeled."
+}
