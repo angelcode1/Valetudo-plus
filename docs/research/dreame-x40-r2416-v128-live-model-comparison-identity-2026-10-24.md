@@ -15,7 +15,7 @@ The operator supplied `X40-R2416-v127-json-model-evidence-20261024T105639Z.zip`.
 
 `DEV_MODEL=absent` is a literal top-level-key absence in the valid JSON snapshot; it does not independently prove how native `ReadModleInfo()` handles the missing value at runtime.
 
-Therefore the v125 **13 possible direct writer sites** remain a valid *hypothetical exact-name source/CFC boundary*, **not** a claim about the live device's selected instruction or `enable_turbidity` value.
+Therefore the v125 **13 possible direct writer sites** remain a valid *hypothetical exact-name source/CFG boundary*, **not** a claim about the live device's selected instruction or `enable_turbidity` value.
 
 ## Original native compiled model census
 
@@ -38,7 +38,7 @@ The companion owner-downloadable `X40-R2416-v128-sanitized-model-identity-kit.zi
 - `x40_r2416_v128_model_cfg_audit.py`: offline original-source/CFG verifier for seven family names and 23 audited regex source branches, without robot access.
 - v112–v127 sanitized verifier modules, full report, aggregate-only JSON, README and a SHA256SUMS manifest.
 
-A site identifier is an **exact compiled string-comparison reference**, not a native execution trace. Even a successful match cannot be equated with the execution of the `enable_turbidity` writer, a live Blackjack/Blackboard value, or an additional physical mop wash.
+A site identifier is an **exact compiled string-comparison reference**, not a native execution trace. Even a successful match cannot be equated with the execution of the `enable_turbidity` writer, a live native Blackboard value, or an additional physical mop wash.
 
 The collector enforces the uploaded v127 observation, validates native site IDs against the SHA-pinned original comparison table, refuses changed/unexpected protocol fields, and keeps the actual `MODEL` string on-device. In synthetic tests it exported no tokens or serials. The configuration is never uploaded or written, and no guessed station command or MIOT property is transmitted.
 
