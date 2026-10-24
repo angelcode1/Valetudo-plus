@@ -1,0 +1,53 @@
+{
+  "schema": "X40_R2416_V124_DIRECT_FLAG_STORE_VALUE_PROVENANCE_1",
+  "exact_model": "dreame.vacuum.r2416",
+  "firmware_source": "node_lethe.so:ProcessModelInfo",
+  "original_elf_sha256_pins_passed": 10,
+  "prior_native_direct_writer_candidates": 13,
+  "architectural_zero_register_sites": [
+    "0x4703fc"
+  ],
+  "locally_one_staged_sites": [
+    "0x474cd0",
+    "0x475bc4",
+    "0x4761c4",
+    "0x476598",
+    "0x476798",
+    "0x4773dc",
+    "0x4774d8",
+    "0x4775a4",
+    "0x4776b4",
+    "0x47776c",
+    "0x478160",
+    "0x47826c"
+  ],
+  "positive_local_initializer_dominates_site": [
+    "0x475bc4",
+    "0x476598",
+    "0x476798",
+    "0x4774d8",
+    "0x4776b4",
+    "0x47776c",
+    "0x478160",
+    "0x47826c"
+  ],
+  "positive_local_initializer_does_not_dominate_site": [
+    "0x474cd0",
+    "0x4761c4",
+    "0x4773dc",
+    "0x4775a4"
+  ],
+  "possible_last_direct_writer_sites_count": 13,
+  "independent_instruction_mutations_rejected": 49,
+  "reaching_final_flag_value_proven": false,
+  "live_enable_turbidity_observed": false,
+  "actual_second_physical_wash_proven": false,
+  "device_modified": false,
+  "original_vendor_binaries_committed": false,
+  "caveats": [
+    "Local code staging and CFG dominance are not complete register reaching-definition proofs",
+    "Potential last direct store does not imply execution or exclude indirect aliases",
+    "Exact model and source-pinned regex branch constraints are conservative within ProcessModelInfo",
+    "No runtime Blackboard scope or real dirt-triggered rewash delivery established"
+  ]
+}
