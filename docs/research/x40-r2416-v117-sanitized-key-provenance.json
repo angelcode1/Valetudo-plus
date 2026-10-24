@@ -1,0 +1,42 @@
+{
+  "schema": "X40_R2416_V117_NATIVE_KEY_PROVENANCE_1",
+  "sha256_pinned_original_elf_count": 10,
+  "direct_adrp_add_reference_counts": {
+    "smart_hosting_switch": {
+      "node_lethe.so": 31,
+      "liblethe_tactics_tree.so": 10,
+      "liblethe_route_nodes.so": 4
+    },
+    "enable_turbidity": {
+      "node_lethe.so": 3,
+      "liblethe_tactics_tree.so": 6,
+      "liblethe_route_nodes.so": 5
+    },
+    "smart_auto_wash_switch": {
+      "node_lethe.so": 2,
+      "liblethe_tactics_tree.so": 1
+    },
+    "smart_auto_mop_switch": {
+      "node_lethe.so": 4,
+      "liblethe_tactics_tree.so": 1
+    }
+  },
+  "source_node_lethe": {
+    "constructor_typed_blackboard_set_smart_hosting_switch": true,
+    "constructor_typed_blackboard_set_smart_auto_mop_switch": true,
+    "process_model_info_guarded_typed_set_enable_turbidity": true,
+    "state_init_checks_enable_turbidity_presence": true,
+    "state_init_typed_blackboard_set_smart_auto_wash_switch": true,
+    "r2416_comparison_branch_checked": true,
+    "r2416_match_proven_to_reach_enable_turbidity_write": false
+  },
+  "station_gate": {
+    "configuration_derived_0x688_0x689_regression_v116": true,
+    "constructor_initial_flag_values_can_persist": true,
+    "live_gate_values_observed": false
+  },
+  "independent_instruction_and_key_mutations_rejected": 37,
+  "robot_modified": false,
+  "original_vendor_binaries_committed": false,
+  "live_auto_rewash_proven": false
+}
