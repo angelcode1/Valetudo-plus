@@ -1,0 +1,52 @@
+{
+  "schema": "X40_V120_DREAMEHOME_SPLIT_APK_STATIC_CENSUS_1",
+  "manifest": {
+    "package": "com.dreame.smartlife",
+    "versionName": "2.6.6.3",
+    "versionCode": 102060603
+  },
+  "apk_splits": [
+    "base.apk",
+    "config.arm64_v8a.apk",
+    "config.xhdpi.apk"
+  ],
+  "apk_entries_inspected": 3927,
+  "nested_mall_entries_inspected": 391,
+  "flutter_aot_present": true,
+  "generic_device_protocol_status_2_1_en": {
+    "8": "Mop Drying",
+    "9": "Mop Washing",
+    "10": "Returning to wash",
+    "25": "The second cleaning underway",
+    "37": "Heading to the extra cleaning area...",
+    "38": "Extra Cleaning in Progress"
+  },
+  "ascii_case_insensitive_literal_counts": {
+    "r2416": 0,
+    "r2343": 0,
+    "cleangenius": 0,
+    "clean_genius": 0,
+    "rewash": 0,
+    "turbidity": 0,
+    "enable_turbidity": 0,
+    "smart_auto_wash_switch": 0,
+    "r2343_start_rewash": 0,
+    "WASH_CONTROL": 0,
+    "get_properties": 1,
+    "set_properties": 2,
+    "updateDevicePlugin": 1,
+    "getCurrentAIModePiidByCurrentUserMode": 1
+  },
+  "absence_is_only_literal_byte_absence": true,
+  "r2416_device_specific_plugin_collected": false,
+  "r2416_specific_property_or_action_mapping_proven": false,
+  "physical_second_mop_wash_proven": false,
+  "robot_modified": false,
+  "original_app_assets_committed": false,
+  "caveats": [
+    "generic app status vocabulary not R2416 capability proof",
+    "libgpac.so set_properties occurrence not robot API proof",
+    "laundry washing_machine_smart_hosting is unrelated to robot-native smart_hosting_switch",
+    "obfuscated/encoded/dynamically loaded features may evade case-insensitive ASCII literal search"
+  ]
+}
