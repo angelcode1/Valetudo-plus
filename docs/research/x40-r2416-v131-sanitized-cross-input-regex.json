@@ -1,0 +1,69 @@
+{
+  "schema": "X40_R2416_V131_CROSS_INPUT_REGEX_CFG_1",
+  "source_model_id": "site_0x473540",
+  "original_elf_sha256_pins": 10,
+  "prior_strict_primary_comparisons": 294,
+  "prior_audited_regex_sites": 23,
+  "new_direct_regex_result_branches": 4,
+  "new_primary_model_regex_branches": 2,
+  "new_secondary_model_regex_branches": 2,
+  "normal_absent_dev_model_empty_return": true,
+  "possible_direct_writer_sites_before": 13,
+  "possible_direct_writer_sites_after": 12,
+  "newly_excluded_direct_store_sites": [
+    "0x4761c4"
+  ],
+  "remaining_possible_direct_store_sites": [
+    "0x4703fc",
+    "0x474cd0",
+    "0x475bc4",
+    "0x476598",
+    "0x476798",
+    "0x4773dc",
+    "0x4774d8",
+    "0x4775a4",
+    "0x4776b4",
+    "0x47776c",
+    "0x478160",
+    "0x47826c"
+  ],
+  "source_proofs": [
+    {
+      "call": "0x4721f0",
+      "branch": "0x472200",
+      "input": "primary",
+      "no_match": true,
+      "impossible_successor": "0x4722c8"
+    },
+    {
+      "call": "0x4738dc",
+      "branch": "0x4738e8",
+      "input": "primary",
+      "no_match": true,
+      "impossible_successor": "0x4738ec"
+    },
+    {
+      "call": "0x476228",
+      "branch": "0x476238",
+      "input": "secondary",
+      "no_match": true,
+      "impossible_successor": "0x47623c"
+    },
+    {
+      "call": "0x476d24",
+      "branch": "0x476d34",
+      "input": "secondary",
+      "no_match": true,
+      "impossible_successor": "0x476d38"
+    }
+  ],
+  "source_mutations_rejected_without_elf_hash_shortcut": 24,
+  "sanitized_evidence_mutations_rejected": 5,
+  "unique_executed_writer_proven": false,
+  "runtime_native_state_measured": false,
+  "physical_second_wash_proven": false,
+  "robot_access": false,
+  "original_vendor_ELF_committed": false,
+  "original_model_literal_disclosed": false,
+  "caveat": "Conditional normal valid JSON missing-key return and finite intraprocedural direct-CFG analysis. Twelve static candidates are not observed executions; indirect memory and four unanalyzed regex call outcomes remain."
+}
