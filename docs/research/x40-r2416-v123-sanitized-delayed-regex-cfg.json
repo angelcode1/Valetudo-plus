@@ -1,0 +1,38 @@
+{
+  "schema": "X40_R2416_V123_DELAYED_REGEX_MODEL_GATE_1",
+  "model": "dreame.vacuum.r2416",
+  "original_elves_sha256_pinned": 10,
+  "prior_v122_regex_branches": 14,
+  "additional_delayed_regex_result_branches": 9,
+  "additional_matching_r2416": 0,
+  "direct_writer_candidates_v122": 17,
+  "direct_writer_candidates_v123": 13,
+  "excluded": [
+    "0x471a90",
+    "0x474500",
+    "0x474578",
+    "0x474958"
+  ],
+  "remaining": [
+    "0x4703fc",
+    "0x474cd0",
+    "0x475bc4",
+    "0x4761c4",
+    "0x476598",
+    "0x476798",
+    "0x4773dc",
+    "0x4774d8",
+    "0x4775a4",
+    "0x4776b4",
+    "0x47776c",
+    "0x478160",
+    "0x47826c"
+  ],
+  "independent_source_mutations_rejected": 44,
+  "native_enable_turbidity_eligibility_proven": false,
+  "physical_second_mop_wash_proven": false,
+  "robot_or_runtime_modified": false,
+  "proprietary_binaries_committed": false,
+  "bounded_flow": "x20 model input -> typed native regex_match -> low-byte AND -> saved register/stack -> delayed CBZ/CBNZ, intervening instructions pinned",
+  "limitation": "Direct intraprocedural AArch64 CFG and specific native regex branches, not all group/regex/indirect writers or live Blackboard state"
+}
