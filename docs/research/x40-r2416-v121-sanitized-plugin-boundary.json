@@ -1,0 +1,58 @@
+{
+  "schema": "X40_R2416_V121_DREAMEHOME_PLUGIN_BOUNDARY_1",
+  "source_version": "2.6.6.3",
+  "source_archive_sha256": "fca9ce895b6c4e9f0f7cbb3b9d80e3da7810bcd81608f34e7161e3099f3bd8f0",
+  "source_splits": {
+    "base.apk": "fbeeb15c93f3a12e52983a5ffdf9258556b82407a066203814d3a1db20269792",
+    "config.arm64_v8a.apk": "1e2b66e21623fa795261cad8e51f01e402faac2b633f654be19a002261c544f8",
+    "config.xhdpi.apk": "09cf998622907d20fcb7f92f6633b3b6ad9d377afb767aaeab192555216709ae"
+  },
+  "flutter_aot": {
+    "sha256": "a7364e7b1bcf27971b3e510115adf63d1a5a43892f6cbba3da571b1d175b4f6e",
+    "size_bytes": 21431216,
+    "marker_counts": {
+      "Package.getPluginVersions": 3,
+      "PackageBridgeMixin: Package.getPluginVersions called": 1,
+      "H5PluginVersionModel": 14,
+      "androidPluginUrl": 2,
+      "ohosPluginUrl": 2,
+      "downloadPlugin": 3,
+      "WebPluginPage: loading Android local resource ": 1,
+      "WebPluginPage: load resource url=": 1,
+      "_currentPluginBaseUrl": 1,
+      "WebPluginDreameBridgeMixin": 31,
+      "DeviceBridgeMixin": 26,
+      "updateDevicePlugin": 1,
+      "DeviceInfoPlugin": 1,
+      "get_properties": 1,
+      "set_properties": 1
+    }
+  },
+  "bundled_assets_plugin_files": [
+    "assets/plugin/RNExecutorBase.jx",
+    "assets/plugin/RNExecutorTest.jx"
+  ],
+  "bundled_react_native_bridge_markers": {
+    "global.__fbBatchedBridge = Bridge;": 1,
+    "global.__fbGenNativeModule = genModule;": 1,
+    "global.nativeFlushQueueImmediate": 2,
+    "global.Native = global.nativeModuleProxy;": 1,
+    "Native.JSCallee.receiveResult(": 1
+  },
+  "only_bundled_generic_bootstrap_in_assets_plugin": true,
+  "downloaded_r2416_plugin_retrieved": false,
+  "actual_plugin_url_known": false,
+  "runtime_plugin_version_observed": false,
+  "r2416_specific_property_ids_verified": false,
+  "r2416_enable_turbidity_native_model_gate_resolved": false,
+  "genuine_second_physical_mop_wash_confirmed": false,
+  "original_source_marker_mutations_rejected_without_hash_shortcut": 20,
+  "robot_actions": 0,
+  "sensitive_app_material_exported": false,
+  "limitations": [
+    "Marker co-presence not proof of actual runtime function calls",
+    "ASCII string absence not global feature absence",
+    "Only assets/plugin directory excludes a model-specific bundle, not other code",
+    "No live plugin version, URL, device-capability reply, credential or network observation"
+  ]
+}
