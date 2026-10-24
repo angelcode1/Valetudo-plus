@@ -1,0 +1,57 @@
+{
+  "schema": "X40_R2416_V125_DUAL_POSITIVE_SOURCE_COVERAGE_1",
+  "source": "node_lethe.so:ProcessModelInfo",
+  "exact_model": "dreame.vacuum.r2416",
+  "original_sha256_pinned_elfs": 10,
+  "remaining_potential_last_direct_store_sites": 13,
+  "zero_register_sites": [
+    "0x4703fc"
+  ],
+  "positive_candidate_stores": 12,
+  "v124_single_source_dominated_stores": 8,
+  "v125_two_source_covered_stores": 4,
+  "new_sites": [
+    {
+      "store": "0x474cd0",
+      "primary": "0x474cb4",
+      "alternate": "0x474df8",
+      "branch": "0x474e04",
+      "target": "0x474cc4",
+      "primary_reachable": false
+    },
+    {
+      "store": "0x4761c4",
+      "primary": "0x476190",
+      "alternate": "0x476298",
+      "branch": "0x4762a8",
+      "target": "0x47619c",
+      "primary_reachable": true
+    },
+    {
+      "store": "0x4773dc",
+      "primary": "0x4773b4",
+      "alternate": "0x4775d0",
+      "branch": "0x4775e0",
+      "target": "0x4773c0",
+      "primary_reachable": true
+    },
+    {
+      "store": "0x4775a4",
+      "primary": "0x47758c",
+      "alternate": "0x4774b4",
+      "branch": "0x4774bc",
+      "target": "0x477590",
+      "primary_reachable": false
+    }
+  ],
+  "all_four_sites_unreachable_when_both_sources_blocked_in_bounded_cfg": true,
+  "all_four_alternate_branch_destinations_sha_pinned": true,
+  "independent_source_mutations_rejected_without_whole_file_hash_shortcut": 28,
+  "all_12_positive_stores_have_bounded_local_source_coverage": true,
+  "actual_r2416_last_writer_resolved": false,
+  "native_enable_turbidity_live_state_observed": false,
+  "second_physical_mop_wash_proven": false,
+  "robot_modified": false,
+  "original_vendor_binaries_committed": false,
+  "limitation": "Bounded model-pruned AArch64 CFG source coverage, not full SSA/register analysis or an actual R2416 runtime measurement."
+}
