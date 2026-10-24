@@ -1,0 +1,38 @@
+{
+  "schema": "X40_R2416_V135_CORRELATED_SP98_SP100_FLAG_PATH_BOUND_1",
+  "source_model_site": "site_0x473540",
+  "original_elf_sha256_pins_passed": 10,
+  "native_sp98_value_classes_at_branch": [
+    "ONE",
+    "UNKNOWN_X64",
+    "ZERO"
+  ],
+  "native_sp100_value_classes_at_branch": [
+    "ZERO"
+  ],
+  "all_modelled_paths_to_guard_have_inventoried_direct_flag_store": true,
+  "all_ten_possible_last_direct_flag_sources_locally_positive_conditional": true,
+  "conditional_positive_source_does_not_prove_live_effective_value": true,
+  "possible_last_flag_store_count": 10,
+  "possible_last_flag_stores": [
+    "0x474cd0",
+    "0x475bc4",
+    "0x476798",
+    "0x4773dc",
+    "0x4774d8",
+    "0x4775a4",
+    "0x4776b4",
+    "0x47776c",
+    "0x478160",
+    "0x47826c"
+  ],
+  "alternative_static_classes_at_guard": 25,
+  "symbolic_state_count": 68924,
+  "source_mutations_rejected": 27,
+  "active_enable_turbidity_measured": false,
+  "actual_executed_flag_writer_identified": false,
+  "additional_physical_mop_wash_proven": false,
+  "robot_actions": 0,
+  "original_vendor_binaries_committed": false,
+  "limitation": "Only model-pruned direct AArch64 CFG and source-pinned direct stack stores; unknown 64-bit pointer low word preserves both branches. Missing indirect aliases/exception/memory writes/native runtime observation."
+}
