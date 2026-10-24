@@ -1,0 +1,66 @@
+{
+  "schema": "X40_R2416_V133_NONPREFIX_MODEL_AND_SPILL_1",
+  "source_model_site": "site_0x473540",
+  "original_elf_sha256_pins": 10,
+  "prior_prefixed_primary_string_compares": 294,
+  "extended_direct_primary_literal_compares": 297,
+  "new_nonprefix_comparisons": [
+    {
+      "call": "0x472afc",
+      "branch": "0x472b00",
+      "branch_kind": "CBZ",
+      "impossible_successor": "0x4707f8",
+      "match": false
+    },
+    {
+      "call": "0x47305c",
+      "branch": "0x473060",
+      "branch_kind": "CBZ",
+      "impossible_successor": "0x470758",
+      "match": false
+    },
+    {
+      "call": "0x476534",
+      "branch": "0x476538",
+      "branch_kind": "CBNZ",
+      "impossible_successor": "0x47653c",
+      "match": false
+    }
+  ],
+  "possible_direct_flag_writers_before": 11,
+  "possible_direct_flag_writers_after": 10,
+  "newly_excluded": [
+    "0x476598"
+  ],
+  "remaining": [
+    "0x474cd0",
+    "0x475bc4",
+    "0x476798",
+    "0x4773dc",
+    "0x4774d8",
+    "0x4775a4",
+    "0x4776b4",
+    "0x47776c",
+    "0x478160",
+    "0x47826c"
+  ],
+  "sp100_direct_32bit_store_sites": [
+    "0x4707fc",
+    "0x472b44"
+  ],
+  "sp100_positive_store_reachable_under_bounded_model_cfg": false,
+  "sp100_last_reaching_direct_store_at_0x4710bc": [
+    "0x472b44"
+  ],
+  "sp100_source_value_bounded_zero": true,
+  "sp98_unique_reaching_value_proven": false,
+  "sp80_late_shared_result_consumer_0x4782d4_reachable": false,
+  "original_source_mutations_rejected": 24,
+  "fresh_unzip_and_checksum_verifier_replay_passed": true,
+  "unique_executed_writer_observed": false,
+  "live_enable_turbidity_observed": false,
+  "additional_physical_mop_wash_proven": false,
+  "robot_access": false,
+  "proprietary_binary_distributed": false,
+  "caveat": "Direct intraprocedural branch and 32-bit stack-store scope only; no indirect aliases, exception paths, device execution trace or native Blackboard runtime read."
+}
