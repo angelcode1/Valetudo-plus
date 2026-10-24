@@ -1,0 +1,54 @@
+{
+  "schema": "X40_R2416_V134_OVERLAPPING_SP98_LAST_DIRECT_STORES_1",
+  "source_model_site": "site_0x473540",
+  "original_elf_sha256_pins_passed": 10,
+  "direct_str_w_sp98_inventory": 25,
+  "direct_str_x_sp98_inventory": 1,
+  "last_direct_32bit_reaching_count": 8,
+  "last_direct_32bit_reaching_sites": [
+    "0x4707e0",
+    "0x47085c",
+    "0x4734a8",
+    "0x475bbc",
+    "0x4774d0",
+    "0x4775d8",
+    "0x477768",
+    "0x478134"
+  ],
+  "last_direct_64bit_reaching_sites": [
+    "0x47130c"
+  ],
+  "last_direct_64bit_reaching_source_kind": "pointer_derived_not_boolean",
+  "last_direct_any_width_reaching_count": 9,
+  "zero_regex_result_last_source_site": "0x4734a8",
+  "native_cset_nonmatch_last_source_site": "0x478134",
+  "shared_store_six_alternate_incoming_branches": [
+    "0x471980",
+    "0x471998",
+    "0x4719ac",
+    "0x4719c0",
+    "0x4719d4",
+    "0x4719ec"
+  ],
+  "secondary_comparison_fallthrough_pruned_without_eliminating_shared_source": true,
+  "possible_direct_turbidity_flag_writer_sites": 10,
+  "possible_direct_turbidity_flag_writer_addresses": [
+    "0x474cd0",
+    "0x475bc4",
+    "0x476798",
+    "0x4773dc",
+    "0x4774d8",
+    "0x4775a4",
+    "0x4776b4",
+    "0x47776c",
+    "0x478160",
+    "0x47826c"
+  ],
+  "independent_native_source_mutations_rejected": 32,
+  "unique_executed_flag_writer_identified": false,
+  "active_turbidity_enablement_observed": false,
+  "physical_second_mop_wash_proven": false,
+  "robot_actions": 0,
+  "original_vendor_binaries_committed": false,
+  "caveat": "Bounded direct AArch64 CFG and STR W/X exact SP+0x98 stores; not full memory SSA or runtime evidence."
+}
