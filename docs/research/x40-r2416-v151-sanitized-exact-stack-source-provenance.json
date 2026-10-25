@@ -1,0 +1,65 @@
+{
+  "schema": "X40_R2416_V151_CORRELATED_SP98_SOURCE_SITE_1",
+  "verified_original_sha256_elf_pins": 10,
+  "primary_model_compare_regression_sites": 19,
+  "prior_possible_last_direct_flag_writers": 5,
+  "correlated_compound_graph_states": 100132,
+  "distinct_terminal_source_site_writer_combinations": 30,
+  "previous_sp98_reaching_source_sites": 9,
+  "last_sp98_source_sites_at_read": [
+    "0x4707e0",
+    "0x47085c",
+    "0x47130c",
+    "0x4734a8",
+    "0x475bbc",
+    "0x4774d0",
+    "0x478134"
+  ],
+  "source_site_pairs_by_writer": {
+    "0x475bc4": [
+      "0x4707e0",
+      "0x47085c",
+      "0x47130c",
+      "0x475bbc"
+    ],
+    "0x4774d8": [
+      "0x4707e0",
+      "0x47085c",
+      "0x47130c",
+      "0x4774d0"
+    ],
+    "0x4775a4": [
+      "0x4707e0",
+      "0x47085c",
+      "0x47130c",
+      "0x4734a8"
+    ],
+    "0x478160": [
+      "0x4707e0",
+      "0x47085c",
+      "0x47130c",
+      "0x478134"
+    ],
+    "0x47826c": [
+      "0x4707e0",
+      "0x47085c",
+      "0x47130c",
+      "0x478134"
+    ]
+  },
+  "sp98_zero_result_source": "0x4734a8",
+  "only_flag_writer_when_this_is_last_sp98_source": "0x4775a4",
+  "sp98_pointer_derived_wide_source": "0x47130c",
+  "sp98_source_shared_by_two_flag_writers": "0x478134",
+  "source_checked_primary_model_nonmatch_at_pc": "0x478140",
+  "that_model_nonmatch_prunes_any_final_direct_flag_writer": false,
+  "independent_native_source_mutations_rejected": 29,
+  "clean_extraction_source_replay_verified": true,
+  "actual_native_flag_writer_executed_observed": false,
+  "native_enable_turbidity_live_value_observed": false,
+  "second_physical_mop_wash_proven": false,
+  "runtime_robot_actions": 0,
+  "private_source_bytes_published": false,
+  "download_zip_sha256": "c73e34f013a3acc00734abb84064aa5297465bc51993a608095bb071e115816f",
+  "boundary": "Source-verified bounded intraprocedural direct stack-store provenance. Runtime conditions, aliases, called functions, exception paths and real hardware execution unverified."
+}
