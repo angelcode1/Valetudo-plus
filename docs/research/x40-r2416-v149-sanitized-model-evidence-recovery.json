@@ -1,0 +1,22 @@
+{
+  "schema": "X40_R2416_V149_ONE_PASS_V127_V128_RECOVERY_1",
+  "source_archive_sha256": "f996955745d07786d6290fd7afad4970f4d2cd182a493d61d329230c8038e6f6",
+  "original_elf_sha256_pins_verified": 10,
+  "original_compiled_native_comparison_sites_verified": 294,
+  "unique_compiled_model_strings": 235,
+  "private_v62_restored_from_conversation": true,
+  "private_v62_committed_to_public_repo": false,
+  "v127_parser_selftest_cases": 13,
+  "v128_probe_selftest_cases": 6,
+  "v148_synthetic_differential_cases": 192,
+  "synthetic_one_ssh_read_generated_both_v127_and_v128_zips": true,
+  "clean_extraction_sha256_and_zip_crc_pass": true,
+  "newly_captured_real_v128_observation": false,
+  "v148_original_source_execution_with_live_model": false,
+  "prior_possible_direct_flag_writer_sites": 10,
+  "unique_executed_flag_writer_identified": false,
+  "second_physical_mop_wash_proven": false,
+  "robot_modified": false,
+  "published_utility_zip_sha256": "6fbed310690fbcc81a6aee91275a7e84b493bf0c73af1648eb142a7a121851e7",
+  "caveat": "The authenticated v128 site still requires one read-only owner-initiated SSH classification; synthetic end-to-end successful but no live robot collection executed."
+}
