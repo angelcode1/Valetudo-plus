@@ -1,0 +1,78 @@
+{
+  "schema": "X40_R2416_V192_DYNAMIC_OBSTACLE_POINT_HANDOFF_V1",
+  "originalRouteELFSha256": "fcf706dfa3f4777415d86e95162bf1bbbe3453dcff3126da70946f46c851988e",
+  "candidateHelper": "GetNextDynamicObstaclesArea::getFirstCleanDynamicObstaclesData",
+  "candidateHelperEntry": "0xaead90",
+  "currentCoordReference": {
+    "key": "current_coord",
+    "instructionVA": "0xaead98",
+    "literalVA": "0xfccda0",
+    "typedGetVA": "0xaeadf0",
+    "typedGetPLT": "0x43f220"
+  },
+  "closestPointEvidence": {
+    "distanceArithmetic": [
+      "0xaeae40",
+      "0xaeae44",
+      "0xaeae48",
+      "0xaeae4c",
+      "0xaeae50",
+      "0xaeae70"
+    ],
+    "comparison": "0xaeae78",
+    "minUpdateBranch": "0xaeae7c",
+    "candidateLoop": "0xaeae80-0xaeae88",
+    "copySelectedOut": "0xaeae94-0xaeae98",
+    "vectorTailMove": "0xaeaeac",
+    "vectorEndReduction": "0xaeaeb4",
+    "emptyReturnsFalse": "0xaeaefc"
+  },
+  "parentNode": "GetNextDynamicObstaclesArea::tick",
+  "helperCalls": [
+    {
+      "site": "0xaee8f4",
+      "targetPLT": "0x447cb0",
+      "role": "getFirstCleanDynamicObstaclesData"
+    },
+    {
+      "site": "0xaeedcc",
+      "targetPLT": "0x44f440",
+      "role": "getSelectedAreasDynamicObstaclesData"
+    }
+  ],
+  "selectedHelperChoiceGuard": {
+    "cmp": "0xaee8d4",
+    "equalBranch": "0xaee8dc",
+    "branchTarget": "0xaeedb8"
+  },
+  "outputKeyHandoffs": [
+    {
+      "key": "original_dynamic_obstacles_point",
+      "literalVA": "0x1007ce0",
+      "keyReference": "0xaee92c",
+      "setterCompatibleVirtualCall": "0xaee990"
+    },
+    {
+      "key": "next_dynamic_obstacles_point",
+      "literalVA": "0x1007d08",
+      "keyReference": "0xaeee4c",
+      "setterCompatibleVirtualCall": "0xaeee90"
+    }
+  ],
+  "isExactVirtualSetterTypeProven": false,
+  "bothOutputKeysUpdatedInSameRuntimeBranchProven": false,
+  "robotCleaningTaskSchedulerDispatchProven": false,
+  "nativeAiDirtClassificationCausesSecondPassProven": false,
+  "privateOriginalELFUnitTests": {
+    "passed": 222,
+    "skipped": 0
+  },
+  "cleanZipWithoutOriginalELF": {
+    "passed": 109,
+    "skipped": 71
+  },
+  "zipSha256": "7bd8c90cc20f4b4ea4fbc2ef839083f0fda7dacf7d8b6df46ef11169d857263e",
+  "noNativeBinariesOrPrivateCoordinatesCommitted": true,
+  "noRobotAccess": true,
+  "noRuntimeChanges": true
+}
