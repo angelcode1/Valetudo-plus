@@ -1,0 +1,29 @@
+{
+  "schema": "X40_R2416_V177_STAIN_ID_ASYNC_INT_BOUNDARY_V1",
+  "originalElfSha256": "b34eb5c71bccd90342f34d64a1871197455d69d9511cfa709ee027dd44b554e0",
+  "originalSha256Pass": true,
+  "key": "now_stain_cleaning_id",
+  "exactKeyOccurrencesInAvailableElf": 1,
+  "adjacentAdrpAddKeyReferences": [
+    "0x4b8a64"
+  ],
+  "priorV176ChangeGatedDequeVerified": true,
+  "callbackType": "AsyncDeque::_ProcessAsyncPub<int>(Publisher<int>*, shared_ptr<int>)",
+  "asyncGOTBindingsVerified": true,
+  "callbackBindingSites": [
+    "0x4b8b9c",
+    "0x4b8bd0",
+    "0x4b8bd8",
+    "0x4b8be0"
+  ],
+  "standaloneAdvertisedIntTopic": "AI_STAIN_CLEANING",
+  "standaloneAdvertiseSite": "0x35ecac",
+  "samePublisherObjectAsStainIdReporterProven": false,
+  "blackboardWriterIdentified": false,
+  "fullWriterCensusProven": false,
+  "consumerTaskPlannerProven": false,
+  "liveStainIdObserved": false,
+  "automaticRecleanCausedByStainIdProven": false,
+  "noDeviceAccess": true,
+  "boundary": "Typed int event queued after changed Blackboard ID; publishing topic linkage, producer of value and task effect remain unproven."
+}
