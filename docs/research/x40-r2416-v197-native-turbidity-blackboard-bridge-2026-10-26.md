@@ -1,0 +1,23 @@
+# X40 R2416 v197 — Verified native turbidity configuration-to-Blackboard bridge
+
+**26 October 2026 — owner-private original R2416 firmware, offline read-only analysis.** This extends the corrected [v195 native RobotNode research](x40-r2416-v195-native-robotnode-corrigendum-2026-10-26.md), not the superseded v194 suggestion that `RobotNode.xml` must be present. Neither Valetudo+, the robot, nor `master` has been changed. No proprietary ELF, full XML, raw configuration, credentials, maps, or calibration payloads are in Git.
+
+## New positive native result
+
+The pinned original host `node_lethe.so` contains `AvaNodeRoute::LoadTurbidityCheckConfig(rapidjson::Value const&)` at `0x62aa40`. At `0x62aa60–0x62aa64`, it prepares key `turbidity_check_config_file_path` (VA `0xa16298`); its conditional execution uses `rapidjson::FindMember` at `0x62aaa0`, file open at `0x62ab24`, and `ParseStream` at `0x62abb4`. At `0x62ae40–0x62ae44` it prepares the literal `turbidity_check_tables` (VA `0xa16378`); at `0x62ae48–0x62ae54` it accesses `AvaNodeRoute+0x30` and calls a native `BT::Blackboard::set` specialization. **A compiled configuration-to-Blackboard producer path is now verified.** This is not evidence that the live load happened or that the downstream reader used the same Blackboard instance.
+
+The exact-SHA-256-pinned original `liblethe_tactics_tree.so` contains a corresponding reader. `SweepStationContorl::InitTable()` builds `turbidity_check_tables` from literal VA `0x340b88` (`0x250894–0x250898`) and has a Blackboard existence check with a **not-present** branch at `0x2508e0 → 0x250d90`, leading to distinct compiled defaults. The present branch conditionally dereferences/copies a typed table collection. `TurbidityMonitorGetAByTable(int,bool)` dispatches a C-table path to `FindC` (`0x252ad4`); the other path reads Blackboard key `station_info_sub` (VA `0x32a600`), branches on a retrieved 16-bit value `0–3`, then can consult A-vector `+0x5f8/+0x600` through `FindA` (`0x252c5c`). **The `0–3` branch values must not be equated to JSON A[0–3] IDs without further mapping.**
+
+The B helper's positive input above 19 returns a **compiled 1.0** instead of reading the JSON B row 20; the default recheck input at `0x2530e8` is 20, before the multiplication of a stored threshold at `0x253100`. The direct file-to-runtime-table publisher, exact selected A-series calibration and thresholds remain conditional, not observed.
+
+## Owner-provided collection evidence
+
+The first private ZIP has **18 independently checksum-verified payloads** including five SHA-pinned original ELFs. The second private ZIP has **seven checksum-verified, redacted JSON payloads**. The original unredacted JSON hashes cannot be independently reconstructed from redacted saved bytes. The recovered turbidity JSON contains 4 A calibrations (63/35/60/60 points), 20 B points and 63 C points. A[3] mentions the 40-series but **R2416's live selection is not established**. The native host also contains the literal `ai_model_inuse.json`; that file is not in either collection and this literal alone proves no model activation.
+
+**Still unproven:** successful live loader invocation; identity of producer/consumer Blackboard; A[3] selection; a live sensor threshold crossing; AI stain → new task; R2416-reachable `special_push_clean_dish` producer; or any physical extra floor cleaning or dock wash. Those latter two outcomes remain separate research questions. Do not enable experimental CleanGenius writes.
+
+## Reproducibility
+
+A self-contained **offline** Python 3 standard-library v197 verifier and complete sanitized report are supplied in the local `X40-R2416-v197-sanitized-analysis-kit.zip`. It verifies 18 + 7 checksums, **five** whole-file native ELF pins, **45** named AArch64 instruction anchors across host/tactics libraries, literal VA mappings, the missing-table fallback target and JSON data shape. Results: `X40_R2416_V197_NATIVE_BLACKBOARD_CONFIGURATION_STATIC_PASS`; four focused verifier unit tests passed; ZIP integrity and all five payload checksums passed. Exact-original inputs stay private and no runtime/device calls are made. The ZIP SHA-256 is `a319e7fb5c038c532e19e6f0e81fe174d1d1fa3606d634edd15bab6ffaa945c1`.
+
+Next: inspect host call sites to `LoadTurbidityCheckConfig`, verify the source of the RapidJSON path setting and connect `AvaNodeRoute+0x30` to the instantiated `StationHandle` node's Blackboard. In parallel, reconstruct the native generated `RobotNode` stain-to-task-start edge from already collected binaries. Keep `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=0`, `SmartHost=0`, `SmartAutoMop=-1`, `SmartAutoWash=0` and `writeGateOpen=false`.
