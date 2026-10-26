@@ -1,0 +1,34 @@
+{
+  "schema": "X40_R2416_V205_EXPLICIT_REUSE_PATH_OPT_IN_STATIC_V1",
+  "research_baseline": "v195 native RobotNode corrected; v197-v204 offline regression passed",
+  "exact_original_ELF_SHA256_pins_in_full_replay": 5,
+  "private_saved_payload_SHA256_checks_in_full_replay": [
+    18,
+    7
+  ],
+  "v205_exact_instruction_word_anchors": 63,
+  "v205_decoded_branch_call_targets": 19,
+  "focused_tests_passed": 11,
+  "source_only_package_file_SHA256_checks": 26,
+  "native_literal_reuse": "reuse",
+  "native_parser_checks_last_slash_and_dot": true,
+  "native_reuse_flag_derived_from_prefix_comparison": true,
+  "native_simple_filename_StationWash_reuse_flag": false,
+  "native_explicit_reuse_StationWash_can_opt_in": true,
+  "native_plain_filename_can_read_preexisting_matching_cache_entry": true,
+  "generated_RobotNode_SubtreeCondition_parameters": {
+    "expand_in_logger": "true",
+    "subtree_file_path": "StationWash.xml"
+  },
+  "original_tree_library_contains_other_explicit_reuse_children": true,
+  "original_tree_library_contains_contiguous_reuse_StationWash_literal": false,
+  "runtime_active_node_registration_verified": false,
+  "runtime_StationWash_cache_hit_observed": false,
+  "runtime_matching_prepopulated_cache_entry_observed": false,
+  "runtime_cache_owner_destruction_order_observed": false,
+  "runtime_route_and_station_Blackboard_same_instance_verified": false,
+  "physical_second_clean_or_dock_rewash_verified": false,
+  "original_private_ELF_or_sensitive_configuration_published": false,
+  "robot_access_or_firmware_write": false,
+  "zip_sha256": "102f2965bf2f773230f7dfe429ee0f98f0811b1c8eb1191b9c9c933314ae32c1"
+}
