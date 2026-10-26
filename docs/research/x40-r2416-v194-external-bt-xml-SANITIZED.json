@@ -1,0 +1,82 @@
+{
+  "schema": "X40_R2416_V194_EXTERNAL_BT_XML_CONFIGURATION_BOUNDARY_V1",
+  "originalHostELF": "node_lethe.so",
+  "originalHostELFSha256": "b34eb5c71bccd90342f34d64a1871197455d69d9511cfa709ee027dd44b554e0",
+  "originalRouteELF": "liblethe_route_nodes.so",
+  "originalRouteELFSha256": "fcf706dfa3f4777415d86e95162bf1bbbe3453dcff3126da70946f46c851988e",
+  "hostNativeConfig": [
+    {
+      "function": "Parameter::LOAD_behavior_tree_path(YAML::Node&)",
+      "functionVA": "0x2c4040",
+      "yamlKey": "behavior_tree_path",
+      "yamlKeyVA": "0x9ce460",
+      "fallback": "cleanbot_pro/RobotNode.xml",
+      "fallbackVA": "0x9ce478",
+      "assignCall": "0x2c4194",
+      "assignTargetPLT": "0x273b90",
+      "interpretation": "Compiled YAML default on identified absent/missing branch, not proven active deployed value"
+    },
+    {
+      "function": "Parameter::LOAD_tree_lib_path(YAML::Node&)",
+      "functionVA": "0x2c44c0",
+      "yamlKey": "tree_lib_path",
+      "yamlKeyVA": "0x9ce498",
+      "fallback": "/usr/lib/tree_lib",
+      "fallbackVA": "0x9ce4a8",
+      "assignCall": "0x2c4614",
+      "assignTargetPLT": "0x273b90",
+      "interpretation": "Plugin library path fallback; NOT proven XML location"
+    }
+  ],
+  "taskWrapper": {
+    "function": "BtTask::BtTask(std::string const&,std::shared_ptr<BT::Blackboard> const&)",
+    "functionVA": "0x316410",
+    "xmlStartVA": "0x9d3380",
+    "buildTreeFromTextCall": "0x316600",
+    "targetPLT": "0x2753c0",
+    "inlineRootPrefixCount": 4,
+    "knownReuseTreeXmlWrapper": true,
+    "completeExternalRobotNodeTreeIncluded": false
+  },
+  "routePlugin": {
+    "entry": "BT_RegisterNodesFromPlugin",
+    "entryVA": "0x48cc80",
+    "branchToRegisterNodesPLT": "0x43f9b0",
+    "subtreeNode": "utility::SubtreeConditionOptNode::onInit",
+    "functionVA": "0x5b29b0",
+    "parameter": "subtree_file_path",
+    "parameterLiteralVA": "0xf9e498",
+    "typedParameterCall": "0x5b2a20",
+    "parameterCallTargetPLT": "0x44e820",
+    "xmlControl": "basic_nodes::XmlControl::onInit",
+    "xmlControlVA": "0x5e6880",
+    "parentBlackboardGetterCall": "0x5e6890",
+    "childSetBlackboardCall": "0x5e689c"
+  },
+  "conclusions": {
+    "externalTreeStructureAvailable": false,
+    "actualRuntimeYAMLValueVerified": false,
+    "installedXmlPresentVerified": false,
+    "routeNodePortBindingsVerified": false,
+    "secondPassCleanTaskSchedulerEdgeVerified": false,
+    "xmlWrapperIsNotFullTree": true,
+    "pluginLibraryPathIsNotXmlDirectoryProof": true,
+    "noRobotAccess": true,
+    "noOriginalFirmwareDistributed": true
+  },
+  "testedPackage": {
+    "name": "X40-R2416-v194-sanitized-external-bt-xml-boundary.zip",
+    "sha256": "c8d2b952cd0a77d13d70e83c26e31861e0203e4fd259383ef7de6800f7f92ed5",
+    "files": 40,
+    "verifiedFileChecksums": 39,
+    "withBothPrivateOriginalELFs": {
+      "tests": 258,
+      "passed": 258
+    },
+    "cleanExtractionWithoutELFs": {
+      "tests": 216,
+      "passed": 120,
+      "skipped": 96
+    }
+  }
+}
