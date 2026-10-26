@@ -26,7 +26,7 @@ class Refusal(ValueError):pass
 def require(ok,msg):
  if not ok:raise Refusal(msg)
 def native_words(data):
- require(data[:6]==b'\\x7fELF\\x02\\x01' and struct.unpack_from('<H',data,18)[0]==183,'not ELF64 AArch64')
+ require(data[:6]==bytes([127,69,76,70,2,1]) and struct.unpack_from('<H',data,18)[0]==183,'not ELF64 AArch64')
  off=struct.unpack_from('<Q',data,40)[0]
  entsize,n,idx=struct.unpack_from('<HHH',data,58)
  require(entsize>=64 and 1<n<100 and idx<n and off+n*entsize<=len(data),'bad section table')
