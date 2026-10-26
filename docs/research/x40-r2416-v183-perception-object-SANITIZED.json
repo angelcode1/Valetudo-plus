@@ -1,0 +1,59 @@
+{
+  "schema": "X40_R2416_V183_STAIN_PERCEPTION_OBJECT_LINK_V1",
+  "privateModules": {
+    "node_laser_transfer.so": "16b487f486fb34d8fe85fb6e383243100657e0769d6df823aa13c34643644856",
+    "liblethe_route_nodes.so": "fcf706dfa3f4777415d86e95162bf1bbbe3453dcff3126da70946f46c851988e"
+  },
+  "objectChain": [
+    {
+      "function": "MapAccumulatorNode::InitNode",
+      "instruction": "0x1306e4",
+      "action": "stores new MapAccumulator pointer to node+0x1380"
+    },
+    {
+      "function": "MapAccumulator::MapAccumulator",
+      "instruction": "0x3b8384",
+      "action": "calls SetSemanticConfig"
+    },
+    {
+      "function": "MapAccumulator::SetSemanticConfig",
+      "instruction": "0x3ac948",
+      "action": "stores newly constructed SemanticFuser pointer to accumulator+0x89a0"
+    },
+    {
+      "function": "MapAccumulatorNode::ProcessStainCleanInfo(int*)",
+      "instruction": "0x1123a4",
+      "action": "follows node+0x1380, accumulator+0x89a0 and atomically stores value to fuser+0xfd0"
+    },
+    {
+      "function": "SemanticFuser::UpdateObstaclesWithThirdPartyInfo",
+      "instruction": "0x1e300c",
+      "action": "calls UpdateCleanedStainId"
+    },
+    {
+      "function": "SemanticFuser::ProcessSemanticData",
+      "instruction": "0x1e9ab4",
+      "action": "calls UpdateObstaclesWithThirdPartyInfo"
+    }
+  ],
+  "compiledObjectPathEstablished": true,
+  "semanticIdMayMarkMatchedStainHandled": true,
+  "exactRuntimeObjectLifetimeProven": false,
+  "messageDeliveryAtRuntimeProven": false,
+  "replanSecondFloorCleaningTaskProven": false,
+  "sensorCausedV165SpatialRevisitProven": false,
+  "completeOfflineUnitTests": {
+    "withOriginalELFs": {
+      "run": 48,
+      "passed": 48
+    },
+    "withoutELFs": {
+      "run": 48,
+      "passed": 19,
+      "skipped": 29
+    }
+  },
+  "archiveSha256": "302185d902c82ddfad8ad99eaf6920d5e0ac16d3dba2bf1957cbc6e4889cbc2d",
+  "noRobotAccess": true,
+  "noProprietaryBinariesCommitted": true
+}
