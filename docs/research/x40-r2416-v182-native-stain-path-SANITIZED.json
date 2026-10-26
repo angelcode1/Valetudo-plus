@@ -1,0 +1,36 @@
+{
+  "schema": "X40_R2416_V182_CROSS_MODULE_STAIN_ID_LINK_V1",
+  "moduleHashes": {
+    "node_laser_transfer.so": "16b487f486fb34d8fe85fb6e383243100657e0769d6df823aa13c34643644856",
+    "liblethe_route_nodes.so": "fcf706dfa3f4777415d86e95162bf1bbbe3453dcff3126da70946f46c851988e"
+  },
+  "compiledSubscriberIdentified": true,
+  "subscriberTopic": "AI_STAIN_CLEANING",
+  "subscriberSite": "node_laser_transfer.so:0x12b3e0",
+  "subscriberCallback": "MapAccumulatorNode::ProcessStainCleanInfo(int*)",
+  "callbackBoundViaThreeTypedELFRelocations": true,
+  "compiledBlackboardWriterIdentified": true,
+  "writerKey": "now_stain_cleaning_id",
+  "writerSite": "liblethe_route_nodes.so:0xc26bfc",
+  "writerFunction": "pointcloud::PointCloudProcess::FluidSlowDown",
+  "writerSourceRecordOffset": "0x78",
+  "virtualSetterIdentityComparedTo": "BT::Blackboard::set<int> at 0x58dcb0",
+  "receiverAtomicStore": "node_laser_transfer.so:0x1123a4",
+  "compatibleSemanticFuserStateConsumer": "node_laser_transfer.so:0x1db720",
+  "semanticFuserMarkMatchedRecordAndClearPendingId": true,
+  "exactCallbackToSemanticFuserObjectIdentityProven": false,
+  "sameRuntimeBlackboardInstanceProven": false,
+  "nativeMessageDeliveredAtRuntimeProven": false,
+  "runtimeTaskPlannerRecleanTransitionProven": false,
+  "v165RevisitsCausedByCleanGeniusProven": false,
+  "offlineTestsOriginalBinary": {
+    "passed": 30,
+    "skipped": 0
+  },
+  "offlineTestsWithoutPrivateBinary": {
+    "passed": 13,
+    "skipped": 17
+  },
+  "noFirmwareBinariesCommitted": true,
+  "noRobotAccess": true
+}
