@@ -1,0 +1,64 @@
+{
+  "schema": "X40_R2416_V193_DYNAMIC_POINT_CONSUMER_BOUNDARY_V1",
+  "sourceELFSha256": "fcf706dfa3f4777415d86e95162bf1bbbe3453dcff3126da70946f46c851988e",
+  "sourceELF": "liblethe_route_nodes.so",
+  "xrefScope": "Exact adjacent executable AArch64 ADRP+ADD in original R2416 ELF; not all dynamically routed accesses",
+  "keyAddresses": {
+    "next_dynamic_obstacles_point": "0x1007d08",
+    "original_dynamic_obstacles_point": "0x1007ce0"
+  },
+  "adjacentReferenceSites": {
+    "next_dynamic_obstacles_point": [
+      "0xaeee4c",
+      "0xb14e2c"
+    ],
+    "original_dynamic_obstacles_point": [
+      "0xaee92c",
+      "0xaf0268",
+      "0xaf1be4",
+      "0xaf231c",
+      "0xf82920",
+      "0xf8be54"
+    ]
+  },
+  "siteFunctions": {
+    "0xaeee4c": "GetNextDynamicObstaclesArea::tick (setter-compatible +0x20)",
+    "0xb14e2c": "PresetBlackboard::tick (key helper and +0x30 virtual operation, exact semantics unresolved)",
+    "0xaee92c": "GetNextDynamicObstaclesArea::tick (setter-compatible +0x20)",
+    "0xaf0268": "DynamicObstanceAreaIsClear::tick (typed Vector2<int> cast)",
+    "0xaf1be4": "CheckDynamicObstance::tick (typed Vector2<int> cast)",
+    "0xaf231c": "GetToGoalAngle::tick (typed Vector2<int> cast, atan2, fmod)",
+    "0xf82920": "MapSensor::PointCloudEliminate (key reference only)",
+    "0xf8be54": "MapSensor::CleanedAreaBuild (key reference only)"
+  },
+  "compiledGoalAngleCalls": {
+    "safeAnyVectorCast": "0xaf248c",
+    "atan2": "0xaf24e4",
+    "fmod": "0xaf250c"
+  },
+  "presetVirtualCall": {
+    "site": "0xb14e54",
+    "slot": "0x30",
+    "exactDirection": "unresolved"
+  },
+  "directAdjacentNamedNextPointReaderIdentified": false,
+  "navigationHeadingConsumerCompiled": true,
+  "noNewTaskDispatchIdentified": true,
+  "noRuntimeRobotMovementFromThisTrace": true,
+  "autonomousDirtTriggeredSecondPassProven": false,
+  "offlineWithOriginalElf": {
+    "tests": 239,
+    "passed": 239
+  },
+  "cleanZipWithoutOriginalElf": {
+    "tests": 197,
+    "passed": 114,
+    "skipped": 83
+  },
+  "validatedArchive": "X40-R2416-v193-sanitized-dynamic-point-consumers.zip",
+  "validatedArchiveSha256": "7e3b23509728f3e434c4e6dfd63d35e6766c96de36bf15e31d3dde071ae48d43",
+  "packagedFileSHA256Checks": 35,
+  "noOriginalNativeELFIncluded": true,
+  "noRobotAccess": true,
+  "noFirmwareWrites": true
+}
