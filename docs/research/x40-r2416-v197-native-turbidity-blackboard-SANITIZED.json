@@ -1,0 +1,32 @@
+{
+  "schema": "X40_R2416_V197_NATIVE_BLACKBOARD_CONFIG_BOUNDARY_SANITIZED_V1",
+  "native_host_loader": "AvaNodeRoute::LoadTurbidityCheckConfig",
+  "native_host_loader_entry": "0x62aa40",
+  "native_config_file_path_key": "turbidity_check_config_file_path",
+  "native_config_publisher_blackboard_key": "turbidity_check_tables",
+  "native_config_publisher_call": "0x62ae54",
+  "native_consumer": "SweepStationContorl::InitTable",
+  "native_consumer_absent_branch": "0x2508e0 -> 0x250d90",
+  "native_false_a_branch_blackboard_key": "station_info_sub",
+  "native_station_info_sub_cases": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "native_A_B_C_vector_paths_verified": true,
+  "config_to_blackboard_compiled_path_verified": true,
+  "real_time_loader_invocation_verified": false,
+  "producer_consumer_same_blackboard_verified": false,
+  "selected_a3_calibration_verified": false,
+  "sensor_threshold_event_verified": false,
+  "AI_stain_new_cleaning_task_verified": false,
+  "physical_extra_clean_or_rewash_verified": false,
+  "original_elf_pins_verified": 5,
+  "native_instruction_anchors_verified": 45,
+  "prior_payloads_verified": 18,
+  "delta_redacted_payloads_verified": 7,
+  "original_unredacted_json_hash_reproducible_from_redacted_payloads": false,
+  "all_original_firmware_and_private_config_excluded": true,
+  "kit_sha256": "a319e7fb5c038c532e19e6f0e81fe174d1d1fa3606d634edd15bab6ffaa945c1"
+}
