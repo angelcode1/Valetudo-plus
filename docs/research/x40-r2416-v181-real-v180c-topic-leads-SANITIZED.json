@@ -1,0 +1,46 @@
+{
+  "schema": "X40_R2416_V181_REAL_V180C_TOPIC_LEADS_V1",
+  "sourceCapture": "X40-R2416-v180c-loaded-modules-20261026T085603Z-aee17628-SANITIZED.json",
+  "sourceSha256": "a8e5e6bc8df39af518f3523c0818462cd26df7838b95989c24772ab5f444c0f9",
+  "sourceSchema": "X40_R2416_V180C_LOADED_MODULE_TOPIC_DISCOVERY_V1",
+  "relevantProcessCount": 1,
+  "mappedDistinctFileCount": 105,
+  "scannedFileCount": 105,
+  "literalProbeReadErrors": 0,
+  "allProbedLiteralsReadable": true,
+  "probeCompleted": true,
+  "literalMatches": {
+    "AI_STAIN_CLEANING": [
+      "node_laser_transfer.so",
+      "node_lethe.so"
+    ],
+    "now_stain_cleaning_id": [
+      "liblethe_route_nodes.so",
+      "node_lethe.so"
+    ],
+    "WR_PROPI": [
+      "node_health_lethe.so",
+      "node_lethe.so",
+      "node_msg_cvt.so",
+      "node_signal.so",
+      "node_speech_control.so"
+    ]
+  },
+  "priority": [
+    {
+      "module": "node_laser_transfer.so",
+      "literal": "AI_STAIN_CLEANING",
+      "receiverProven": false
+    },
+    {
+      "module": "liblethe_route_nodes.so",
+      "literal": "now_stain_cleaning_id",
+      "writerProven": false
+    }
+  ],
+  "noProprietaryFirmwareIncluded": true,
+  "sensorTriggeredFloorRecleanProven": false,
+  "subscriberIdentified": false,
+  "writerIdentified": false,
+  "boundary": "All 105 mapped files were readable for exact literal probing, but byte-string presence is not proof of subscription, publication, Blackboard writes, or autonomous reclean. Other processes and indirect references are outside the scope."
+}
