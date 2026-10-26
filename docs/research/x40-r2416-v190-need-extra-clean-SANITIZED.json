@@ -1,0 +1,102 @@
+{
+  "schema": "X40_R2416_V190_NEED_EXTRA_CLEAN_KEY_ROLES_V1",
+  "privateOriginalRouteSha256": "fcf706dfa3f4777415d86e95162bf1bbbe3453dcff3126da70946f46c851988e",
+  "BlackboardKey": "need_extra_clean",
+  "keyVA": "0xfd7d68",
+  "referenceScope": "One private native ELF, executable adjacent AArch64 ADRP+ADD only",
+  "adjacentReferenceCount": 11,
+  "referenceRoles": [
+    {
+      "site": "0x5d2f64",
+      "function": "types::ResetPlanningCleanTaskBB",
+      "role": "indirect virtual +0x30 operation; direction unresolved"
+    },
+    {
+      "site": "0xad4994",
+      "function": "subregion::SetExtraCleanArea::EndExtraCleanArea",
+      "role": "conditional set<bool> true",
+      "call": "0xad49bc"
+    },
+    {
+      "site": "0xad8ca4",
+      "function": "subregion::SetExtraCleanArea::tick",
+      "role": "set<bool> false",
+      "call": "0xad8cc8"
+    },
+    {
+      "site": "0xad9d6c",
+      "function": "subregion::SetExtraCleanArea::tick",
+      "role": "set<bool> false",
+      "call": "0xad9d98"
+    },
+    {
+      "site": "0xadfa4c",
+      "function": "subregion::SetExtraCleanArea::tick",
+      "role": "set<bool> false",
+      "call": "0xadfa70"
+    },
+    {
+      "site": "0xaee5a8",
+      "function": "subregion::GetNextDynamicObstaclesArea::tick",
+      "role": "get<bool> (lookup-success return)",
+      "call": "0xaee5e4"
+    },
+    {
+      "site": "0xb3ed08",
+      "function": "switch_mode::CheckHumanInRoom::tick",
+      "role": "get<bool>",
+      "call": "0xb3ed28"
+    },
+    {
+      "site": "0xd47958",
+      "function": "lds_descent::CalculateMaxLiftUnderBedArea::tick",
+      "role": "get<bool>",
+      "call": "0xd47994"
+    },
+    {
+      "site": "0xd4a120",
+      "function": "lds_descent::FindRecoverPt::tick",
+      "role": "get<bool>",
+      "call": "0xd4a15c"
+    },
+    {
+      "site": "0xee3de4",
+      "function": "subregion::SaveDynamicObstaclesArea::SaveArea",
+      "role": "get<bool> (lookup-success return)",
+      "call": "0xee3e20"
+    },
+    {
+      "site": "0xf8b664",
+      "function": "cleanbot::MapSensor::CleanedAreaBuild",
+      "role": "stages integer 1 to setter-compatible virtual slot +0x20",
+      "instructionSites": [
+        "0xf8b690",
+        "0xf8b69c",
+        "0xf8b6a0",
+        "0xf8b6b0"
+      ]
+    }
+  ],
+  "directTypedGetBoolCount": 5,
+  "directTypedSetBoolCount": 4,
+  "directSetTrueCount": 1,
+  "directSetFalseCount": 3,
+  "virtualMapSensorCompatibleSetterCount": 1,
+  "unknownDirectionResetOperationCount": 1,
+  "typedGetReturnIsLookupSuccessRatherThanPayload": true,
+  "runtimeFlagValueMeasured": false,
+  "dirtyAIDecisionToSchedulerLinked": false,
+  "autonomousPhysicalSecondPassProven": false,
+  "testsOriginalPrivateElf": {
+    "passed": 181,
+    "skipped": 0
+  },
+  "testsCleanZipWithoutPrivateElf": {
+    "passed": 92,
+    "skipped": 47
+  },
+  "zip": "X40-R2416-v190-sanitized-need-extra-clean-role-audit.zip",
+  "zipSha256": "8bdbb48242b4ecfe8fae9fc7cebef4411558aff0b822239e1857e41a31835222",
+  "noRobotAccess": true,
+  "noProprietaryELFDistributed": true
+}
