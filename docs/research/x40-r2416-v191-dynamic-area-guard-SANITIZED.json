@@ -1,0 +1,95 @@
+{
+  "schema": "X40_R2416_V191_DYNAMIC_OBSTACLE_NEXT_AREA_GUARD_V1",
+  "binary": "liblethe_route_nodes.so",
+  "binarySha256": "fcf706dfa3f4777415d86e95162bf1bbbe3453dcff3126da70946f46c851988e",
+  "node": "subregion::GetNextDynamicObstaclesArea::tick",
+  "nodeStart": "0xaee540",
+  "specificKeyReferences": [
+    {
+      "key": "need_extra_clean",
+      "site": "0xaee5a8",
+      "literalVA": "0xfd7d68"
+    },
+    {
+      "key": "smart_hosting_switch",
+      "site": "0xaee640",
+      "literalVA": "0xfd7878"
+    },
+    {
+      "key": "smart_host_clean_set",
+      "site": "0xaee6cc",
+      "literalVA": "0xfd2458"
+    },
+    {
+      "key": "use_mop",
+      "site": "0xaee7e4",
+      "literalVA": "0xfd1e90"
+    },
+    {
+      "key": "reuse_cleaning",
+      "site": "0xaee804",
+      "literalVA": "0xfce630"
+    },
+    {
+      "key": "next_dynamic_obstacles_point",
+      "site": "0xaeee4c",
+      "literalVA": "0x1007d08"
+    }
+  ],
+  "checkedNativeCalls": [
+    {
+      "site": "0xaee5e4",
+      "targetPLT": "0x449720",
+      "callee": "Blackboard::get<bool>(need_extra_clean)"
+    },
+    {
+      "site": "0xaee684",
+      "targetPLT": "0x440000",
+      "callee": "Blackboard::get<int>(smart_hosting_switch)"
+    },
+    {
+      "site": "0xaee838",
+      "targetPLT": "0x440000",
+      "callee": "Blackboard::get<int>(reuse_cleaning)"
+    },
+    {
+      "site": "0xaee86c",
+      "targetPLT": "0x4465e0",
+      "callee": "GetNextDynamicObstaclesArea::initDynamicObstaclesData"
+    },
+    {
+      "site": "0xaee8f4",
+      "targetPLT": "0x447cb0",
+      "callee": "GetNextDynamicObstaclesArea::getFirstCleanDynamicObstaclesData"
+    }
+  ],
+  "needExtraCleanGetterSuccessCopiedToW22": "0xaee5ec",
+  "lookupSuccessBranch": "0xaee608",
+  "lookupSuccessBranchTarget": "0xaeee08",
+  "lookupSuccessEarlyResultConstant": 3,
+  "boolValueInSeparateOutParameter": true,
+  "lookupSuccessNotIdenticalToStoredBool": true,
+  "smartHostCleanSetAccess": "native hash-map lookup and byte load, not separately verified typed getter",
+  "selectedPointKey": "next_dynamic_obstacles_point",
+  "selectedPointSetterCompatibleVirtualDispatch": "0xaeee90",
+  "selectedPointSetterExactTypedImplementationProven": false,
+  "controlledRuntimeValueObserved": false,
+  "dirtTriggeredTaskDispatchProven": false,
+  "actualSecondPhysicalCleaningPassProven": false,
+  "fullOfflineTestsWithOriginalElf": {
+    "run": 201,
+    "passed": 201,
+    "skipped": 0
+  },
+  "cleanZipTestsWithoutPrivateElf": {
+    "run": 159,
+    "passed": 101,
+    "skipped": 58
+  },
+  "offlineKit": "X40-R2416-v191-sanitized-dynamic-area-selection-guard.zip",
+  "offlineKitSha256": "e9aa20bfe12a03c933faf54fdc4fe4bd426ce81306a8afa0b579ad0c10bafdf2",
+  "privateSourceBinaryIncluded": false,
+  "robotAccessPerformed": false,
+  "safetyBaseline": "v74, SmartHost=0, SmartAutoMop=-1, SmartAutoWash=0, writeGateOpen=false",
+  "evidenceLimit": "Bounded compiled instruction and key-reference audit of one behavior-tree node in one ELF; no runtime scheduler, message causation or physical reclean proof."
+}
