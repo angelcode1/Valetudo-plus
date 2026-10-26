@@ -23,10 +23,19 @@
   "AI_stain_new_cleaning_task_verified": false,
   "physical_extra_clean_or_rewash_verified": false,
   "original_elf_pins_verified": 5,
-  "native_instruction_anchors_verified": 45,
+  "native_instruction_anchors_verified": 54,
   "prior_payloads_verified": 18,
   "delta_redacted_payloads_verified": 7,
   "original_unredacted_json_hash_reproducible_from_redacted_payloads": false,
   "all_original_firmware_and_private_config_excluded": true,
-  "kit_sha256": "a319e7fb5c038c532e19e6f0e81fe174d1d1fa3606d634edd15bab6ffaa945c1"
+  "kit_sha256": "13283ef8d25381c2b37ca5aa368d5ae42ec7d56f23f2c21663534bec5d32bc06",
+  "native_route_constructor_call_verified": true,
+  "native_constructor_call_site": "0x3670b0",
+  "native_constructor_loader_plt": "0x275bf0",
+  "native_constructor_adjacent_config_loaders": [
+    "LoadReplenishConfig",
+    "LoadAutoWaterConfig",
+    "LoadTurbidityCheckConfig",
+    "LoadMopWaterPumpConfig"
+  ]
 }
