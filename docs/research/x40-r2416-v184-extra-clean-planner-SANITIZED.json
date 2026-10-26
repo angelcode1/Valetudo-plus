@@ -1,0 +1,77 @@
+{
+  "schema": "X40_R2416_V184_EXTRA_CLEAN_PLANNER_BOUNDARY_V1",
+  "originalRouteElfSha256": "fcf706dfa3f4777415d86e95162bf1bbbe3453dcff3126da70946f46c851988e",
+  "sources": [
+    "user-provided original R2416 liblethe_route_nodes.so",
+    "prior v182-v183 verified stain handling native code"
+  ],
+  "literalBoundedAdjacentAdrpAddCounts": {
+    "is_extra_clean_area": 16,
+    "need_extra_clean": 11,
+    "extra_clean_rooms": 4
+  },
+  "evidence": [
+    {
+      "function": "types::ResetPlanningCleanTaskBB",
+      "site": "0x5d2ec4",
+      "observation": "direct BL to EndExtraCleanArea PLT"
+    },
+    {
+      "function": "subregion::SetExtraCleanArea::EndExtraCleanArea",
+      "sites": [
+        "0xad4940",
+        "0xad4964",
+        "0xad4970",
+        "0xad4978"
+      ],
+      "observation": "read is_extra_clean_area as bool; check both presence and true value"
+    },
+    {
+      "function": "subregion::SetExtraCleanArea::EndExtraCleanArea",
+      "sites": [
+        "0xad4994",
+        "0xad49a8",
+        "0xad49b8",
+        "0xad49bc"
+      ],
+      "observation": "conditional need_extra_clean=true through Blackboard set<bool>"
+    },
+    {
+      "function": "subregion::SetExtraCleanArea::tick",
+      "sites": [
+        "0xad8ca4",
+        "0xad8cc4",
+        "0xad8cc8",
+        "0xad9d6c",
+        "0xad9d94",
+        "0xad9d98"
+      ],
+      "observation": "need_extra_clean=false in two compiled branches"
+    },
+    {
+      "function": "switch_mode::CleanedAreaCheckTool::GetExtraCleanType",
+      "sites": [
+        "0xb75e60",
+        "0xb76018",
+        "0xb76058"
+      ],
+      "observation": "reads extra-clean state and extra_clean_rooms vector"
+    }
+  ],
+  "tests": {
+    "withOriginalPrivateRouteELF": {
+      "passed": 29,
+      "skipped": 0
+    },
+    "withoutPrivateELF": {
+      "passed": 16,
+      "skipped": 13
+    }
+  },
+  "archiveSha256": "a2b681998d2d057ced058616b366a8f34c396303e9179a6554c7de8acb39643f",
+  "preciseKeyWriterIntoPlannerFromStainIdentified": false,
+  "runtimeSecondPassCommandProven": false,
+  "v165SpatialRevisitAttributedToStain": false,
+  "noRobotAccess": true,
+  "firmwareBinariesIncluded": false
+}
