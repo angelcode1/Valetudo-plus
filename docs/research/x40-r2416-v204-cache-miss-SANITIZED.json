@@ -1,0 +1,30 @@
+{
+  "schema": "X40_R2416_V204_CACHE_MISS_VS_NULL_ENTRY_STATIC_V1",
+  "original_vendor_ELF_SHA256_pins_checked": 5,
+  "original_payload_hashes_verified": {
+    "first_collection": 18,
+    "delta_collection": 7
+  },
+  "inherited_v197_to_v203_regressions_passed": true,
+  "new_instruction_word_anchors_verified": 50,
+  "new_branch_call_targets_verified": 16,
+  "new_focused_tests_passed": 10,
+  "cache_lookup_miss_clears_postbuild_insert_flag": true,
+  "empty_cache_entry_can_set_postbuild_insert_flag": true,
+  "zero_flag_causes_postbuild_cache_store_skip": true,
+  "nonnull_flag_permits_cache_pointer_store": true,
+  "separate_initialization_writes_null_to_new_key_entry": true,
+  "new_entry_null_write_is_proof_of_owner_destroy_invalidation": false,
+  "cache_hit_attaches_root_and_null_owner_tree_pointer": true,
+  "original_owner_tree_destructor_can_delete_tree": true,
+  "live_StationWash_cache_path_observed": false,
+  "live_route_to_station_Blackboard_identity_verified": false,
+  "live_dangling_pointer_or_use_after_free_observed": false,
+  "unconditional_cache_invalidation_absence_proven": false,
+  "AI_stain_new_task_or_physical_extra_clean_proven": false,
+  "no_device_or_firmware_interaction": true,
+  "private_original_ELF_or_config_in_public_repo": false,
+  "source_only_package_files_including_manifest": 24,
+  "source_only_package_file_sha256_checks": 23,
+  "package_sha256": "ee9718094c87e4b8a46c3074acc898a3e49125f7b94d5980a85cd092112d0b90"
+}
