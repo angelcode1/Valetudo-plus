@@ -1,0 +1,72 @@
+{
+  "schema": "X40_R2416_V189_EXTRA_CLEAN_END_COMPLETION_BOUNDARY_V1",
+  "privateRouteELFSha256": "fcf706dfa3f4777415d86e95162bf1bbbe3453dcff3126da70946f46c851988e",
+  "endLiteral": "end",
+  "endLiteralVA": "0xfe3f88",
+  "endComparison": "0xad9fc0",
+  "nonmatchGuard": "0xad9fc4",
+  "nonmatchBranchTarget": "0xad837c",
+  "endCallSite": "0xad9fd0",
+  "endCallPLT": "0x4435b0",
+  "endFlagReadSite": "0xad4964",
+  "endConditionalFlagSetSite": "0xad49bc",
+  "endCallers": [
+    "0x5d2ec4",
+    "0xad9fd0"
+  ],
+  "completionKey": "auto_mode_break_by_high_level_event_flag",
+  "completionKeyVA": "0x100c5f0",
+  "completionKeyReference": "0xb606e0",
+  "completionResultInversionSites": [
+    "0xb607f8",
+    "0xb60890"
+  ],
+  "completionDirectCallers": [
+    {
+      "site": "0xb6c60c",
+      "function": "GetAreaEdgesAndDoAnalyse"
+    },
+    {
+      "site": "0xb81e30",
+      "function": "GetUnreachableArea"
+    },
+    {
+      "site": "0xb86700",
+      "function": "UpdateReuseLdsHeightMap"
+    }
+  ],
+  "updateCleanAreasVectorCallers": [
+    {
+      "site": "0xab2770",
+      "function": "RemoveNoCleanFromList::RemoveNoCleanAreaFromList"
+    }
+  ],
+  "updateCleanAreasNoArgsDirectCallerCount": 0,
+  "totalDirectBoundedCallerSites": 6,
+  "PLTGOTMapping": {
+    "EndExtraCleanArea": [
+      "0x4435b0",
+      "0x1241358"
+    ],
+    "IsCleanTaskComplete": [
+      "0x4468b0",
+      "0x1242cd8"
+    ],
+    "UpdateCleanAreasVector": [
+      "0x44e910",
+      "0x1246d08"
+    ],
+    "UpdateCleanAreasNoArgs": [
+      "0x448350",
+      "0x1243a28"
+    ]
+  },
+  "verifiedOriginalELFUnitTests": 165,
+  "cleanZIPUnitTestsPassed": 83,
+  "cleanZIPUnitTestsSkipped": 40,
+  "zipSha256": "5e458ed0eb62ccf42dd551687178be55295e6eeadfa85c075741f06bcb5e4269",
+  "nativeAutomaticRecleanTaskProven": false,
+  "physicalExtraFloorPassProven": false,
+  "noDeviceAccess": true,
+  "noProprietaryELFCommitted": true
+}
