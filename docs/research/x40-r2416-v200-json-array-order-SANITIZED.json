@@ -1,0 +1,39 @@
+{
+  "schema": "X40_R2416_V200_JSON_ARRAY_ORDER_TO_NATIVE_A_SERIES_STATIC_V1",
+  "historical_v195_native_RobotNode_correction_preserved": true,
+  "all_v197_through_v199_regressions_passed": true,
+  "first_collector_payload_sha_verified": 18,
+  "second_collector_payload_sha_verified": 7,
+  "full_original_native_ELF_pins_verified": 5,
+  "v200_host_instruction_word_anchors": 143,
+  "v200_decoded_native_edges": 18,
+  "v200_focused_tests_passed": 10,
+  "saved_JSON_A_array_ids": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "saved_JSON_A_series_record_counts": [
+    63,
+    35,
+    60,
+    60
+  ],
+  "native_A_array_iterates_in_input_order": true,
+  "native_A_inner_vectors_appended_in_input_order": true,
+  "native_A_id_lookup_or_sort_detected_in_checked_loop": false,
+  "native_B_GetDouble_to_float32_verified": true,
+  "native_JSON_array_position_matches_native_outer_A_position_conditionally": true,
+  "station_info_sub_bounds_checked_A_selection_v199_verified": true,
+  "live_subtype_value_measured": false,
+  "live_config_parse_success_verified": false,
+  "live_loader_station_blackboard_identity_verified": false,
+  "live_A3_selected_verified": false,
+  "AI_stain_caused_new_floor_task_verified": false,
+  "extra_physical_floor_clean_verified": false,
+  "extra_physical_dock_wash_verified": false,
+  "robot_access_performed": false,
+  "original_vendor_ELF_or_private_config_redistributed": false,
+  "offline_kit_sha256": "959d8d77932e9632a1dc7c9002b57ae7809ba9fab904efaa0be25a031aa55b37"
+}
