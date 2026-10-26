@@ -1,0 +1,40 @@
+{
+  "schema": "X40_R2416_V195_CORRIGENDUM_V1",
+  "originalHostSha256": "b34eb5c71bccd90342f34d64a1871197455d69d9511cfa709ee027dd44b554e0",
+  "originalRouteSha256": "fcf706dfa3f4777415d86e95162bf1bbbe3453dcff3126da70946f46c851988e",
+  "independentlyReplayedHostSites": [
+    "0x355210",
+    "0x355228",
+    "0x355264",
+    "0x3552a0",
+    "0x3552b0",
+    "0x3552c0",
+    "0x3552c8",
+    "0x3552d8",
+    "0x355058"
+  ],
+  "historicallyCollectedEffectiveSelector": "RobotNode",
+  "historicalTreeLibraryPath": "/tmp/lib/tree_lib//",
+  "historicallyVerifiedNativeTreeLibrarySha256": "9d7eda3325b8278fc8caad66f7cb3f6b8c06d4ddd2821e414d57e6b7546e6c99",
+  "historicallyVerifiedBuildRobotNodeEntry": "0x312c6c",
+  "historicallyVerifiedGeneratedRobotNodeBuilder": "0x30d8c0",
+  "historicalSourceFiles": [
+    "docs/research/dreame-x40-r2416-v27-runtime-tree-factory-2026-10-22.md",
+    "docs/research/dreame-x40-r2416-v29-robotnode-stationwash-parameters-2026-10-22.md",
+    "docs/research/dreame-x40-r2416-v44-configured-robotnode-wrapper-2026-10-23.md",
+    "docs/research/dreame-x40-r2416-v46-odometry-root-tick-2026-10-23.md"
+  ],
+  "rawYamlReplayedInV195": false,
+  "nativeRobotNodeBuilderELFReplayedInV195": false,
+  "v194FallbackVerifiedButNotEffectiveRuntimePath": true,
+  "XMLRequiredForGeneratedNativeRobotNodeReconstruction": false,
+  "nativeAIStainToSecondCleanTaskDispatchProven": false,
+  "originalPrivateELFUnitTestsPassed": 277,
+  "cleanZipTestsPassed": 128,
+  "cleanZipTestsSkipped": 107,
+  "verifiedFileChecksums": 42,
+  "offlineKitName": "X40-R2416-v195-sanitized-native-robotnode-reconciliation.zip",
+  "offlineKitSha256": "c0aea5da94545c2fa2e43406a5617fd28a4dbd63f69fa3c749c8d2874563abbe",
+  "masterModified": false,
+  "robotAccessPerformed": false
+}

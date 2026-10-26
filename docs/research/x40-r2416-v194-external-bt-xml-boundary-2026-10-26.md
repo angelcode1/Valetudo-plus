@@ -1,3 +1,5 @@
+> **CORRECTION (v195, 26 October 2026):** This report accurately verifies *compiled fallback* XML path and plugin mechanisms, but its next-step suggestion to obtain `RobotNode.xml` overlooked earlier v27/v44 findings. The previously collected R2416 `setting.yaml` actually selected native factory ID `RobotNode`, and `liblethe_tree.so` contains a registered compiled `RobotNode` builder. The external XML is **not a prerequisite** for reconstructing that generated tree. See [`v195 native RobotNode corrigendum`](x40-r2416-v195-native-robotnode-corrigendum-2026-10-26.md) before applying the collection guidance below. The 2026-10-26 v194 test evidence remains valid in its bounded scope.
+
 # X40 R2416 v194 — Verified external behavior-tree XML configuration boundary
 
 **26 October 2026 — offline native analysis only.** Private, user-provided original R2416 source ELFs: `node_lethe.so` SHA-256 `b34eb5c71bccd90342f34d64a1871197455d69d9511cfa709ee027dd44b554e0`; `liblethe_route_nodes.so` SHA-256 `fcf706dfa3f4777415d86e95162bf1bbbe3453dcff3126da70946f46c851988e`. Neither original ELF, robot files, nor video screenshots are committed or included in the companion ZIP.
