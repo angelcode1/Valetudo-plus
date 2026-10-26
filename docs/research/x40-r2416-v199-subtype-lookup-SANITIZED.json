@@ -1,0 +1,50 @@
+{
+  "schema": "X40_R2416_V199_NATIVE_LOOKUP_DATA_LAYOUT_V1",
+  "provenance": "Owner-private R2416 original ELF and redacted collector ZIPs; offline verification",
+  "native_elf_sha256_pins_verified": 5,
+  "collected_saved_payloads_sha256_verified": {
+    "first": 18,
+    "delta": 7
+  },
+  "prior_v197_v198_full_regressions_passed": true,
+  "new_aarch64_instruction_anchors": 152,
+  "new_decoded_control_flow_edges": 17,
+  "native_table_pair_size_bytes": 8,
+  "native_find_a": {
+    "entry_va": "0x24df50",
+    "record": "int32,int32",
+    "start_offset": "0x5f8",
+    "end_offset": "0x600"
+  },
+  "native_find_b": {
+    "entry_va": "0x24e0f0",
+    "record": "int32,float32",
+    "start_offset": "0x610",
+    "end_offset": "0x618"
+  },
+  "native_find_c": {
+    "entry_va": "0x24e020",
+    "record": "int32,int32",
+    "start_offset": "0x628",
+    "end_offset": "0x630"
+  },
+  "nested_outer_vector_offsets": [
+    "0x5b0",
+    "0x5c8",
+    "0x5e0"
+  ],
+  "station_info_sub_uint16_read_va": "0x250850",
+  "compiled_loaded_A_subtype_bounds_check_va": "0x251fbc",
+  "compiled_out_of_range_branch_va": "0x251fc0",
+  "compiled_A_inner_vector_selection_va": "0x251fec",
+  "compiled_A_inner_vector_destination_offset": "0x5f8",
+  "compiled_A_outer_element_stride_bytes": 24,
+  "compiled_subtype_to_outer_A_series_index_verified": true,
+  "live_subtype_value_verified": false,
+  "JSON_A_record_to_native_vector_index_mapping_verified": false,
+  "runtime_producer_consumer_blackboard_instance_verified": false,
+  "AI_stain_to_new_cleaning_task_start_verified": false,
+  "physical_extra_floor_clean_or_dock_rewash_verified": false,
+  "owner_robot_access_or_writes_performed": false,
+  "packaged_kit_sha256": "f441a20707261428a7796023edf787b09ff6482e32277f460225484c22437bcb"
+}
