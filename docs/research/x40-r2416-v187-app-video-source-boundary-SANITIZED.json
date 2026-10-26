@@ -1,0 +1,28 @@
+{
+  "schema": "X40_R2416_V187_APP_VIDEO_SOURCE_BOUNDARY_V1",
+  "userProvidedVideo": "https://www.youtube.com/watch?v=cWB9SBORkQg",
+  "videoFramesAnalyzed": false,
+  "videoTranscriptRetrieved": false,
+  "videoSpecificUIEventsOrTimestampsVerified": false,
+  "relatedIndependentExternalSources": [
+    {
+      "url": "https://support.dreametech.com/hc/en-us/articles/11495198440847-What-is-the-difference-between-daily-mode-and-ultimate-mode-in-CleanGenius",
+      "scope": "Dreame documents Daily vs Ultimate secondary cleaning, deep paths and rewash"
+    },
+    {
+      "url": "https://dreameservice.zendesk.com/hc/en-us/articles/11640725021199-Setting-Up-a-Scheduled-Cleanup-A-Simple-Guide-with-X40-Ultra-as-example",
+      "scope": "X40 Ultra example distinguishes CleanGenius All and Room ordering"
+    },
+    {
+      "url": "https://dreametech.zendesk.com/hc/en-us/articles/55534904939673-Robot-Vacuum-and-Mop-Poor-Cleaning-Performance",
+      "scope": "Deep cleaning uses denser/slower paths; custom wash frequency separate"
+    },
+    {
+      "url": "https://forum.dreametech.com/forum.php?mod=viewthread&tid=1882",
+      "scope": "Dreame support mentions auto-recleaning user toggle for Matrix10, not proof of R2416 app"
+    }
+  ],
+  "userR2416AppUIInspected": false,
+  "uiControlToMiotPropertyMapProven": false,
+  "differentModelFeaturesAreNotAutomaticallyR2416Features": true
+}
