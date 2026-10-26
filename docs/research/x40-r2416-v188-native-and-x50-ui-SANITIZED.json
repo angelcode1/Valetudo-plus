@@ -1,0 +1,99 @@
+{
+  "schema": "X40_R2416_V188_EXTRA_CLEAN_TYPE_GEOMETRY_CONSUMERS_V1",
+  "module": "liblethe_route_nodes.so",
+  "originalRouteELFSha256": "fcf706dfa3f4777415d86e95162bf1bbbe3453dcff3126da70946f46c851988e",
+  "nativeSymbol": "switch_mode::CleanedAreaCheckTool::GetExtraCleanType(std::shared_ptr<BT::Blackboard> const&)",
+  "implementationVA": "0xb75e00",
+  "targetPLTVA": "0x4510c0",
+  "directPLTCallsInAvailableELF": 5,
+  "callers": [
+    {
+      "function": "BlockGridsAnalyzer::GetSegmentMap",
+      "call": "0xb5caf8",
+      "preserveReturn": "w20 at 0xb5cb00"
+    },
+    {
+      "function": "CleanedAreaCheckTool::FloodFillGetCleanedEdge",
+      "call": "0xb6720c",
+      "preserveReturn": "w26 at 0xb67210"
+    },
+    {
+      "function": "CleanedAreaCheckTool::GetSeed",
+      "call": "0xb7776c",
+      "preserveReturn": "w23 at 0xb77774"
+    },
+    {
+      "function": "CleanedAreaCheckTool::CheckAreaUnreachable",
+      "call": "0xb7fda8",
+      "preserveReturn": "w22 at 0xb7fdb0"
+    },
+    {
+      "function": "CleanedAreaCheckTool::GetUnreachableArea",
+      "call": "0xb812f0",
+      "preserveReturn": "w19 at 0xb812f4"
+    }
+  ],
+  "countIncludesIndirectCalls": false,
+  "allDirectCallersAreaGeometry": true,
+  "taskSchedulerCalledFromTheseVerified": false,
+  "autonomousStainTriggeredSecondPassProven": false,
+  "userVideoScreenshotCount": 12,
+  "videoUrl": "https://www.youtube.com/watch?v=cWB9SBORkQg",
+  "modelShownInScreenshots": "X50 Ultra",
+  "notDirectR2416AppEvidence": true,
+  "topLevelTabs": [
+    "CleanGenius",
+    "Custom"
+  ],
+  "cleanGenius": {
+    "visibleText": [
+      "Free your hands",
+      "Intelligently Recommend Cleaning Parameters",
+      "Re-clean Dirty Areas (Optional)"
+    ],
+    "cleaningModes": [
+      "Vac & Mop",
+      "Mop after Vac"
+    ],
+    "deepCleaningSeparateToggle": "shown off",
+    "dedicatedDirtyAreaRecleanToggleVisible": false,
+    "dailyUltimateTabsVisible": false
+  },
+  "custom": {
+    "cleaningModes": [
+      "Vacuum",
+      "Mop",
+      "Vac & Mop",
+      "Mop after Vac",
+      "further partially cropped mode"
+    ],
+    "suction": [
+      "Quiet",
+      "Standard",
+      "Intense",
+      "Max"
+    ],
+    "mopWetnessValue16": true,
+    "mopWashingFrequencyByArea15m2": true,
+    "routeModes": [
+      "Quick",
+      "Standard",
+      "Intensive",
+      "Deep"
+    ],
+    "roomCustomizationVisible": true
+  },
+  "modelControlMappingsToR2416Proven": false,
+  "noProprietaryBinariesOrOriginalScreenshotsCommitted": true,
+  "withPrivateELFTests": {
+    "run": 145,
+    "passed": 145
+  },
+  "withoutPrivateELFTests": {
+    "run": 103,
+    "passed": 73,
+    "skipped": 30
+  },
+  "privateZipSHA256": "39198cb2487bd5f0a01d9cf22eeee9c21dc302deee6513ffa499e01daad36e5c",
+  "robotAccessPerformed": false
+}
