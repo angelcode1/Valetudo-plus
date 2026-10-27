@@ -1,0 +1,30 @@
+{
+  "schema": "X40_R2416_V217_STAIN_GENERATED_NODES_CLEANLIST_HANDOFF_STATIC_V1",
+  "full_v197_v216_native_and_private_evidence_regression_passed": true,
+  "v217_original_exact_native_words": 53,
+  "v217_decoded_control_flow_edges": 21,
+  "generated_AiStainCheck_nodes_in_tree_plugin": 1,
+  "generated_AiStainCheck_owner": "buildNavigateTree",
+  "generated_SetExtraCleanArea_nodes_in_tree_plugin": 2,
+  "generated_SetExtraCleanArea_owners": [
+    "buildCleanSelectedAreas",
+    "buildFindNearbyMovablePoint"
+  ],
+  "same_generated_builder_contains_AiStainCheck_and_SetExtraCleanArea": false,
+  "bounded_adjacent_same_reg_stain_area_for_logic_key_references": 11,
+  "bounded_adjacent_same_reg_Areas_Clean_List_key_references": 62,
+  "compiled_MapSensor_stain_area_for_logic_set_compatible_virtual_dispatch": true,
+  "compiled_AiStainCheck_stain_area_read_and_guard": true,
+  "compiled_SetExtraCleanArea_guarded_CleanList_append_and_typed_Blackboard_set": true,
+  "compiled_Cleanbot_preprocess_Areas_Clean_List_read": true,
+  "compiled_SendCLeanListToCleanbot_typed_get_and_empty_guard": true,
+  "shared_runtime_Blackboard_and_task_order_verified": false,
+  "actual_new_cleaning_task_dispatch_verified": false,
+  "physical_extra_floor_clean_or_dock_rewash_verified": false,
+  "focused_v217_tests_passed": 13,
+  "source_only_zip_entries_including_manifest": 73,
+  "source_only_zip_internal_sha256_checks": 72,
+  "source_only_zip_sha256": "6ed558fc279fa41b148f6c52b2ec8197685fb39f619543dc43524a0fef399704",
+  "no_robot_commands_or_state_changes": true,
+  "no_private_binary_or_configuration_published": true
+}
