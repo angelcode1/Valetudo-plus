@@ -1,0 +1,42 @@
+{
+  "schema": "X40_R2416_V224_MOP_DIRTY_BLACKBOARD_CONSUMER_MCU_BOUNDARY_STATIC_V1",
+  "original_host_sha256": "b34eb5c71bccd90342f34d64a1871197455d69d9511cfa709ee027dd44b554e0",
+  "ai_code15_typed_Blackboard_bool_true_set_compiled": true,
+  "exact_key_literal": "ai_set_mop_is_dirty_data",
+  "exact_key_literal_va": "0xa13488",
+  "same_register_adjacent_ADRP_ADD_key_references": [
+    "0x5dcfec",
+    "0x5dd024",
+    "0x7b8b10"
+  ],
+  "bounded_key_reference_count": 3,
+  "named_consumer": "AvaNodeRoute::SendMopStainCheckCmd",
+  "named_consumer_guarded_virtual_lookup_va": "0x7b8b38",
+  "named_consumer_negative_result_branch_va": "0x7b8b40",
+  "host_UpdateOutput_direct_consumer_call_site": "0x3db484",
+  "host_UpdateOutput_direct_SendAITurbidityValue_call_site": "0x3db47c",
+  "host_UpdateOutput_direct_SendAINewCmd_call_site": "0x3db598",
+  "direct_host_caller_count_for_each_selected_function": 1,
+  "consumer_direct_CtrlMcuCMD_publish_sites": [
+    "0x7b88d8",
+    "0x7b8c18"
+  ],
+  "consumer_direct_CtrlMcuCMD_publish_count": 2,
+  "consumer_typed_Blackboard_getBool_count": 1,
+  "consumer_typed_Blackboard_getInt_count": 2,
+  "consumer_typed_Blackboard_getString_count": 2,
+  "consumer_typed_Blackboard_setBool_count": 1,
+  "typed_lookups_proven_to_all_read_dirty_key": false,
+  "original_AArch64_instruction_words": 37,
+  "decoded_native_control_flow_edges": 11,
+  "full_v197_v223_original_private_evidence_replay_passed": true,
+  "v224_source_directory_unit_tests_passed": 11,
+  "source_only_zip_entries_including_manifest": 115,
+  "source_only_zip_internal_checksums_passed": 114,
+  "source_only_zip_sha256": "ec8bad8c1875a6ef21681b445dc0343cdfc0bc81968c7acdfca59901d54b2fa3",
+  "live_code15_to_CtrlMcuCMD_causal_dispatch_proven": false,
+  "MCU_payload_interpretation_or_dock_wash_proven": false,
+  "AI_stain_caused_new_floor_task_or_second_physical_pass_proven": false,
+  "new_robot_communication_or_modification": false,
+  "private_vendor_ELF_or_user_config_published": false
+}
