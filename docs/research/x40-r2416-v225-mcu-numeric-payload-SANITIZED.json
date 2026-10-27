@@ -1,0 +1,53 @@
+{
+  "schema": "X40_R2416_V225_MOP_DIRTY_MCU_NUMERIC_PAYLOAD_GUARDS_STATIC_V1",
+  "original_host_sha256": "b34eb5c71bccd90342f34d64a1871197455d69d9511cfa709ee027dd44b554e0",
+  "producer": "AvaNodeRoute::SendMopStainCheckCmd",
+  "CtrlMcuCMD_publish_calls": [
+    {
+      "site": "0x7b88d8",
+      "command_field_dec": 32,
+      "following_byte": 0,
+      "word_store_va": "0x7b88cc",
+      "byte_store_va": "0x7b88d0",
+      "readable_vendor_semantics": false
+    },
+    {
+      "site": "0x7b8c18",
+      "command_field_dec": 33,
+      "following_byte_on_direct_nonpositive_countdown_branch": 1,
+      "word_store_va": "0x7b8c10",
+      "byte_store_va": "0x7b8c14",
+      "readable_vendor_semantics": false
+    }
+  ],
+  "publisher_direct_calls_in_original_body": 2,
+  "guard_inputs_compiled": [
+    "AvaSensorsMsg",
+    "_RobotMode",
+    "WashStatus",
+    "other Boolean",
+    "ai_set_mop_is_dirty_data presence"
+  ],
+  "nonpositive_counter_guard_branch_va": "0x7b871c",
+  "nonpositive_counter_publisher_branch_va": "0x7b8bf4",
+  "retained_counter_initialized_to": 750,
+  "counter_time_unit_proven": false,
+  "command_33_direct_local_path_bypasses_dirty_key_lookup": true,
+  "command_32_direct_local_path_bypasses_dirty_key_lookup": true,
+  "all_prior_stored_state_influence_excluded": false,
+  "dirty_key_lookup_present_in_same_function": true,
+  "new_original_AArch64_instruction_anchors": 56,
+  "new_decoded_control_flow_edges": 17,
+  "full_v197_v224_private_original_evidence_regressions_passed": true,
+  "focused_v225_source_directory_tests_passed": 11,
+  "focused_v225_clean_extraction_tests_passed": 11,
+  "source_only_ZIP_internal_checksums_verified": 120,
+  "source_only_ZIP_entries_including_manifest": 121,
+  "source_only_ZIP_bytes": 258403,
+  "source_only_ZIP_sha256": "f10e4fe4ee31df60051b24f943313062dc7bcf71f7f6a4b43f6c0d5459d0b499",
+  "actual_MCU_command_published_live": false,
+  "OEM_command_semantics_or_MCU_ack_verified": false,
+  "physical_station_mop_rewash_or_additional_floor_pass_verified": false,
+  "robot_access_or_firmware_modified": false,
+  "original_vendor_ELF_or_private_device_payload_published": false
+}
