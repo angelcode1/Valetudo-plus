@@ -1,0 +1,49 @@
+{
+  "schema": "X40_R2416_V226_CTRL_MCU_TYPED_PUBLISHER_RESPONDER_CENSUS_STATIC_V1",
+  "original_host_sha256": "b34eb5c71bccd90342f34d64a1871197455d69d9511cfa709ee027dd44b554e0",
+  "original_host_direct_CtrlMcuCMD_publish_BL_calls": 32,
+  "distinct_original_ELF_named_publisher_owner_functions": 18,
+  "immediate_scan_window_bytes_before_each_publish": 144,
+  "bounded_movz_W_register_value_32_or_33_count": 2,
+  "bounded_move_immediate_sites": [
+    {
+      "site": "0x7b88c4",
+      "value": 32,
+      "publisher": "0x7b88d8",
+      "function": "SendMopStainCheckCmd"
+    },
+    {
+      "site": "0x7b8bfc",
+      "value": 33,
+      "publisher": "0x7b8c18",
+      "function": "SendMopStainCheckCmd"
+    }
+  ],
+  "McuSwitchRspProcess_typed_CtrlMcuCMD_subscribe_call": "0x3cd7c8",
+  "McuSwitchRspProcessSUB_native_va": "0x3d90f0",
+  "subscriber_callback_GOT_GLOB_DAT_va": "0xb787f8",
+  "response_subscriber_initial_selector_codes": [
+    24,
+    26,
+    27,
+    36
+  ],
+  "response_selector_has_explicit_32_or_33_case": false,
+  "new_native_AArch64_word_checks": 22,
+  "new_exact_direct_typed_publisher_call_sites": 32,
+  "new_GOT_callback_relocation_checks": 1,
+  "v226_focused_source_directory_tests_passed": 11,
+  "v197_v225_full_original_native_private_evidence_replay_passed_in_source_directory": true,
+  "v226_isolated_clean_extract_tests_passed": 10,
+  "clean_extract_full_historical_replay_timed_out": true,
+  "source_only_zip_size_bytes": 269347,
+  "source_only_zip_files_including_checksum_manifest": 127,
+  "source_only_zip_internal_SHA256_checks_passed": 126,
+  "source_only_zip_sha256": "d7f198651f42c9d7137c4d21eeaf03f992158eebfe00593d4083f1f55692e0c3",
+  "OEM_numeric_32_33_protocol_meanings_proven": false,
+  "indirect_callers_cross_ELF_other_handlers_excluded": false,
+  "live_MCU_publication_response_or_station_wash_observed": false,
+  "additional_AI_stain_floor_task_verified": false,
+  "robot_or_runtime_modified": false,
+  "private_ELF_or_owner_configuration_committed": false
+}
