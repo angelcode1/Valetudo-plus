@@ -1,0 +1,52 @@
+{
+  "schema": "X40_R2416_V218_CLEANLIST_CONSUMER_DIRECT_CALL_BOUNDARY_V1",
+  "original_library": "liblethe_route_nodes.so",
+  "original_library_sha256": "fcf706dfa3f4777415d86e95162bf1bbbe3453dcff3126da70946f46c851988e",
+  "bounded_direct_call_text_range": {
+    "start": "0x4526f0",
+    "end_exclusive": "0xf9c0b0"
+  },
+  "verified_direct_call_sites": {
+    "Cleanbot::preprocess": {
+      "caller": "Cleanbot::edge_cleaning",
+      "PLT": "0x449140",
+      "site": "0xdf4eac",
+      "count": 1
+    },
+    "Cleanbot::edge_cleaning": {
+      "caller": "FollowWallModeDeal::FollowWallModeDealFunc",
+      "PLT": "0x4416a0",
+      "site": "0xcd0cd8",
+      "count": 1
+    },
+    "SendCLeanListToCleanbot": {
+      "caller": "GridmapInit::SetReuseTrans",
+      "PLT": "0x43d950",
+      "site": "0x52f3c0",
+      "count": 1
+    },
+    "Cleanbot::post_process": {
+      "caller": "Cleanbot::edge_cleaning",
+      "PLT": "0x447ac0",
+      "site": "0xdf4f2c",
+      "count": 1
+    }
+  },
+  "guarded_Cleanbot_preprocess_Areas_Clean_List_lookup": true,
+  "compiled_type_info_check_and_area_deque_copy": true,
+  "typed_deque_copy_va": "0xdf2fd4",
+  "complete_indirect_virtual_cross_library_census": false,
+  "same_instance_live_Blackboard_verified": false,
+  "AiStainCheck_to_SetExtraCleanArea_runtime_order_verified": false,
+  "actual_AiStainMop_or_extra_clean_task_dispatch_verified": false,
+  "physical_additional_floor_clean_or_dock_rewash_observed": false,
+  "new_v218_original_words": 57,
+  "new_v218_decoded_edges": 21,
+  "v197_to_v217_full_native_evidence_regression_passed": true,
+  "v218_focused_tests_passed": 12,
+  "source_only_ZIP_entries_including_manifest": 79,
+  "source_only_ZIP_internal_sha256_files_checked": 78,
+  "source_only_ZIP_sha256": "2081da24c4ce84b9e05a7ee930b2721bdae3cd170d4d69d5ab98edad68b26f4c",
+  "new_robot_access_or_firmware_changes": false,
+  "private_native_ELF_configuration_or_logs_published": false
+}
