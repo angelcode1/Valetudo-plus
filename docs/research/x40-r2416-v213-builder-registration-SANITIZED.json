@@ -1,0 +1,33 @@
+{
+  "schema": "X40_R2416_V213_NATIVE_REGISTER_TREE_BUILDER_PAIR_CENSUS_V1",
+  "original_library": "liblethe_tree.so",
+  "original_library_sha256": "9d7eda3325b8278fc8caad66f7cb3f6b8c06d4ddd2821e414d57e6b7546e6c99",
+  "native_plugin_register_entry_va": "0x562b4c",
+  "native_plugin_registration_entry_length": 20268,
+  "native_registerTreeBuilder_PLT": "0x1c6930",
+  "native_registerTreeBuilder_import_jump_slot": "0x7b1928",
+  "direct_registerTreeBuilder_sites": 199,
+  "unique_registration_names": 199,
+  "names_matching_defined_exported_build_functions": 199,
+  "names_matching_actual_GLOB_DAT_callback_symbols": 199,
+  "native_AiStainMop_direct_registration_found": false,
+  "generated_reuse_AiStainMop_child_exists": true,
+  "known_registered_control_names": [
+    "RobotNode",
+    "ReuseTree",
+    "StationWash",
+    "CleanSelectedAreas"
+  ],
+  "alternative_runtime_registry_alias_or_other_plugin_excluded": false,
+  "AiStainMop_file_fallback_runtime_execution_observed": false,
+  "actual_AI_stain_started_new_task_observed": false,
+  "physical_extra_floor_clean_or_dock_rewash_observed": false,
+  "live_runtime_factory_map_measured": false,
+  "full_v197_v212_inherited_regressions_passed": true,
+  "focused_v213_unit_tests_passed": 9,
+  "source_only_kit_entries_including_manifest": 59,
+  "source_only_kit_internal_checksums_verified": 58,
+  "source_only_kit_sha256": "d1ca959ae0ba9be3d0ae2634b5b119a5fa9952ff8b55394463106290bf1d5e06",
+  "new_device_access_or_writes": false,
+  "private_native_ELF_or_raw_settings_published": false
+}
