@@ -1,0 +1,48 @@
+{
+  "schema": "X40_R2416_V221_PRODUCTION_AI_HANDLER_MODES_AND_ASYNC_QUEUE_STATIC_V1",
+  "original_host_sha256": "b34eb5c71bccd90342f34d64a1871197455d69d9511cfa709ee027dd44b554e0",
+  "two_production_AI_bodies": {
+    "ProcessAiCleanBot": [
+      "0x5cebc0",
+      "0x5cfa80"
+    ],
+    "ProcessAiStrategy": [
+      "0x5cfa80",
+      "0x5d0050"
+    ]
+  },
+  "exact_native_instruction_anchors": 52,
+  "decoded_direct_BL_edges": 12,
+  "decoded_conditional_branch_edges": 9,
+  "verified_key_motion_literals": [
+    "RobotAiSwitch",
+    "current_motion_type",
+    "Followwall",
+    "online_pqklfilename",
+    "ai_model_info"
+  ],
+  "ProcessAiStrategy_get_int_and_motion_guards": true,
+  "ProcessAiCleanBot_guarded_AI_model_and_filename_get": true,
+  "ProcessAiCleanBot_async_deque_push_notify_and_write_compiled": true,
+  "direct_bl_to_selected_debug_queue_and_AI_send_targets": 0,
+  "direct_bl_census_checked_targets": [
+    "0x27afd0",
+    "0x5d1fd0",
+    "0x5cd770",
+    "0x315ed0"
+  ],
+  "runtime_execution_and_Blackboard_identity_observed": false,
+  "indirect_virtual_callback_cross_library_scheduling_excluded": false,
+  "native_AI_stain_triggered_extra_clean_task_proven": false,
+  "physical_extra_floor_pass_or_dock_rewash_observed": false,
+  "v197_v220_full_private_firmware_evidence_replay_passed": true,
+  "v221_focused_tests_passed": 13,
+  "standalone_repo_checker_instruction_anchors": 24,
+  "standalone_repo_checker_literals": 5,
+  "release_zip_entries_including_manifest": 97,
+  "release_zip_internal_sha256_passed": 96,
+  "release_zip_bytes": 215356,
+  "release_zip_sha256": "28d2e493a30851e9baec88e4168576f646bfa530df7cdb78ff2406607d014636",
+  "robot_commands_issued_or_firmware_modified": false,
+  "private_binary_configuration_or_user_metadata_published": false
+}
