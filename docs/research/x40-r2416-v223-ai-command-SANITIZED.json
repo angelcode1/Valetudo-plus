@@ -1,0 +1,42 @@
+{
+  "schema": "X40_R2416_V223_AI_NEW_CMD_SUBSCRIBER_BOOLS_BOUNDARY_STATIC_V1",
+  "original_host_sha256": "b34eb5c71bccd90342f34d64a1871197455d69d9511cfa709ee027dd44b554e0",
+  "AiDetectResult_function": "0x5db3e0",
+  "AiDetectResultSUB_function": "0x5dc910",
+  "AiDetectResultSUB_GOT_relocation": "0xb7a300",
+  "AiDetectResult_GOT_relocation": "0xb7e840",
+  "AsyncDeque_MultAsyncSubscribe_ava_ai_new_cmd_BL": "0x5db478",
+  "received_command_bool_true_keys": {
+    "5": "start_offline",
+    "6": "start_material_detect",
+    "15": "ai_set_mop_is_dirty_data"
+  },
+  "typed_BB_bool_set_BLS": [
+    "0x5dcf84",
+    "0x5dcfd8",
+    "0x5dd010"
+  ],
+  "SendAINewCmd_direct_caller": "AvaNodeRoute::UpdateOutput",
+  "SendAINewCmd_direct_BL_caller": "0x3db598",
+  "SendAINewCmd_PLT": "0x275de0",
+  "bounded_host_direct_BL_count_to_SendAINewCmd": 1,
+  "original_instruction_anchors": 56,
+  "decoded_direct_BLS": 9,
+  "verified_GLOB_DAT_callback_relocations": 2,
+  "focused_tests_source_directory_passed": 12,
+  "focused_tests_clean_extraction_passed": 12,
+  "full_v197_to_v222_historical_native_private_evidence_replay_passed": true,
+  "standalone_repo_checker_anchors": 22,
+  "standalone_repo_checker_relocations": 2,
+  "source_only_zip_entries_including_manifest": 109,
+  "source_only_zip_SHA256SUMS_checks_passed": 108,
+  "source_only_zip_bytes": 236932,
+  "source_only_zip_sha256": "df5dc8a0e3f28aaa4e89f1db46ffd670dbc941da3cb656359f90281e1e5634c1",
+  "actual_AI_message_reception_on_live_robot_observed": false,
+  "runtime_mop_is_dirty_BB_read_or_station_wash_verified": false,
+  "outbound_SendAINewCmd_runtime_payload_observed": false,
+  "stain_triggered_production_task_dispatch_verified": false,
+  "physical_additional_floor_clean_or_dock_rewash_verified": false,
+  "robot_access_or_firmware_change": false,
+  "original_vendor_ELF_or_private_configuration_published": false
+}
