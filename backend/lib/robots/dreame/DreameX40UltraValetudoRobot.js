@@ -1,6 +1,7 @@
 const capabilities = require("./capabilities");
 const X40CleanGeniusResearch = require("./DreameX40CleanGeniusResearch");
 const X40CleanGeniusReadOnlyStatus = require("./DreameX40CleanGeniusReadOnlyStatus");
+const X40CachedIdleReadOnlyStatus = require("./DreameX40CachedIdleReadOnlyStatus");
 const X40DockWashReadOnlyStatus = require("./DreameX40DockWashReadOnlyStatus");
 const DreameGen2ValetudoRobot = require("./DreameGen2ValetudoRobot");
 const DreameGen4ValetudoRobot = require("./DreameGen4ValetudoRobot");
@@ -351,6 +352,7 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
         // Never causes additional MIOT requests or writes.
         this.x40CleanGeniusObservation = null;
         this.x40DockWashObservation = null;
+        this.x40CachedIdleObservation = null;
         this.allowExperimentalCleanGenius = X40CleanGeniusResearch.isEnabled();
         const experimentalQuirks = this.allowExperimentalCleanGenius ?
             X40CleanGeniusResearch.createQuirks(this, {
@@ -399,6 +401,7 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
             // for the existing Valetudo polling/error handling.
             this.x40CleanGeniusObservation = null;
             this.x40DockWashObservation = null;
+            this.x40CachedIdleObservation = null;
             throw err;
         }
     }
@@ -409,7 +412,8 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
                 nowMs: nowMs,
                 experimentalEnabled: this.allowExperimentalCleanGenius
             }),
-            dockWashActivity: X40DockWashReadOnlyStatus.buildStatus(this.x40DockWashObservation, nowMs)
+            dockWashActivity: X40DockWashReadOnlyStatus.buildStatus(this.x40DockWashObservation, nowMs),
+            cachedIdle: X40CachedIdleReadOnlyStatus.buildStatus(this.x40CachedIdleObservation, nowMs)
         };
     }
 
@@ -417,6 +421,13 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
         if (!Array.isArray(data)) {
             Logger.error("Received non-array state", data);
             return;
+        }
+
+        // Passive paired mode/task observation from the normal MIOT poll only.
+        // A partial/invalid pair fails closed without changing the setter guard.
+        const cachedIdle = X40CachedIdleReadOnlyStatus.observe(data);
+        if (cachedIdle !== undefined) {
+            this.x40CachedIdleObservation = cachedIdle;
         }
 
         // Cache only a known, sanitized allowlist from the EXISTING MIOT 4:50 poll.
