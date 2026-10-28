@@ -7,13 +7,13 @@ This is a controlled evaluation of the *existing native* `SmartHost` mode. It is
 
 - `DreameX40UltraValetudoRobot` exposes experimental X40-only quirks **only** when `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=1` is set before process startup. Without opt-in, generic Gen2 logic still disables positive `SmartHost` observations.
 - Manual `SmartHost` selection: off (0), routine (1), deep (2), using a *single-key* MIOT SIID 4 PIID 50 update. The same experimental interface exposes `SmartAutoWash` and `SmartAutoMop`, but **do not alter those keys in the initial trial**.
-- Setters require observed mode=0 AND taskStatus=0, verify the device presents a known current value, check idle status again after the MIOT read, serialize selector operations, and verify the requested value with a second MIOT read. No automatic retry or blind rollback.
+- Setters check cached idle mode=0 AND taskStatus=0, verify the device presents a known current value, **then make a fresh batched MIOT read of both MODE (4:1) and TASK_STATUS (4:7)** immediately before any write. Both responses must be successful and zero, with the expected property IDs. This avoids treating the Gen2 constructor's unobserved zero defaults as proof of idleness. Setters serialize selector operations and verify the requested value with a second MIOT 4:50 read. No automatic retry or blind rollback.
 - `SmartAutoMop=-1` remains an unsupported sentinel; the reclean control must reject it. The user's observed baseline is `SmartHost=0`, `SmartAutoMop=-1`, `SmartAutoWash=0`, `StainIdentify=1`.
 - Read-only X40 state and dock status APIs remain passive. A successful setting readback is **not** evidence that robot cleaning behavior changed.
 
 ## Test before any installation
 
-Run the actual project tests and build from the branch on the development machine, following the repo's workspace setup:
+Run the actual project tests and build from the branch on the development machine, following the repo's workspace setup. **The PR's Node.js CI is required before any candidate is called validated.** A passing push-branch CI run uploads an AArch64 candidate to the run's Artifacts section for this specific branch. Downloading it is not an installation or permission to use it on the robot:
 
 ```sh
 npm ci
@@ -41,7 +41,7 @@ If the current workspace does not support one of these commands, record the fail
 | Capability | Status |
 | --- | --- |
 | X40 opt-in quirks and Gen2 override | Code present |
-| Guarded single-key MIOT write and strict readback | Code + fake-helper tests |
+| Guarded single-key MIOT write, fresh idle status, and strict readback | Code + 14 focused fake-helper tests (not full CI) |
 | Candidate build and live MIOT behavior | Unverified |
 | Native CleanGenius effective mode | Unverified |
 | Scheduler task enqueue triggered by stain | Unproven |
