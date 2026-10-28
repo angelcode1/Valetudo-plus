@@ -9,7 +9,7 @@ const env = require("./env");
  * upstream Valetudo's normal DataPath-based behavior on all other installs.
  * Never quietly fall back to defaults when an explicit path is malformed.
  *
- * @param {NodeJS.ProcessEnv} vars
+ * @param {object} vars
  * @returns {string}
  */
 function resolveConfigLocation(vars = process.env) {
