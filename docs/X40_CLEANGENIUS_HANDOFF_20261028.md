@@ -2,6 +2,15 @@
 
 **Read this before doing any work on X40 CleanGenius.** This handoff supplements the binding [AGENTS.md](../AGENTS.md) anti-rabbit-hole instructions and [supervised enablement runbook](./X40_CLEANGENIUS_SUPERVISED_ENABLEMENT.md). It records actual owner-confirmed device results and code/build status. Do **not** restart v291-style binary reverse-engineering, run more firmware collector kits, overwrite the live Valetudo installation, or assume an artifact was installed because CI passed.
 
+## Latest validated code-only checkpoint — 2026-10-28
+
+- **Full CI PASS:** commit `942e3175a2ac26138cf90f6a852eb93444c6f9ff`; [Node.js CI run 40654460714](https://github.com/angelcode1/Valetudo-plus/actions/runs/40654460714) completed successfully, including TypeScript, lint, frontend/backend builds, backend tests and AArch64 upload. This supersedes the earlier failed polling-test fixture runs; the fixture-only correction was `ae5d4a0`.
+- **Code change:** X40's passive `pollHealth` diagnostic now uses a monotonically increasing invocation generation, preventing an older polling attempt finishing late from replacing the diagnostic state of a newer attempt. If a stale/older request fails, it cannot invalidate the newer request's cached observations through the new X40 catch handler. The previous status API and frontend poll lifecycle labels are preserved.
+- **Automated regression coverage:** older failure after newer success, and older success after newer failure; assertions ensure exactly the expected mock MIOT calls and no authorization from cached data. This is *diagnostic tracking*; it is not proof that all out-of-order MIOT responses or firmware state changes are serialized, nor does it authorize writes.
+- **Pull request:** [draft PR #2](https://github.com/angelcode1/Valetudo-plus/pull/2) renamed to **guarded CleanGenius opt-in and passive diagnostics (hardware acceptance pending)** and updated to supersede stale staging instructions. It remains draft/unmerged. No merge to `master` or upstream sync.
+- **Device state:** the second trial was already closed: `STATE=ORIGINAL ORIGINAL_PID=1752`, `WATCHDOG=NOT_RUNNING`. No robot action occurred during this code-only pass. No hardware acceptance of `SmartHost=1`, automatic reclean or mop rewash has occurred.
+- **Go/no-go:** PASS for code-only diagnostic CI, **PARK** hardware activation. Do not stage the CI artifact or initiate another device experiment merely because the software builds. Any future experiment needs a bounded, independently justified hardware acceptance decision; no new firmware collector loop or blind mode-guard relaxation.
+
 ## New code-only fix: report normal MIOT poll lifecycle — 2026-10-28
 
 The original X40 is **still confirmed restored** after the second trial (`STATE=ORIGINAL ORIGINAL_PID=1752`, `WATCHDOG=NOT_RUNNING`). No new robot operations were run for this change.
