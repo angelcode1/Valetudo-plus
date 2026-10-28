@@ -749,6 +749,16 @@ export interface X40DockWashActivity {
     }>;
 }
 
+export interface X40CachedIdleStatus {
+    source: "cached_miot_4_1_4_7";
+    state: "observed" | "stale" | "unavailable";
+    observedAt: string | null;
+    ageMs: number | null;
+    mode: number | null;
+    taskStatus: number | null;
+    cachedGuardMatch: boolean;
+}
+
 export interface X40CleanGeniusReadOnlyStatus {
     source: "miot_4_50";
     readOnly: true;
@@ -767,4 +777,5 @@ export interface X40CleanGeniusReadOnlyStatus {
     };
     nativeMopDirtiness: "unavailable_no_verified_local_status_interface";
     dockWashActivity: X40DockWashActivity;
+    cachedIdle: X40CachedIdleStatus;
 }
