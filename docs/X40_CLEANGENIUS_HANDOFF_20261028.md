@@ -4,12 +4,20 @@
 
 **Read this before doing any work on X40 CleanGenius.** This handoff supplements the binding [AGENTS.md](../AGENTS.md) anti-rabbit-hole instructions and [supervised enablement runbook](./X40_CLEANGENIUS_SUPERVISED_ENABLEMENT.md). It records actual owner-confirmed device results and code/build status. Do **not** restart v291-style binary reverse-engineering, run more firmware collector kits, overwrite the live Valetudo installation, or assume an artifact was installed because CI passed.
 
-## Latest validated code-only checkpoint — 2026-10-28
+## Current consolidated source and validation — 2026-10-28
+
+- **Source of truth:** `master` is the only active branch. The 90 deleted branch refs, captured commit hashes and 172 recovered research documents/tools are recorded in the [consolidation manifest](./BRANCH_CONSOLIDATION_20261028.md).
+- **Verified code:** final source HEAD `177aa2526a0144f584475862fe8f087012e68d75` passed [full Node.js CI run 40657258670](https://github.com/angelcode1/Valetudo-plus/actions/runs/40657258670). Four normal workflow files remain. Cleanup workflow and trigger are removed.
+- **PR #2:** closed as superseded. CI success does not imply a physical SmartHost acceptance.
+- **X40:** the second supervised trial was closed with original PID 1752 and watchdog stopped. No X40 connection or change occurred during repository consolidation.
+- **Decision:** guarded code and diagnostic build PASS; hardware CleanGenius acceptance PARKED. Do not revive deleted branches, weaken the idle guard or run another firmware collector.
+
+## Historical pre-consolidation code-only checkpoint — 2026-10-28
 
 - **Full CI PASS:** commit `942e3175a2ac26138cf90f6a852eb93444c6f9ff`; [Node.js CI run 40654460714](https://github.com/angelcode1/Valetudo-plus/actions/runs/40654460714) completed successfully, including TypeScript, lint, frontend/backend builds, backend tests and AArch64 upload. This supersedes the earlier failed polling-test fixture runs; the fixture-only correction was `ae5d4a0`.
 - **Code change:** X40's passive `pollHealth` diagnostic now uses a monotonically increasing invocation generation, preventing an older polling attempt finishing late from replacing the diagnostic state of a newer attempt. If a stale/older request fails, it cannot invalidate the newer request's cached observations through the new X40 catch handler. The previous status API and frontend poll lifecycle labels are preserved.
 - **Automated regression coverage:** older failure after newer success, and older success after newer failure; assertions ensure exactly the expected mock MIOT calls and no authorization from cached data. This is *diagnostic tracking*; it is not proof that all out-of-order MIOT responses or firmware state changes are serialized, nor does it authorize writes.
-- **Pull request:** [draft PR #2](https://github.com/angelcode1/Valetudo-plus/pull/2) renamed to **guarded CleanGenius opt-in and passive diagnostics (hardware acceptance pending)** and updated to supersede stale staging instructions. It remains draft/unmerged. No merge to `master` or upstream sync.
+- **Historical PR state:** [PR #2](https://github.com/angelcode1/Valetudo-plus/pull/2) was open when this testing snapshot was written. It has since been closed as superseded after its guarded source was consolidated into `master` (not via the PR merge button). No upstream sync or device deployment occurred.
 - **Device state:** the second trial was already closed: `STATE=ORIGINAL ORIGINAL_PID=1752`, `WATCHDOG=NOT_RUNNING`. No robot action occurred during this code-only pass. No hardware acceptance of `SmartHost=1`, automatic reclean or mop rewash has occurred.
 - **Go/no-go:** PASS for code-only diagnostic CI, **PARK** hardware activation. Do not stage the CI artifact or initiate another device experiment merely because the software builds. Any future experiment needs a bounded, independently justified hardware acceptance decision; no new firmware collector loop or blind mode-guard relaxation.
 
@@ -21,7 +29,7 @@ The original X40 is **still confirmed restored** after the second trial (`STATE=
 - Implemented source change (pinned functional commit `c2ca9b9554d2016bfec97050f0220f0ec07978ed`): X40's existing `pollState()` now tracks `not_started`, `in_progress`, `succeeded`, `failed`, and last-attempt timestamp **without any new MIOT calls**. On error it still invalidates all three X40 cached observations and rethrows the original error; neither error text nor credentials appear in the status API. Success records poll completion **not** proof of valid 4:50/4:1/4:7 observations.
 - API adds a passive `pollHealth` property to CleanGenius read-only status; TypeScript API types, OpenAPI and the CleanGenius Status UI reflect the same contract. UI explicitly warns if a poll succeeded but settings or cached mode/task readings remain absent, invalid or stale. It does not send a separate state poll or CleanGenius command.
 - Backend fake-helper regression tests cover never-polled, pending poll, completed-without-valid-readings, failed after success with snapshot invalidation, and privacy of error reporting. Safety-critical `SmartHost` cached/fresh-idle guards, one-key writes, opt-in default and advanced controls remain unchanged.
-- <https://github.com/angelcode1/Valetudo-plus/actions/runs/40651539474> is the corresponding full Node.js CI run; **verify its final conclusion before treating the new code as built**. No artifact from this update is authorized for hardware deployment. The draft PR remains unmerged and device acceptance is still blocked pending a separate, justified decision. No more automatic collector or supervised repetition is planned.
+- **Historical CI:** [run 40651539474](https://github.com/angelcode1/Valetudo-plus/actions/runs/40651539474) was an earlier failing test-fixture iteration, superseded by [passing run 40654460714](https://github.com/angelcode1/Valetudo-plus/actions/runs/40654460714) and the final consolidated [run 40657258670](https://github.com/angelcode1/Valetudo-plus/actions/runs/40657258670). CI is not hardware acceptance; no further collector cycle or unattended device experiment is planned.
 
 ## Read-only 20377ec hardware trial — recovered, diagnostic inconclusive (2026-10-28)
 

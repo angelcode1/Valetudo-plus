@@ -7,7 +7,7 @@
 - **172 research documents/tools recovered into HEAD**, plus legacy code preserved in reachable history; no force-push and no upstream reset.
 - **Workflows:** four retained on master (Node.js CI, CodeQL, Manual Build, Release). The four outdated housekeeping workflows were removed; the temporary prune workflow and trigger were also removed after completing the cleanup.
 - **PR #2:** closed as superseded, without indicating SmartHost acceptance or production rollout. The installed X40 Valetudo remains untouched.
-- **Workflow validation:** the consolidated source tree passed full Node.js CI [run 40656404002](https://github.com/angelcode1/Valetudo-plus/actions/runs/40656404002). Later metadata-only cleanup does not change runtime implementation; normal master CI still applies.
+- **Workflow validation:** the consolidated code passed [run 40656404002](https://github.com/angelcode1/Valetudo-plus/actions/runs/40656404002), and the final repository HEAD `177aa2526a0144f584475862fe8f087012e68d75` passed [full Node.js CI run 40657258670](https://github.com/angelcode1/Valetudo-plus/actions/runs/40657258670). Documentation-only amendments after that do not change runtime logic.
 
 ## Canonical branch
 `master` is the **only supported source-of-truth branch**. The original implementation basis is the passing guarded X40 feature commit `942e3175a2ac26138cf90f6a852eb93444c6f9ff` and its verified documentation state `661fd0184e728edc80d42d40e856c3e5f32e4dea`. The X40's installed `/data/valetudo` remains unchanged and was last owner-confirmed running as PID 1752 with watchdog not running.

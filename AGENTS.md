@@ -27,9 +27,9 @@ The owner has repeatedly asked for an actually working X40 CleanGenius feature a
 
 ## Known implementation status at 2026-10-28
 
-- The feature branch based on `research/x40-cleangenius-v229-sensor-retention-20261027` already contains three opt-in X40 quirks for `SmartHost`, `SmartAutoMop`, and `SmartAutoWash`. The normal Gen2 parser intentionally writes `SmartHost=0` unless the X40 opt-in bypass is active.
+- Canonical `master` contains the guarded X40 Quirks implementation. The initial experimental opt-in exposes only `SmartHost`; `SmartAutoMop` and `SmartAutoWash` require a separate advanced opt-in and are not authorized for an initial hardware trial. The Gen2 parser retains default-off `SmartHost=0` unless the X40 opt-in bypass is active.
 - `SmartHost=0`, `SmartAutoMop=-1`, `SmartAutoWash=0`, and `StainIdentify=1` were observed in a prior read-only X40 MIOT 4:50 response. The auto-reclean sentinel `-1` is unsupported by the existing setter; **never use this as evidence to turn it on**.
-- v290 establishes neither production scheduler enqueue, physical second floor pass, nor dock rewash. No X40 hardware activation was performed in this work.
+- Historic v290 static research establishes neither production scheduler enqueue, physical second floor pass, nor dock rewash. Two supervised sessions happened later: one blocked before a MIOT write, and one read-only/inconclusive; both returned to the original service. No accepted CleanGenius activation or automatic cleaning outcome was demonstrated.
 - The guarded **single-key SmartHost manual opt-in**, fresh idle check, verified readback, separate advanced-control gating, and explicit config-path compatibility are implemented and were CI-tested at `ccaa64d`. The experimental quirk appeared on a supervised robot, but no SmartHost activation was accepted. A later read-only `20377ec` trial produced unavailable cached observations; original recovery was confirmed. Subsequent source-only work must distinguish normal polling lifecycle from missing/invalid observations without weakening write safeguards, and receive CI verification before any deployment decision. Do not install older staged `99c984c` build.
 
 ## Acceptance criteria for next change

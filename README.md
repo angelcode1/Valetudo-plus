@@ -5,6 +5,8 @@
 
 > Fork of [Hypfer/Valetudo](github.com/Hypfer/Valetudo)
 
+> **Repository source of truth (28 October 2026):** `master` is the sole active branch. Start with the [consolidation and research index](docs/BRANCH_CONSOLIDATION_20261028.md), [X40 engineering handoff](docs/X40_CLEANGENIUS_HANDOFF_20261028.md), and [project safety instructions](AGENTS.md). Research is preserved in Git history and the sanitized archive. CleanGenius is experimental and disabled by default; CI success does not establish actual activation or cleaning behaviour.
+
 Valetudo+ is a fork of Valetudo adding extra functionality I desired that was not offered by the original project. These changes were made initially for the Dreame X40 Ultra. In theory this project should work on any robot Valetudo works on but most of the new functionality will require a supported robot (more details below).
 
 When writing the extra functionality offered by this project I did my best to:
@@ -181,14 +183,17 @@ $ git remote add upstream https://github.com/Hypfer/Valetudo.git
 $ git fetch upstream
 ```
 
-#### Update from upstream
+#### Review upstream changes before integration
 
-1. Pull from upstream branch
+Fetch and inspect upstream changes without altering the canonical branch:
+
+```sh
+git fetch upstream
+git log --oneline master..upstream/master
+git diff --stat master..upstream/master
 ```
-$ git fetch upstream
-$ git pull upstream master
-```
-2. Resolve any conflicts after the pull
+
+Do **not** directly `git pull upstream master` into this fork: unique X40, camera, map and dock changes require a separately reviewed, CI-tested integration with explicit approval. Keep `master` as the only persistent source of truth.
 
 ### Useful links
 
