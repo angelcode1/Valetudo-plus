@@ -77,7 +77,7 @@ test("string-typed cached status is reported but not accepted or written", async
     };
     await assert.rejects(
         () => research.createQuirks(robot)[0].setter("routine"),
-        /cached mode=0 \\(string\\), taskStatus=0 \\(string\\); no write attempted/
+        /cached mode=0 \(string\), taskStatus=0 \(string\); no write attempted/
     );
     assert.equal(calls, 0);
 });
