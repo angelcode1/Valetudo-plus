@@ -157,6 +157,30 @@ const CleanGeniusStatus = (): React.ReactElement => {
                                     </Box>
 
                                     <Divider sx={{my: 2}}/>
+                                    <Typography variant="subtitle1">Raw robot idle gate (read-only)</Typography>
+                                    <Typography variant="body2" color="textSecondary" sx={{mb: 1}}>
+                                        These numbers come from the existing cached MIOT 4:1 mode and 4:7 task poll,
+                                        not from the dock-status indicator. They do not authorize a mode change:
+                                        the experimental setter still requires a separate fresh idle check.
+                                    </Typography>
+                                    <Box sx={{p: 2, border: 1, borderColor: "divider", borderRadius: 1}}>
+                                        <Typography>Cached state: {status.cachedIdle.state}</Typography>
+                                        <Typography>
+                                            Raw mode: {status.cachedIdle.mode ?? "unavailable"}
+                                            {" · "}Task status: {status.cachedIdle.taskStatus ?? "unavailable"}
+                                        </Typography>
+                                        <Typography variant="body2" color="textSecondary">
+                                            Cached strict guard: {status.cachedIdle.cachedGuardMatch ? "matches 0/0" : "not confirmed"}
+                                            {status.cachedIdle.ageMs !== null ?
+                                                ` · ${Math.floor(status.cachedIdle.ageMs / 1000)} s old` : ""}
+                                        </Typography>
+                                    </Box>
+                                    <Alert severity="info" sx={{mt: 1}}>
+                                        Record these values once, then restore the original service.
+                                        Do not attempt to change CleanGenius during this diagnostic session.
+                                    </Alert>
+
+                                    <Divider sx={{my: 2}}/>
                                     <Typography variant="subtitle1">Mop-dock activity</Typography>
                                     <Typography variant="body2" color="textSecondary" sx={{mb: 1}}>
                                         From the existing mop-dock status poll, not from water turbidity or
