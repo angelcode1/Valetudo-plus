@@ -140,8 +140,8 @@ test("an older failed poll cannot erase newer completed health or cached reading
     robot.x40CachedIdleObservation = null;
     robot.parseAndUpdateState = () => {};
     let rejectOlder;
-    const olderResponse = new Promise((resolve, reject) => {
-        rejectOlder = reject;
+    const olderResponse = new Promise((...callbacks) => {
+        rejectOlder = callbacks[1];
     });
     let calls = 0;
     robot.miotHelper = {readProperties: async () => {
