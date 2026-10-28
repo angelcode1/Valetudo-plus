@@ -11,6 +11,7 @@ const PIID = MIOT.PROPERTIES.MISC_TUNABLES.PIID;
 // An experimental X40-specific controller, deliberately outside upstream's
 // generic capabilities. No setting is modified on boot or when this is disabled.
 const EXPERIMENTAL_ENV = "VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS";
+const ADVANCED_ENV = "VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_ADVANCED";
 
 const SETTINGS = Object.freeze([
     Object.freeze({
@@ -38,6 +39,12 @@ const SETTINGS = Object.freeze([
 
 function isEnabled(env = process.env) {
     return env[EXPERIMENTAL_ENV] === "1";
+}
+
+// Auto Reclean/Rewash controls are never offered in the initial trial.
+// They require a second deliberate opt-in and remain hardware-unverified.
+function isAdvancedEnabled(env = process.env) {
+    return isEnabled(env) && env[ADVANCED_ENV] === "1";
 }
 
 function isIdle(robot) {
@@ -87,12 +94,13 @@ async function requireFreshIdle(robot) {
     }
 }
 
-function createQuirks(robot) {
+function createQuirks(robot, options = {}) {
     // All three selectors share one MIOT 4:50 property; serialize UI writes.
     // This is a manual, supervised operation. It never runs at startup.
     let changeInProgress = false;
 
-    return SETTINGS.map(definition => {
+    const definitions = options.advanced === true ? SETTINGS : SETTINGS.slice(0, 1);
+    return definitions.map(definition => {
         return new Quirk({
             id: definition.id,
             title: definition.title,
@@ -172,6 +180,8 @@ function createQuirks(robot) {
 
 module.exports = {
     EXPERIMENTAL_ENV: EXPERIMENTAL_ENV,
+    ADVANCED_ENV: ADVANCED_ENV,
+    isAdvancedEnabled: isAdvancedEnabled,
     SETTINGS: SETTINGS,
     isEnabled: isEnabled,
     isIdle: isIdle,
