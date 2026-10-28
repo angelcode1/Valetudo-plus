@@ -2,6 +2,16 @@
 
 **Read this before doing any work on X40 CleanGenius.** This handoff supplements the binding [AGENTS.md](../AGENTS.md) anti-rabbit-hole instructions and [supervised enablement runbook](./X40_CLEANGENIUS_SUPERVISED_ENABLEMENT.md). It records actual owner-confirmed device results and code/build status. Do **not** restart v291-style binary reverse-engineering, run more firmware collector kits, overwrite the live Valetudo installation, or assume an artifact was installed because CI passed.
 
+## Read-only 20377ec hardware trial result — 2026-10-28, 17:25 Brisbane (restoration not yet confirmed)
+
+The owner reported the following exact checks for the already-validated `20377ec` candidate: local ZIP/executable SHA-256 PASS, separate staging under `/data/valetudo.cg-20377ec`, isolated config/data preparation PASS, readiness PASS on original PID 1788, detached watchdog smoke PASS, and an attended trial start reporting `TRIAL_STARTED=PASS CANDIDATE_PID=7402`, `WATCHDOG_ARMED=YES`. No MIOT write or CleanGenius mode change was reported for this session.
+
+The screenshot of the new CleanGenius Status page showed *all* MIOT observations unavailable: no valid 4:50 observation, no cached 4:1/4:7 mode or task status, and no confirmed idle guard. It therefore does **not** show a nonzero docked mode or a rejected firmware setting; there is insufficient evidence to select an idle-guard code change. A newly launched Valetudo may not yet have a successful state poll, or a poll may have failed; the screenshot alone does not distinguish these.
+
+**URGENT NEXT ACTION was issued:** restore the original service with the existing `09-x40-readonly-switch.sh --restore`, and verify `--status` reports `STATE=ORIGINAL` and `WATCHDOG=NOT_RUNNING`. **Restoration output for this second session has not yet been received. Do not claim recovery complete.** If the watchdog already rebooted, check original state. No more live setting changes/cleaning trials without a distinct go/no-go decision. Do not ask for another firmware collector, incremental static-analysis ZIP, or arbitrary new robot experiment.
+
+Code-only inspection of `20377ec`: the status endpoint is passive and builds the 4:50 and cached idle display from `parseAndUpdateState` successful polling. Missing both observations can result from no successful poll before the screenshot; the helper's cached idle decoder additionally requires paired successful numeric `mode=4:1` and `taskStatus=4:7` responses. Do not blindly weaken this requirement. Existing normal Valetudo logs may contain evidence of a poll failure, but do not expose private logs or request more hardware writes.
+
 ## Next supervised check — passive idle diagnostic, verified 2026-10-28
 
 **No device actions have occurred since the original Valetudo restoration reported `STATE=ORIGINAL ORIGINAL_PID=1788 WATCHDOG=NOT_RUNNING`.** The first trial was safely closed, and its `SmartHost` setter was blocked by the cached idle gate before any write. Do not repeat that setter attempt merely to obtain the error text.
