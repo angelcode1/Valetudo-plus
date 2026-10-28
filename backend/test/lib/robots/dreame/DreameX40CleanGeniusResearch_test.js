@@ -40,20 +40,115 @@ test("quirk rejects active cleaning without writing", async () => {
     assert.equal(writes, 0);
 });
 
-test("quirk uses a single-key update only when idle and supported", async () => {
+test("quirk writes one key only, verifies readback, and remains manual", async () => {
     const writes = [];
+    let smartHost = 0;
+    let reads = 0;
     const robot = {
         ephemeralState: {mode: 0, taskStatus: 0},
         miotHelper: {
-            readProperty: async () => JSON.stringify([{k: "SmartHost", v: 0}]),
+            readProperty: async () => {
+                reads++;
+                return JSON.stringify([{k: "SmartHost", v: smartHost}]);
+            },
             writeProperty: async (...args) => {
                 writes.push(args);
+                smartHost = JSON.parse(args[2]).v;
             }
         }
     };
     const [quirk] = research.createQuirks(robot);
     await quirk.setter("routine");
+    assert.equal(reads, 2);
+    assert.equal(smartHost, 1);
     assert.deepEqual(writes, [[4, 50, '{"k":"SmartHost","v":1}']]);
+
+    await quirk.setter("routine");
+    assert.equal(writes.length, 1, "already applied: no additional write");
+});
+
+test("MIOT accepted write without matching readback is an error; no retry", async () => {
+    let writes = 0;
+    const robot = {
+        ephemeralState: {mode: 0, taskStatus: 0},
+        miotHelper: {
+            readProperty: async () => JSON.stringify([{k: "SmartHost", v: 0}]),
+            writeProperty: async () => { writes++; }
+        }
+    };
+    await assert.rejects(
+        () => research.createQuirks(robot)[0].setter("routine"),
+        /readback mismatch/
+    );
+    assert.equal(writes, 1);
+});
+
+test("readback transport failure is surfaced without writing twice", async () => {
+    let reads = 0;
+    let writes = 0;
+    const robot = {
+        ephemeralState: {mode: 0, taskStatus: 0},
+        miotHelper: {
+            readProperty: async () => {
+                reads++;
+                if (reads === 2) { throw new Error("readback unavailable"); }
+                return JSON.stringify([{k: "SmartHost", v: 0}]);
+            },
+            writeProperty: async () => { writes++; }
+        }
+    };
+    await assert.rejects(
+        () => research.createQuirks(robot)[0].setter("routine"),
+        /readback unavailable/
+    );
+    assert.equal(writes, 1);
+});
+
+test("state changing during initial read blocks a write", async () => {
+    let writes = 0;
+    const robot = {
+        ephemeralState: {mode: 0, taskStatus: 0},
+        miotHelper: {
+            readProperty: async () => {
+                robot.ephemeralState.taskStatus = 1;
+                return JSON.stringify([{k: "SmartHost", v: 0}]);
+            },
+            writeProperty: async () => { writes++; }
+        }
+    };
+    await assert.rejects(
+        () => research.createQuirks(robot)[0].setter("deep"),
+        /no longer idle/
+    );
+    assert.equal(writes, 0);
+});
+
+test("concurrent selector writes are blocked across all three X40 quirks", async () => {
+    let releaseRead;
+    const gate = new Promise(resolve => { releaseRead = resolve; });
+    let writes = 0;
+    const robot = {
+        ephemeralState: {mode: 0, taskStatus: 0},
+        miotHelper: {
+            readProperty: async () => {
+                await gate;
+                return JSON.stringify([
+                    {k: "SmartHost", v: 0},
+                    {k: "SmartAutoWash", v: 0}
+                ]);
+            },
+            writeProperty: async () => { writes++; }
+        }
+    };
+    const quirks = research.createQuirks(robot);
+    const first = quirks[0].setter("routine");
+    await assert.rejects(
+        () => quirks[2].setter("all_modes"),
+        /in progress/
+    );
+    releaseRead();
+    await assert.rejects(first, /readback mismatch/);
+    assert.equal(writes, 1);
 });
 
 test("absent setting cannot cause a write", async () => {
