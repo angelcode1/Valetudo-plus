@@ -10,6 +10,7 @@ test("MIOT transport failure invalidates both X40 read-only snapshots", async ()
     const robot = Object.create(DreameX40UltraValetudoRobot.prototype);
     robot.statePropertiesToPoll = [];
     robot.x40CleanGeniusObservation = {observedAtMs: 1, fields: {}};
+    robot.x40CachedIdleObservation = {observedAtMs: 1, mode: 6, taskStatus: 0};
     robot.x40DockWashObservation = {observedAtMs: 1, value: {raw: 1, state: "cleaning"}, transitions: []};
     robot.miotHelper = {
         readProperties: async () => {
@@ -21,6 +22,8 @@ test("MIOT transport failure invalidates both X40 read-only snapshots", async ()
     const status = robot.getCleanGeniusReadOnlyStatus(1000);
 
     assert.equal(status.state, "unavailable");
+    assert.equal(status.cachedIdle.state, "unavailable");
+    assert.equal(status.cachedIdle.cachedGuardMatch, false);
     assert.equal(status.dockWashActivity.state, "unavailable");
     assert.deepEqual(status.dockWashActivity.transitions, []);
 });
@@ -30,6 +33,7 @@ test("successful MIOT poll does not discard read-only observations", async () =>
     robot.state = {attributes: []};
     robot.statePropertiesToPoll = [];
     robot.x40CleanGeniusObservation = {observedAtMs: 1000, fields: {}};
+    robot.x40CachedIdleObservation = {observedAtMs: 1000, mode: 6, taskStatus: 0};
     robot.x40DockWashObservation = {observedAtMs: 1000, value: {raw: 1, state: "cleaning"}, transitions: []};
     robot.miotHelper = {
         readProperties: async () => []
@@ -41,4 +45,5 @@ test("successful MIOT poll does not discard read-only observations", async () =>
     assert.equal(result, robot.state);
     assert.equal(robot.x40CleanGeniusObservation.observedAtMs, 1000);
     assert.equal(robot.x40DockWashObservation.value.raw, 1);
+    assert.equal(robot.x40CachedIdleObservation.mode, 6);
 });
