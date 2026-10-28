@@ -120,6 +120,39 @@ const CleanGeniusStatus = (): React.ReactElement => {
 
                             {!statusError && status && (
                                 <>
+                                    <Typography variant="subtitle2" sx={{mt: 2}}>
+                                        Normal robot state poll
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary">
+                                        State: {status.pollHealth.state.replace(/_/g, " ")}
+                                        {status.pollHealth.lastAttemptAt ?
+                                            ` · Last attempt: ${new Date(status.pollHealth.lastAttemptAt).toLocaleString()}` : ""}
+                                    </Typography>
+                                    {status.pollHealth.state === "not_started" && (
+                                        <Alert severity="info" sx={{mt: 1}}>
+                                            No normal state poll has started in this Valetudo process.
+                                            This page reads cached data only and does not start a poll.
+                                        </Alert>
+                                    )}
+                                    {status.pollHealth.state === "in_progress" && (
+                                        <Alert severity="info" sx={{mt: 1}}>
+                                            A normal state poll is in progress; cached readings may not be available yet.
+                                        </Alert>
+                                    )}
+                                    {status.pollHealth.state === "failed" && (
+                                        <Alert severity="warning" sx={{mt: 1}}>
+                                            The last normal state poll failed. Its error is not exposed here,
+                                            and unavailable readings do not establish that the robot is idle.
+                                        </Alert>
+                                    )}
+                                    {status.pollHealth.state === "succeeded" &&
+                                        (status.state !== "observed" || status.cachedIdle.state !== "observed") && (
+                                        <Alert severity="warning" sx={{mt: 1}}>
+                                            A normal poll completed, but one or more cached settings or idle-state
+                                            readings are missing, invalid or stale. This does not establish idleness.
+                                        </Alert>
+                                    )}
+
                                     {status.state !== "observed" && (
                                         <Alert severity="warning" sx={{mt: 2}}>
                                             {status.state === "stale" ?
@@ -176,8 +209,8 @@ const CleanGeniusStatus = (): React.ReactElement => {
                                         </Typography>
                                     </Box>
                                     <Alert severity="info" sx={{mt: 1}}>
-                                        Record these values once, then restore the original service.
-                                        Do not attempt to change CleanGenius during this diagnostic session.
+                                        Cached readings are informational only. They cannot authorize a CleanGenius
+                                        change; the experimental setter has an independent fresh idle check.
                                     </Alert>
 
                                     <Divider sx={{my: 2}}/>
