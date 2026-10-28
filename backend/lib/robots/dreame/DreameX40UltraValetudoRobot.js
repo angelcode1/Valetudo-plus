@@ -395,22 +395,30 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
     }
 
     async pollState() {
-        // This is the existing state polling path. Observing its lifecycle
-        // does not add any MIOT reads, retries, or changes to the idle guard.
-        this.x40PollHealth = {state: "in_progress", lastAttemptAtMs: Date.now()};
+        // Observe the existing state polling path only: no new MIOT requests.
+        // Concurrent polls are possible. A prior attempt must not overwrite
+        // the health outcome of a more recently started poll.
+        const generation = (this.x40PollGeneration ?? 0) + 1;
+        this.x40PollGeneration = generation;
+        const startedAtMs = Date.now();
+        this.x40PollHealth = {state: "in_progress", lastAttemptAtMs: startedAtMs};
         try {
             const state = await super.pollState();
-            // Success only means the existing transport poll completed.
-            // Missing or invalid 4:50/4:1/4:7 data stays unavailable.
-            this.x40PollHealth = {state: "succeeded", lastAttemptAtMs: Date.now()};
+            if (this.x40PollGeneration === generation) {
+                // A completed poll does not prove every property was valid.
+                this.x40PollHealth = {state: "succeeded", lastAttemptAtMs: startedAtMs};
+            }
             return state;
         } catch (err) {
-            // Clear cached observations on transport/parse errors; don't expose
-            // private error strings or imply a valid state after failure.
-            this.x40CleanGeniusObservation = null;
-            this.x40DockWashObservation = null;
-            this.x40CachedIdleObservation = null;
-            this.x40PollHealth = {state: "failed", lastAttemptAtMs: Date.now()};
+            if (this.x40PollGeneration === generation) {
+                // Invalidate only for the latest attempt. An older failed
+                // request must not erase data from a newer completed request.
+                this.x40CleanGeniusObservation = null;
+                this.x40DockWashObservation = null;
+                this.x40CachedIdleObservation = null;
+                this.x40PollHealth = {state: "failed", lastAttemptAtMs: startedAtMs};
+            }
+            // Propagate the original error without exposing it in status.
             throw err;
         }
     }
