@@ -52,6 +52,22 @@ function isIdle(robot) {
     return robot.ephemeralState?.mode === 0 && robot.ephemeralState?.taskStatus === 0;
 }
 
+// Diagnostic text only. Values come from the existing cached MIOT state;
+// never query the robot or weaken the idle guard just to format an error.
+function describeCachedIdleState(robot) {
+    const describe = value => {
+        if (typeof value === "number" && Number.isSafeInteger(value)) {
+            return String(value);
+        }
+        if (typeof value === "string" && /^-?\\d{1,6}$/.test(value)) {
+            return `${value} (string)`;
+        }
+        return "unavailable";
+    };
+
+    return `cached mode=${describe(robot.ephemeralState?.mode)}, taskStatus=${describe(robot.ephemeralState?.taskStatus)}`;
+}
+
 function decodeValue(raw, definition) {
     const matchingName = Object.keys(definition.values).find(name => {
         return definition.values[name] === raw;
@@ -116,7 +132,7 @@ function createQuirks(robot, options = {}) {
                     throw new Error(`Invalid ${definition.key} selection: ${value}`);
                 }
                 if (!isIdle(robot)) {
-                    throw new Error(`The X40 must be idle before changing ${definition.key}`);
+                    throw new Error(`The X40 must be idle before changing ${definition.key}; ${describeCachedIdleState(robot)}; no write attempted`);
                 }
                 if (changeInProgress) {
                     throw new Error("Another X40 CleanGenius setting change is in progress");
@@ -132,11 +148,11 @@ function createQuirks(robot, options = {}) {
                     // Polls are asynchronous: a cleaning task may begin during
                     // the MIOT read. Re-check immediately before the write.
                     if (!isIdle(robot)) {
-                        throw new Error(`The X40 is no longer idle; ${definition.key} was not written`);
+                        throw new Error(`The X40 is no longer idle; ${definition.key} was not written; ${describeCachedIdleState(robot)}`);
                     }
                     await requireFreshIdle(robot);
                     if (!isIdle(robot)) {
-                        throw new Error(`The X40 is no longer idle; ${definition.key} was not written`);
+                        throw new Error(`The X40 is no longer idle; ${definition.key} was not written; ${describeCachedIdleState(robot)}`);
                     }
 
                     const target = definition.values[value];
