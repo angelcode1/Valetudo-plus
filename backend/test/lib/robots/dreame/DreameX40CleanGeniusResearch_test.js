@@ -97,7 +97,9 @@ test("readback transport failure is surfaced without writing twice", async () =>
             readProperties: async properties => properties.map(p => ({...p, code: 0, value: 0})),
             readProperty: async () => {
                 reads++;
-                if (reads === 2) { throw new Error("readback unavailable"); }
+                if (reads === 2) {
+                    throw new Error("readback unavailable");
+                }
                 return JSON.stringify([{k: "SmartHost", v: 0}]);
             },
             writeProperty: async () => {
