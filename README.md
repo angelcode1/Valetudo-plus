@@ -5,7 +5,7 @@
 
 > Fork of [Hypfer/Valetudo](github.com/Hypfer/Valetudo)
 
-> **Repository source of truth (28 October 2026):** `master` is the sole active branch. Start with the [consolidation and research index](docs/BRANCH_CONSOLIDATION_20261028.md), [X40 engineering handoff](docs/X40_CLEANGENIUS_HANDOFF_20261028.md), and [project safety instructions](AGENTS.md). Research is preserved in Git history and the sanitized archive. CleanGenius is experimental and disabled by default; CI success does not establish actual activation or cleaning behaviour.
+> **Branch policy (29 October 2026):** [`master`](https://github.com/angelcode1/Valetudo-plus/tree/master) is the canonical code/release branch; [`research/consolidated`](https://github.com/angelcode1/Valetudo-plus/tree/research/consolidated) is the single research branch. Start with the [consolidated research index](research/README.md), [branch-preservation manifest](docs/BRANCH_CONSOLIDATION_20261028.md), [current X40 handoff](docs/X40_CLEANGENIUS_HANDOFF_20261028.md), and [safety contract](AGENTS.md). Former branches were already consolidated and their refs deleted. CleanGenius remains experimental/default-off and **has not been demonstrated to activate on hardware**; CI success is not runtime acceptance.
 
 Valetudo+ is a fork of Valetudo adding extra functionality I desired that was not offered by the original project. These changes were made initially for the Dreame X40 Ultra. In theory this project should work on any robot Valetudo works on but most of the new functionality will require a supported robot (more details below).
 
