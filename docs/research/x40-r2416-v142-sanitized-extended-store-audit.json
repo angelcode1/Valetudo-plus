@@ -1,0 +1,33 @@
+{
+  "schema": "X40_R2416_V142_EXPANDED_ARM64_STORE_BOUNDARY_1",
+  "source_evidence_available_in_this_environment": [
+    "sanitized_v141_verifier",
+    "assembled_synthetic_aarch64_store_examples"
+  ],
+  "owner_private_v62_present": false,
+  "v128_model_site_evidence_present": false,
+  "original_vendor_elf_examined_in_this_run": false,
+  "expanded_original_firmware_census": "NOT_RUN_MISSING_PRIVATE_SOURCE",
+  "synthetic_assembled_memory_form_tests_passed": 18,
+  "negative_control_tests_passed": 5,
+  "load_bit_mutation_tests_passed": 3,
+  "total_decoder_selftests_passed": 26,
+  "v141_missing_pair_post_indexed_confirmed": true,
+  "v141_missing_non_temporal_pair_confirmed": true,
+  "v141_excluded_fixed_simd_stores_confirmed": true,
+  "other_excluded_classes": [
+    "gpr_register_indexed",
+    "simd_register_indexed",
+    "atomic_exclusive_family",
+    "simd_structure_family"
+  ],
+  "fixture_test_indicates_a_original_firmware_store": false,
+  "v141_original_direct_immediate_overlap_census_remains_scoped": true,
+  "previous_original_firmware_possible_direct_flag_writers": 10,
+  "new_original_firmware_candidate_writers_eliminated": 0,
+  "single_executed_model_flag_writer_observed": false,
+  "live_blackboard_alias_or_value_confirmed": false,
+  "second_physical_mop_wash_confirmed": false,
+  "device_actions": 0,
+  "reproducible_zip_sha256": "448c4ee519f9cb1f710d7146cd157ffdab5500835bacc95f8b0d65f516655df7"
+}

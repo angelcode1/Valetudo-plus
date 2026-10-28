@@ -1,0 +1,38 @@
+{
+  "schema": "X40_R2416_V147_CORRELATED_FLAG_WITNESS_PREPARED_1",
+  "date": "2026-10-25",
+  "private_elf_source_available_in_active_container": false,
+  "sanitized_v128_site_zip_available_in_active_container": false,
+  "source_specific_v147_witness_extraction_executed": false,
+  "synthetic_witness_selftests_passed": true,
+  "clean_archive_replay_passed": true,
+  "previous_v135_state_count_source_reported": 118989,
+  "previous_v135_terminal_class_count_source_reported": 35,
+  "possible_last_direct_writers_all": [
+    "0x474cd0",
+    "0x475bc4",
+    "0x476798",
+    "0x4773dc",
+    "0x4774d8",
+    "0x4775a4",
+    "0x4776b4",
+    "0x47776c",
+    "0x478160",
+    "0x47826c"
+  ],
+  "conditional_possible_writers_if_sp98_is_known_zero": [
+    "0x474cd0",
+    "0x476798",
+    "0x4773dc",
+    "0x4775a4",
+    "0x4776b4"
+  ],
+  "actual_sp98_value_observed": false,
+  "number_native_writers_eliminated_in_v147": 0,
+  "uniquely_executed_writer_proven": false,
+  "live_turbidity_boolean_observed": false,
+  "second_physical_mop_wash_proven": false,
+  "robot_actions": 0,
+  "downloadable_kit_sha256": "274dd4518f6b94195e384f904c1a2bb18b9b399f61318aa4dae63de18ac02269",
+  "limitations": "Earlier v135 source-pinned conditional claim and new synthetic witness extraction tests; no original ELF-backed v147 execution or source-path witnesses produced in current turn."
+}

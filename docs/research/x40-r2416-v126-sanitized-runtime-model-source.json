@@ -1,0 +1,48 @@
+{
+  "schema": "X40_R2416_V126_RUNTIME_MODEL_PROVENANCE_1",
+  "original_elf_sha256_pins_verified": 10,
+  "readmodel_function": "ReadModleInfo",
+  "runtime_config_path": "/var/run/runava.conf",
+  "native_runtime_config_captured": false,
+  "model_key": "MODEL",
+  "dev_model_key": "DEV_MODEL",
+  "model_read_call_sites": [
+    "0x46fdc4",
+    "0x46fec0"
+  ],
+  "primary_register": "x20",
+  "secondary_stack_result": "SP+0x240",
+  "secondary_register": "x26",
+  "secondary_comparison_calls": [
+    "0x478228",
+    "0x478238",
+    "0x47824c"
+  ],
+  "secondary_comparison_model_literals": [
+    "dreame.vacuum.r2416f",
+    "dreame.vacuum.r2449b",
+    "dreame.vacuum.r2492x"
+  ],
+  "previous_candidate_last_direct_store_count": 13,
+  "number_further_excluded_by_v126": 0,
+  "unique_selected_store_found": false,
+  "live_enable_turbidity_value_observed": false,
+  "second_physical_mop_wash_proven": false,
+  "independent_instruction_and_literal_mutations_rejected": 29,
+  "remote_collector": {
+    "read_only": true,
+    "run_on_device": false,
+    "config_content_exported": false,
+    "keys_queried": [
+      "MODEL",
+      "DEV_MODEL"
+    ],
+    "output": "fixed model classes only",
+    "synthetic_secret_fixture_no_leak": true,
+    "malformed_response_cases_refused": 5,
+    "simulated_ssh_auth_failure_refused": true
+  },
+  "robot_modified": false,
+  "repository_master_modified": false,
+  "caveat": "Separate runtime-dependent DEV_MODEL input prevents selecting a unique executed flag-store instruction using the primary R2416 model string alone."
+}

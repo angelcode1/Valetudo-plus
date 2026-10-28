@@ -1,0 +1,21 @@
+{
+  "schema": "X40_R2416_V143_UNPRIVILEGED_STTR_COVERAGE_1",
+  "date": "2026-10-25",
+  "new_store_forms": [
+    "STTR",
+    "STTRB",
+    "STTRH"
+  ],
+  "synthetic_fixture_tests_and_mutations_passed": 56,
+  "v142_regression_passed": 26,
+  "v143_new_assertions_passed": 30,
+  "v128_dependency_required_for_this_narrow_source_census": false,
+  "owner_v62_original_accessible_in_analysis_container": false,
+  "original_firmware_census": "NOT_RUN_PRIVATE_SOURCE_UNAVAILABLE",
+  "potential_model_flag_writer_sites_from_previous_source_work": 10,
+  "model_flag_writer_observed": false,
+  "actual_blackboard_alias_proven": false,
+  "physical_second_mop_wash_proven": false,
+  "robot_modified": false,
+  "source_zip_sha256": "bf5ecd2e7894838ddea3d3382c70e45b139506bdab1649eab0c049a7b830861c"
+}

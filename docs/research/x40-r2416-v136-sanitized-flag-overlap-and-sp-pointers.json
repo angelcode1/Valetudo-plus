@@ -1,0 +1,47 @@
+{
+  "schema": "X40_R2416_V136_FLAG_STACK_STORE_AND_ADDRESS_SURFACE_1",
+  "owner_model_site": "site_0x473540",
+  "original_elf_sha256_pins": 10,
+  "original_native_function_instructions": 11345,
+  "flag_read_pc": "0x470be4",
+  "flag_byte_range_sp": [
+    "0xbc",
+    "0xc0"
+  ],
+  "original_direct_integer_store_overlap_sites": 61,
+  "original_direct_overlap_store_family": "STP_W",
+  "additional_direct_gpr_wide_or_subword_overlap_sites": 0,
+  "original_sp_add_immediate_total": 64,
+  "nonframe_explicit_stack_address_constructors": 62,
+  "lowest_nonframe_explicit_stack_address_offset": "0x110",
+  "original_frame_pointer_copy_pc": "0x46fd4c",
+  "original_sp_restore_pc": "0x4716ec",
+  "explicit_direct_flag_area_nonframe_pointer_constructed": false,
+  "model_specific_possible_final_direct_writers": [
+    "0x474cd0",
+    "0x475bc4",
+    "0x476798",
+    "0x4773dc",
+    "0x4774d8",
+    "0x4775a4",
+    "0x4776b4",
+    "0x47776c",
+    "0x478160",
+    "0x47826c"
+  ],
+  "conservative_correlated_terminal_combinations": 35,
+  "conservative_state_count": 118989,
+  "feature_specific_native_instruction_mutations_rejected": 29,
+  "synthetic_store_decoder_and_pointer_tests": 10,
+  "source_archive_clean_extract_and_replay_passed": true,
+  "original_vendor_ELFs_or_config_committed": false,
+  "robot_access_or_runtime_changes": false,
+  "selected_executed_writer_proven": false,
+  "active_enable_turbidity_proven": false,
+  "genuine_second_physical_mop_wash_proven": false,
+  "limitations": [
+    "Direct integer SP-immediate store opcode family census, not all memory stores or complete pointer-alias proof",
+    "Explicit stack-address materialization alone does not prove what called functions or indirect stores may do",
+    "Static graph has 10 possible final direct sites; no runtime instruction trace"
+  ]
+}

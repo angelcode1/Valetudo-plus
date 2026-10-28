@@ -31,7 +31,7 @@
               { 'run': 'npm test --workspace=backend', 'env': { 'CI': true } },
               {
                 'name': 'Upload validated X40 AArch64 candidate',
-                'if': "github.event_name == 'push' && (github.ref == 'refs/heads/feature/x40-cleangenius-research' || github.ref == 'refs/heads/feature/x40-cleangenius-supervised-activation-20261028')",
+                'if': "github.event_name == 'push' && github.ref == 'refs/heads/master'",
                 'uses': 'actions/upload-artifact@v7',
                 'with': {
                   'name': 'x40-valetudo-aarch64-ci-candidate',

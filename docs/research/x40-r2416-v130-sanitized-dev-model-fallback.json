@@ -1,0 +1,34 @@
+{
+  "schema": "X40_R2416_V130_ABSENT_DEV_MODEL_NATIVE_FALLBACK_1",
+  "original_sha256_pinned_vendor_elfs": 10,
+  "uploaded_source_model_comparison_site": "site_0x473540",
+  "top_level_dev_model_absent_from_valid_json_snapshot": true,
+  "native_reader_missing_key_default_result": "empty_std_string_on_normal_lookup_miss",
+  "native_missing_key_fallback_primary_model": false,
+  "pinned_secondary_compare_sites": [
+    "0x478228",
+    "0x478238",
+    "0x47824c"
+  ],
+  "pinned_secondary_branch_sites": [
+    "0x47822c",
+    "0x47823c",
+    "0x478288"
+  ],
+  "model_strict_comparison_count": 294,
+  "model_regex_branch_constraints": 23,
+  "previous_bounded_direct_writer_count": 13,
+  "with_normal_empty_secondary_model_bounded_direct_writer_count": 13,
+  "remaining_direct_writer_site_count": 13,
+  "zero_source_sites_possible": 1,
+  "locally_positive_sites_possible": 12,
+  "unique_executed_writer_identified": false,
+  "live_native_return_observed": false,
+  "real_enable_turbidity_value_observed": false,
+  "physical_second_mop_wash_proven": false,
+  "device_io": false,
+  "firmware_or_settings_modified": false,
+  "source_mutations_rejected": 32,
+  "model_evidence_mutations_rejected": 5,
+  "limitations": "Missing-member normal JSON return is statically modelled; live return not traced. Secondary comparisons constrain three branches, but 13 earlier direct stores remain conservatively possible."
+}

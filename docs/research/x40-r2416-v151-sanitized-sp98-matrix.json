@@ -1,0 +1,36 @@
+{
+  "schema": "X40_R2416_V151_SP98_WRITER_CLASS_1",
+  "original_elf_pins_verified": 10,
+  "authenticated_model_site": "site_0x473540",
+  "correlated_states": 52713,
+  "terminal_classes": 16,
+  "per_writer": {
+    "0x475bc4": [
+      "LOCAL_POSITIVE_SOURCE_UNRESOLVED_REG_CLOBBERS",
+      "WIDE_POINTER_LOW32_UNKNOWN"
+    ],
+    "0x4774d8": [
+      "LOCAL_POSITIVE_SOURCE_UNRESOLVED_REG_CLOBBERS",
+      "WIDE_POINTER_LOW32_UNKNOWN"
+    ],
+    "0x4775a4": [
+      "LOCAL_POSITIVE_SOURCE_UNRESOLVED_REG_CLOBBERS",
+      "REGEX_ZERO",
+      "WIDE_POINTER_LOW32_UNKNOWN"
+    ],
+    "0x478160": [
+      "LOCAL_POSITIVE_SOURCE_UNRESOLVED_REG_CLOBBERS",
+      "WIDE_POINTER_LOW32_UNKNOWN"
+    ],
+    "0x47826c": [
+      "LOCAL_POSITIVE_SOURCE_UNRESOLVED_REG_CLOBBERS",
+      "WIDE_POINTER_LOW32_UNKNOWN"
+    ]
+  },
+  "known_zero_conditional_singleton": "0x4775a4",
+  "actual_SP98_value_observed": false,
+  "uniquely_executed_writer_identified": false,
+  "physical_second_mop_wash_proven": false,
+  "private_vendor_binaries_committed": false,
+  "companion_zip_sha256": "0189d5eeae6dff88d4f07dd65a6769d7c1f57bc46625c9299c5ecd16dd5317d7"
+}

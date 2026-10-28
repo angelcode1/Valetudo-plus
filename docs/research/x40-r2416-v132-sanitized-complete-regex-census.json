@@ -1,0 +1,54 @@
+{
+  "schema": "X40_R2416_V132_FULL_NATIVE_REGEX_CENSUS_1",
+  "source_model_site": "site_0x473540",
+  "original_elf_sha256_pins": 10,
+  "original_native_typed_regex_match_calls": 31,
+  "previously_audited_calls": 27,
+  "newly_audited_calls": 4,
+  "manual_compiled_regex_call": "0x47038c",
+  "manual_compiled_regex_branch": "0x470394",
+  "manual_compiled_regex_nonmatch_destination": "0x4721cc",
+  "manual_compiled_regex_impossible_successor": "0x470398",
+  "no_match_spilled_regex_results": [
+    {
+      "call": "0x472b3c",
+      "stack_slot": "SP+0x100",
+      "global_branch_pruned": false
+    },
+    {
+      "call": "0x47349c",
+      "stack_slot": "SP+0x98",
+      "global_branch_pruned": false
+    },
+    {
+      "call": "0x478404",
+      "stack_slot": "SP+0x80",
+      "global_branch_pruned": false
+    }
+  ],
+  "bounded_possible_direct_writer_count_before": 12,
+  "bounded_possible_direct_writer_count_after": 11,
+  "excluded_direct_zero_source_writer": "0x4703fc",
+  "remaining_possible_direct_writers": [
+    "0x474cd0",
+    "0x475bc4",
+    "0x476598",
+    "0x476798",
+    "0x4773dc",
+    "0x4774d8",
+    "0x4775a4",
+    "0x4776b4",
+    "0x47776c",
+    "0x478160",
+    "0x47826c"
+  ],
+  "each_survivor_has_bounded_local_positive_source_coverage": true,
+  "actual_executed_writer_identified": false,
+  "live_blackboard_enable_turbidity_observed": false,
+  "physical_second_mop_wash_proven": false,
+  "source_mutations_independently_rejected": 37,
+  "clean_unzip_and_verifier_replay_passed": true,
+  "robot_access": false,
+  "proprietary_ELF_or_APK_committed": false,
+  "caveat": "One direct native regex branch pruned; three zero result spills deliberately not propagated through shared consumers without path-sensitive reaching-definition proof."
+}

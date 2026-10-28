@@ -1,0 +1,45 @@
+{
+  "schema": "X40_R2416_V137_REGISTER_SOURCE_CORRIDOR_1",
+  "model_comparison_site": "site_0x473540",
+  "sha256_pinned_original_vendor_elfs": 10,
+  "possible_final_direct_flag_writer_sites": [
+    "0x474cd0",
+    "0x475bc4",
+    "0x476798",
+    "0x4773dc",
+    "0x4774d8",
+    "0x4775a4",
+    "0x4776b4",
+    "0x47776c",
+    "0x478160",
+    "0x47826c"
+  ],
+  "all_site_paths_cross_at_least_one_compiled_positive_initializer_in_model_cfg": true,
+  "ten_positive_source_stores": 10,
+  "three_alternate_positive_source_sites": [
+    "0x474cd0",
+    "0x4773dc",
+    "0x4775a4"
+  ],
+  "audited_source_preservation_instruction_corridors": 16,
+  "semantically_audited_corridor_instructions": 97,
+  "unique_bl_calls_crossed_by_source_corridors": 2,
+  "caller_saved_w0_source_corridor_bl_calls": 0,
+  "callee_saved_w23_or_w24_source_corridor_bl_calls": 2,
+  "synthetic_clobber_decoder_tests_passed": 7,
+  "independent_native_source_instruction_mutations_rejected": 25,
+  "zip_sha256": "8ac6e6d6e4d0bca9b0f1aef605eb34bebe72025ba3e3947dd15a088204b5a560",
+  "clean_extraction_replay_passed": true,
+  "bounded_correlated_terminal_combinations_from_v135b": 35,
+  "unique_executed_native_writer_proven": false,
+  "effective_blackboard_turbidity_enabled_proven": false,
+  "real_second_physical_mop_wash_proven": false,
+  "robot_modified": false,
+  "firmware_or_Valetudo_runtime_modified": false,
+  "proprietary_binary_or_private_model_literal_published": false,
+  "limitations": [
+    "All conclusions conditional on source-pinned direct CFG and AAPCS64 callee-saved register preservation",
+    "Not complete register SSA or interprocedural pointer-alias analysis",
+    "No real dynamic execution trace, native Blackboard value or physical second wash observation"
+  ]
+}

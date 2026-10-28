@@ -1,0 +1,38 @@
+{
+  "schema": "X40_R2416_V237_ROUTE_HEALTH_BYTE_CHANGE_RESETS_FOUR_STUCK_CHECKS_V1",
+  "original_health_sha256": "5eb715d9f66816794823e31484f1f0c229cef07ea611414e1c3b020fc99471d5",
+  "baseline_v236_commit": "49fa743d4bb9f54d84a2d2ea0ff0d779bd632f73",
+  "input_topic": "ROUTE_NODE_HEALTH",
+  "input_typed_message": "AvaRouteNodeHealthMsg",
+  "retained_message_previous_byte_offset_hex": "0x15",
+  "retained_previous_byte_read_va": "0x9bf24",
+  "new_byte_read_va": "0x9bf70",
+  "old_new_compare_va": "0x9bf74",
+  "unchanged_byte_branch_va": "0x9bf78",
+  "unchanged_byte_branch_target": "0x9bfcc",
+  "changed_byte_reset_start_va": "0x9bf7c",
+  "changed_byte_reset_end_va": "0x9bfcc",
+  "reset_globals": [
+    "gs_stuck_reciprocting_motion_check",
+    "gs_stuck_reciprocting_motion_quick_check",
+    "gs_stuck_reciprocting_motion_large_turn_check",
+    "gs_stuck_reciprocting_motion_precise_follow_wall_check"
+  ],
+  "reset_fields_relative_offsets": [
+    "0x0 (16-bit)",
+    "0x20 (32-bit)",
+    "0x24 (16-bit)"
+  ],
+  "original_callback_direct_BL_site_count": 1,
+  "guarded_ClimbEntryClear_direct_call_va": "0x9c000",
+  "new_original_AArch64_words_checked": 49,
+  "named_original_global_relocations_checked": 4,
+  "conditional_branch_edges_checked": 2,
+  "private_v230_archived_payload_hashes_verified": 35,
+  "original_private_mutation_tests_passed": 20,
+  "source_only_kit_clean_extraction_verified": true,
+  "original_route_publisher_found": false,
+  "runtime_route_health_delivery_proven": false,
+  "stain_triggered_second_floor_pass_proven": false,
+  "robot_or_firmware_modified": false
+}

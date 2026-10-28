@@ -1,0 +1,51 @@
+{
+  "schema": "X40_R2416_V127_NATIVE_RAPIDJSON_MODEL_INPUT_CORRECTION_1",
+  "uploaded_v126_evidence": {
+    "schema": "X40_V126_RUNTIME_MODEL_CLASSES_1",
+    "runtime_config_readable": true,
+    "model_class": "absent",
+    "dev_model_class": "absent",
+    "v126_line_parser_incompatible_with_json": true,
+    "do_not_prune_branches_from_v126_absent": true
+  },
+  "original_source": "node_lethe.so",
+  "source_sha256": "b34eb5c71bccd90342f34d64a1871197455d69d9511cfa709ee027dd44b554e0",
+  "original_elves_sha256_pinned": 10,
+  "native_config_reader": "ReadModleInfo",
+  "native_file": "/var/run/runava.conf",
+  "native_reader_format": "RapidJSON",
+  "native_parsevalue_call": {
+    "pc": "0x46ec78",
+    "plt": "0x2757f0"
+  },
+  "native_skipwhitespace_call": {
+    "pc": "0x46ec88",
+    "plt": "0x279ad0"
+  },
+  "native_keys": [
+    "MODEL",
+    "DEV_MODEL"
+  ],
+  "new_independent_instruction_mutations_rejected": 8,
+  "corrected_probe": {
+    "read_only": true,
+    "remote_script_language": "POSIX awk",
+    "parse_scope": "valid JSON top-level object MODEL and DEV_MODEL only",
+    "max_bytes": 131072,
+    "max_nesting": 32,
+    "synthetic_json_format_test_cases": 13,
+    "parser_invalid_output_refusals": 5,
+    "simulated_ssh_success": true,
+    "simulated_ssh_authentication_failure_refused": true,
+    "raw_config_exported": false,
+    "other_identifiers_or_secrets_exported": false,
+    "robot_executed": false
+  },
+  "candidate_last_direct_flag_stores_remaining": 13,
+  "native_enable_turbidity_current_value_observed": false,
+  "uniquely_executed_writer_identified": false,
+  "second_physical_mop_wash_proven": false,
+  "robot_modified": false,
+  "master_or_runtime_code_modified": false,
+  "notes": "The original parser calls RapidJSON; v126's line-oriented key absence is not evidence of native model input absence. v127 still requires an owner-run, category-only remote read."
+}

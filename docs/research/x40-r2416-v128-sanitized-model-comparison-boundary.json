@@ -1,0 +1,41 @@
+{
+  "schema": "X40_R2416_V128_MODEL_IDENTITY_BOUNDARY_1",
+  "uploaded_v127": {
+    "schema": "X40_V127_RAPIDJSON_MODEL_CLASSES_1",
+    "source_readable": true,
+    "source_format": "json_object",
+    "model_class": "other_vendor_model",
+    "dev_model_class": "absent",
+    "raw_config_exported": false,
+    "robot_modified": false
+  },
+  "original_elf_sha256_pins_passed": 10,
+  "direct_native_strict_model_comparisons": 294,
+  "distinct_native_compiled_models": 235,
+  "compiled_r2416_family_names": 7,
+  "pinned_native_regex_sites": 23,
+  "compiled_r2416_family_cases_with_same_potential_writers": 7,
+  "candidate_last_direct_flag_stores_in_bare_model_hypothesis": 13,
+  "live_model_identity_from_v127_exactly_r2416": false,
+  "live_r2416_name_variant_identified": false,
+  "selected_live_flag_writer_proven": false,
+  "optional_collector": {
+    "schema": "X40_V128_COMPILED_MODEL_COMPARE_SITE_1",
+    "real_device_executed": false,
+    "returns": "source-pinned comparison-site ID only",
+    "raw_config_exported": false,
+    "raw_model_string_exported": false,
+    "number_of_synthetic_fixtures": 6,
+    "number_of_protocol_refusals": 6,
+    "simulated_ssh_success_failure_passed": true
+  },
+  "original_vendor_ELFs_or_device_config_committed": false,
+  "device_modified": false,
+  "master_modified": false,
+  "limitations": [
+    "v127 other_vendor_model does not uniquely determine a model name",
+    "Top-level DEV_MODEL absence is not a native return-value trace",
+    "Conservative per-model AArch64 CFG cannot establish which native writer executed",
+    "A compiled model comparison-site match does not establish turbidity enablement or physical auto-rewash"
+  ]
+}

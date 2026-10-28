@@ -1,0 +1,22 @@
+{
+  "schema": "X40_R2416_V148_NECESSARY_BRANCH_EDGE_TEST_BOUNDARY_1",
+  "date": "2026-10-25",
+  "synthetic_behavior_fixtures_passed": 11,
+  "differential_synthetic_graphs": 64,
+  "crosschecks_against_v135_joint_product_passed": 192,
+  "prior_v147_source_free_regression_passed": true,
+  "clean_extraction_tested": true,
+  "sha256sum_manifest_passed": true,
+  "source_pinned_v148_edge_cut_result_produced": false,
+  "private_original_v62_bytes_available_in_runtime": false,
+  "sanitized_v128_evidence_zip_available_in_runtime": false,
+  "candidate_last_direct_writers_remaining": 10,
+  "candidate_last_direct_writers_if_sp98_known_zero": 5,
+  "actual_sp98_zero_observed": false,
+  "single_executed_writer_proven": false,
+  "native_enable_turbidity_live_state_proven": false,
+  "second_physical_mop_wash_proven": false,
+  "robot_actions": 0,
+  "tested_archive_sha256": "4633b7490b82a3637449b507e3cee58e2c510d47b6a6fe40465a6fbffdffedb9",
+  "caveat": "Only selected, source-backed edges can be audited on owner side; sample witness branch choice is not necessary, and edge necessity is not evidence of runtime execution."
+}

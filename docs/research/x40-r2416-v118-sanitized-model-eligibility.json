@@ -1,0 +1,34 @@
+{
+  "schema": "X40_R2416_V118_SEPARATE_MODEL_GROUP_TURBIDITY_GATE_1",
+  "original_vendor_elves_sha256_pinned": 10,
+  "exact_r2416_model_literal": "dreame.vacuum.r2416",
+  "exact_r2416_match_branch": {
+    "from": "0x470940",
+    "to": "0x470958"
+  },
+  "source_stack_flag": "SP+0xBC",
+  "source_flag_known_zero_initializers": [
+    "0x4703fc",
+    "0x471a90"
+  ],
+  "source_flag_example_positive_initializers": [
+    "0x47227c",
+    "0x47373c"
+  ],
+  "direct_32bit_stp_or_str_writes_overlapping_sp_bc_entire_ProcessModelInfo": 61,
+  "guard_checks": [
+    "0x470be4",
+    "0x470be8",
+    "0x47182c",
+    "0x471830"
+  ],
+  "typed_bool_write": "0x47185c",
+  "r2416_literal_match_alone_sets_source_flag": false,
+  "all_r2416_model_group_paths_resolved": false,
+  "live_blackboard_eligibility_observed": false,
+  "physical_second_mop_wash_proven": false,
+  "single_instruction_and_literal_mutations_rejected": 44,
+  "original_vendor_binaries_committed": false,
+  "robot_modified": false,
+  "caveat": "61 counts bounded direct SP-relative 32-bit STP/STR overlap sites, not distinct models, dynamic writers, or an exhaustive semantic origin audit"
+}

@@ -1,0 +1,42 @@
+{
+  "schema": "X40_R2416_V146_OFFLINE_PROOF_BOUNDARY_1",
+  "date": "2026-10-25",
+  "original_elf_accessible_in_execution_container": false,
+  "original_v62_elf_rescanned_this_run": false,
+  "new_firmware_census_performed": false,
+  "synthetic_v146_result_mutations_rejected": 21,
+  "inherited_v145_synthetic_assembled_opcodes": 1857,
+  "inherited_v145_assertions": 133,
+  "possible_ProcessModelInfo_flag_writer_sites": [
+    "0x474cd0",
+    "0x475bc4",
+    "0x476798",
+    "0x4773dc",
+    "0x4774d8",
+    "0x4775a4",
+    "0x4776b4",
+    "0x47776c",
+    "0x478160",
+    "0x47826c"
+  ],
+  "separate_proof_targets": {
+    "route_field": "AvaNodeRoute+0x30 (3,194 instruction constructor corridor)",
+    "model_flag": "ProcessModelInfo SP+0xBC (10 possible direct writer sites)"
+  },
+  "sanitized_census_parser_requirements": [
+    "v145 declared RAN_SOURCE_PINNED, pinned original flag and previous native regression",
+    "exact source instruction interval and 3,194 count",
+    "fixed base-relative sites aligned, in corridor, offsets overlapping +0x30",
+    "counts, types, register widths, LSE family non-literal semantics consistent",
+    "malformed or misleading evidence rejected, extra fields not exported",
+    "imported JSON is unverified claim and not authenticated original ELF source",
+    "local --owner-private-v62 mode reruns the original SHA256 pins"
+  ],
+  "original_ELF_hashes_independently_verified_this_run": false,
+  "selected_executed_writer_identified": false,
+  "blackboard_runtime_object_identity_proven": false,
+  "second_physical_mop_wash_observed": false,
+  "robot_modified": false,
+  "master_modified": false,
+  "zip_sha256": "80033a695eeaf047c8ab15b6dfc6a7bb29026cbb4ad75be0fc913e3bda10fc98"
+}

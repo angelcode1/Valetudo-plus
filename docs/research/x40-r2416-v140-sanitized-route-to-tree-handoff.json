@@ -1,0 +1,46 @@
+{
+  "schema": "X40_R2416_V140_ROUTE_SHARED_BLACKBOARD_ARGUMENT_PROVENANCE_1",
+  "firmware_original_sha256_pins_passed": 10,
+  "root_config_preference": "RobotNode",
+  "constructor_name": "ancp::AvaNodeRoute",
+  "constructor_start": "0x34c020",
+  "only_direct_process_model_info_call": "0x352308",
+  "model_call_arg_blackboard_pointer_source": "route+0x30",
+  "compiled_tree_build_calls_in_same_constructor": [
+    "0x35511c",
+    "0x3552c8",
+    "0x3553f4",
+    "0x3554e8"
+  ],
+  "tree_build_blackboard_pointer_source_for_each": "route+0x30",
+  "other_direct_tree_build_call_in_BtTask": "0x316600",
+  "source_pinned_direct_model_call_count": 1,
+  "source_pinned_direct_build_tree_call_count": 5,
+  "source_pinned_constructor_build_call_count": 4,
+  "build_tree_forward_to_xml_parser": {
+    "build_tree_function": "0x70a10",
+    "argument_retained": "0x70a3c",
+    "argument_forwarded": "0x70a6c",
+    "parser_instantiate_call": "0x70a84",
+    "parser_argument_saved": "0x6e244"
+  },
+  "previous_v139_station_factory_setBlackboard_handoff_passed": true,
+  "original_instruction_mutations_rejected": 28,
+  "fresh_extract_replay_passed": true,
+  "source_kit_sha256": "54238940e0e4e9c36dbabb9f86a0040935ade94e6bb41d60384a4e27a411ca72",
+  "native_possible_direct_flag_writers_remaining": 10,
+  "runtime_same_blackboard_object_across_calls_proven": false,
+  "live_robot_station_tree_selected_proven": false,
+  "subtree_remapping_absent_proven": false,
+  "one_executed_native_flag_writer_proven": false,
+  "live_enable_turbidity_value_observed": false,
+  "genuine_second_physical_mop_wash_proven": false,
+  "robot_or_master_or_runtime_modified": false,
+  "proprietary_binaries_or_private_model_exported": false,
+  "limitations": [
+    "Same field source across independent native calls, not continuous dynamic pointer identity",
+    "Actual RobotNode/StationWash registration and tick not observed",
+    "TreeNode effective Blackboard may be remapped",
+    "Ten possible flag writes are static paths, not a dynamic execution trace"
+  ]
+}

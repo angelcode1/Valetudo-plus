@@ -1,0 +1,27 @@
+{
+  "schema": "X40_R2416_V150_SOURCE_PINNED_PRIMARY_MODEL_GATE",
+  "model_site": "site_0x473540",
+  "original_elf_pins": 10,
+  "v147_source_states": 118989,
+  "v147_terminal_classes": 35,
+  "v148_native_edge_cuts": 16,
+  "additional_primary_model_comparisons": 19,
+  "local_native_mutations_rejected": 114,
+  "v150_correlated_states": 52713,
+  "v150_terminal_classes": 16,
+  "v150_possible_last_direct_writers": [
+    "0x475bc4",
+    "0x4774d8",
+    "0x4775a4",
+    "0x478160",
+    "0x47826c"
+  ],
+  "if_sp98_known_zero": [
+    "0x4775a4"
+  ],
+  "live_sp98_verified": false,
+  "executed_writer_verified": false,
+  "physical_second_mop_wash_verified": false,
+  "robot_modified": false,
+  "full_verifier_zip_sha256": "e8c916817101fa1f281d122e920e2ebe5b500df379e3d2ea3caaedb195cc23c5"
+}
