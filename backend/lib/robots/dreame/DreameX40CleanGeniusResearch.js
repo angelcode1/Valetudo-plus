@@ -59,7 +59,7 @@ function describeCachedIdleState(robot) {
         if (typeof value === "number" && Number.isSafeInteger(value)) {
             return String(value);
         }
-        if (typeof value === "string" && /^-?\\d{1,6}$/.test(value)) {
+        if (typeof value === "string" && /^-?\d{1,6}$/.test(value)) {
             return `${value} (string)`;
         }
         return "unavailable";
