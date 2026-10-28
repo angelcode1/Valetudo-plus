@@ -67,6 +67,26 @@ async function readSettings(robot) {
     return DreameUtils.DESERIALIZE_MISC_TUNABLES(value);
 }
 
+// Never infer idleness from Gen2's constructor defaults (mode=0, taskStatus=0).
+// Verify both independently reported MIOT fields from a fresh device poll.
+async function requireFreshIdle(robot) {
+    const props = [MIOT.PROPERTIES.MODE, MIOT.PROPERTIES.TASK_STATUS].map(prop => ({
+        siid: SIID, piid: prop.PIID
+    }));
+    const observations = await robot.miotHelper.readProperties(props);
+
+    if (!Array.isArray(observations) || observations.length !== props.length ||
+        !props.every((prop, index) => {
+            const observed = observations[index];
+            return observed?.siid === prop.siid &&
+                observed?.piid === prop.piid &&
+                observed?.code === 0 &&
+                observed?.value === 0;
+        })) {
+        throw new Error("The X40 did not confirm idle mode and task status in a fresh MIOT read");
+    }
+}
+
 function createQuirks(robot) {
     // All three selectors share one MIOT 4:50 property; serialize UI writes.
     // This is a manual, supervised operation. It never runs at startup.
@@ -103,6 +123,10 @@ function createQuirks(robot) {
 
                     // Polls are asynchronous: a cleaning task may begin during
                     // the MIOT read. Re-check immediately before the write.
+                    if (!isIdle(robot)) {
+                        throw new Error(`The X40 is no longer idle; ${definition.key} was not written`);
+                    }
+                    await requireFreshIdle(robot);
                     if (!isIdle(robot)) {
                         throw new Error(`The X40 is no longer idle; ${definition.key} was not written`);
                     }
