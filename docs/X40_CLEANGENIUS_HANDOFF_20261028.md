@@ -1,5 +1,7 @@
 # X40 CleanGenius implementation handoff — 2026-10-28
 
+**Canonical repository source:** [master](https://github.com/angelcode1/Valetudo-plus/tree/master) and [branch-consolidation manifest](./BRANCH_CONSOLIDATION_20261028.md). All prior `feature/`, `diagnostics/` and numbered `research/` branches were archived into Git ancestry and their refs removed in [one-time cleanup run 40656864797](https://github.com/angelcode1/Valetudo-plus/actions/runs/40656864797). References to the old branches elsewhere in this document are historical, not active work targets. PR #2 was closed as superseded. No robot changes were performed for the repository consolidation.
+
 **Read this before doing any work on X40 CleanGenius.** This handoff supplements the binding [AGENTS.md](../AGENTS.md) anti-rabbit-hole instructions and [supervised enablement runbook](./X40_CLEANGENIUS_SUPERVISED_ENABLEMENT.md). It records actual owner-confirmed device results and code/build status. Do **not** restart v291-style binary reverse-engineering, run more firmware collector kits, overwrite the live Valetudo installation, or assume an artifact was installed because CI passed.
 
 ## Latest validated code-only checkpoint — 2026-10-28

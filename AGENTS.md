@@ -1,5 +1,7 @@
 # X40 CleanGenius: engineering contract for future work
 
+**Repository source of truth:** `master` only. Read [Branch Consolidation and Research Preservation](docs/BRANCH_CONSOLIDATION_20261028.md) before changing X40 research. All 90 other branch refs have been removed after preservation of their historical commit tips. Do not recreate numbered version branches or duplicate the research archive.
+
 **Current handoff (2026-10-28):** [X40 CleanGenius implementation handoff](docs/X40_CLEANGENIUS_HANDOFF_20261028.md). Read it before proposing new work. **Two bounded candidate trials already happened**: `ccaa64d` displayed the experimental quirk but its mode change was blocked by the idle guard; `20377ec` displayed unavailable cached MIOT readings. The original Valetudo is confirmed restored after the second trial (`STATE=ORIGINAL ORIGINAL_PID=1752`, `WATCHDOG=NOT_RUNNING`). No `SmartHost=1` acceptance or automated cleaning behaviour was demonstrated. **Do not repeat the hardware trials by default.**
 
 **This file is a binding project instruction, not an optional research suggestion.**

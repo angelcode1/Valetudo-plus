@@ -1,5 +1,14 @@
 # Branch consolidation and research preservation — 2026-10-28
 
+## Completed cleanup and verified result — 2026-10-28
+
+- **Only branch remaining:** `master`. GitHub branches endpoint returned precisely one ref after [successful one-time prune job 40656864797](https://github.com/angelcode1/Valetudo-plus/actions/runs/40656864797).
+- **90 stale branch refs deleted** with exact SHA verification and lease-based pushes. All 89 non-default tip commits captured before consolidation were verified as parent ancestry, in addition to the canonical feature branch's first-parent lineage.
+- **172 research documents/tools recovered into HEAD**, plus legacy code preserved in reachable history; no force-push and no upstream reset.
+- **Workflows:** four retained on master (Node.js CI, CodeQL, Manual Build, Release). The four outdated housekeeping workflows were removed; the temporary prune workflow and trigger were also removed after completing the cleanup.
+- **PR #2:** closed as superseded, without indicating SmartHost acceptance or production rollout. The installed X40 Valetudo remains untouched.
+- **Workflow validation:** the consolidated source tree passed full Node.js CI [run 40656404002](https://github.com/angelcode1/Valetudo-plus/actions/runs/40656404002). Later metadata-only cleanup does not change runtime implementation; normal master CI still applies.
+
 ## Canonical branch
 `master` is the **only supported source-of-truth branch**. The original implementation basis is the passing guarded X40 feature commit `942e3175a2ac26138cf90f6a852eb93444c6f9ff` and its verified documentation state `661fd0184e728edc80d42d40e856c3e5f32e4dea`. The X40's installed `/data/valetudo` remains unchanged and was last owner-confirmed running as PID 1752 with watchdog not running.
 
@@ -8,7 +17,7 @@ This consolidation brings in previously branch-only **sanitized historical resea
 **Caveat:** CI proves compilation/tests, **not** physical SmartHost acceptance, actual reclean or dock rewash. Keep `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=0` by default; do not run another hardware trial merely because branches were consolidated.
 
 ## Research archive
-- The feature branch's verified runtime and X40 handoff remain authoritative; the extra research docs/scripts are archival, not implementation requirements.
+- The consolidated master branch's verified guarded runtime and X40 handoff remain authoritative; the extra research docs/scripts are archival, not implementation requirements.
 - Missing `v70–v151` sanitized research reports and checks from the independent `v117` lineage are included as documentation.
 - Missing `v233–v237` sanitized reports and checkers are added from the later `v237` lineage.
 - Previous `stage9`, passive MIOT61, and the alternate v82 research checkpoint are preserved.
