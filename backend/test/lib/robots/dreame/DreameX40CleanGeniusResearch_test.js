@@ -10,6 +10,29 @@ test("experimental feature is opt-in", () => {
     assert.equal(research.isEnabled({VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS: "1"}), true);
 });
 
+test("first-trial UI exposes only the native CleanGenius mode", () => {
+    const robot = {ephemeralState: {mode: 0, taskStatus: 0}};
+    const quirks = research.createQuirks(robot);
+    assert.equal(quirks.length, 1);
+    assert.equal(quirks[0].id, research.SETTINGS[0].id);
+    assert.deepEqual(quirks[0].options, ["off", "routine", "deep"]);
+});
+
+test("Auto Reclean and Auto Rewash need a separate advanced opt-in", () => {
+    assert.equal(research.isAdvancedEnabled({}), false);
+    assert.equal(research.isAdvancedEnabled({
+        VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_ADVANCED: "1"
+    }), false);
+    assert.equal(research.isAdvancedEnabled({
+        VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS: "1"
+    }), false);
+    assert.equal(research.isAdvancedEnabled({
+        VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS: "1",
+        VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_ADVANCED: "1"
+    }), true);
+    assert.equal(research.createQuirks({}, {advanced: true}).length, 3);
+});
+
 test("rejects an unrecognized mode", () => {
     const definition = research.SETTINGS[0];
     assert.equal(research.decodeValue(1, definition), "routine");
@@ -158,7 +181,7 @@ test("concurrent selector writes are blocked across all three X40 quirks", async
             }
         }
     };
-    const quirks = research.createQuirks(robot);
+    const quirks = research.createQuirks(robot, {advanced: true});
     const first = quirks[0].setter("routine");
     await assert.rejects(
         () => quirks[2].setter("all_modes"),
@@ -206,7 +229,7 @@ test("R2416 observed 4:50 sentinel values do not cause an accidental write", asy
         }
     };
 
-    const [cleanGenius, autoReclean, autoRewash] = research.createQuirks(robot);
+    const [cleanGenius, autoReclean, autoRewash] = research.createQuirks(robot, {advanced: true});
     assert.equal(await cleanGenius.getter(), "off");
     assert.equal(await autoRewash.getter(), "off");
 
