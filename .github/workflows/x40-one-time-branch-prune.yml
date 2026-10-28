@@ -1,0 +1,63 @@
+name: One-time X40 branch consolidation prune
+on:
+  push:
+    branches: [master]
+    paths:
+      - docs/.x40-branch-prune-trigger-20261028
+permissions:
+  contents: write
+jobs:
+  prune:
+    if: github.repository == 'angelcode1/Valetudo-plus'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Check exact captured branch tips and reachable merge ancestry, then prune
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os
+          import re
+          import subprocess
+          from pathlib import Path
+
+          def cmd(*args):
+              return subprocess.check_output(args, text=True).strip()
+
+          manifest = Path("docs/BRANCH_CONSOLIDATION_20261028.md").read_text()
+          entries = re.findall(r"^\| `([^\x60]+)` \| `([0-9a-f]{40})` \|$", manifest, re.M)
+          if len(entries) != 91 or len({name for name, _ in entries}) != 91:
+              raise SystemExit("REFUSE: expected precisely 91 distinct captured refs")
+          listed = dict(entries)
+          if "master" not in listed:
+              raise SystemExit("REFUSE: missing master from manifest")
+          remote = cmd("git", "ls-remote", "--heads", "origin").splitlines()
+          actual = {name.removeprefix("refs/heads/"): sha for sha, name in
+                    (line.split("\t", 1) for line in remote)}
+          expected = {name: sha for name, sha in entries if name != "master"}
+          if len(expected) != 90:
+              raise SystemExit("REFUSE: unexpected stale-branch count")
+          for name, sha in expected.items():
+              if actual.get(name) != sha:
+                  raise SystemExit(f"REFUSE: branch moved/missing since capture: {name}")
+          if actual.get("master") != os.environ["GITHUB_SHA"]:
+              raise SystemExit("REFUSE: master moved during cleanup")
+          for name, sha in expected.items():
+              if subprocess.run(["git", "merge-base", "--is-ancestor", sha,
+                                 os.environ["GITHUB_SHA"]], check=False).returncode != 0:
+                  raise SystemExit(f"REFUSE: unpreserved ancestry: {name}")
+          print(f"PRECHECK PASS: {len(expected)} exact refs in canonical ancestry", flush=True)
+          for index, (name, sha) in enumerate(expected.items(), start=1):
+              # A deletion lease prevents accidentally removing a moved branch.
+              subprocess.run([
+                  "git", "push", f"--force-with-lease=refs/heads/{name}:{sha}",
+                  "origin", f":refs/heads/{name}"
+              ], check=True)
+              if index % 10 == 0:
+                  print(f"DELETED {index}/{len(expected)}", flush=True)
+          print("ALL 90 CAPTURED NON-MASTER REFS PRUNED", flush=True)
+          PY
