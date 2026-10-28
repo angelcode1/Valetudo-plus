@@ -1,6 +1,6 @@
 # X40 CleanGenius: engineering contract for future work
 
-**Current handoff (2026-10-28):** [X40 CleanGenius implementation handoff](docs/X40_CLEANGENIUS_HANDOFF_20261028.md). Read it before proposing new work. It records that the original Valetudo backup and an older staged binary are verified; a **corrected** config-compatible AArch64 candidate passed full CI at `ccaa64d` but has **not** been installed. No live activation yet.
+**Current handoff (2026-10-28):** [X40 CleanGenius implementation handoff](docs/X40_CLEANGENIUS_HANDOFF_20261028.md). Read it before proposing new work. **Two bounded candidate trials already happened**: `ccaa64d` displayed the experimental quirk but its mode change was blocked by the idle guard; `20377ec` displayed unavailable cached MIOT readings. The original Valetudo is confirmed restored after the second trial (`STATE=ORIGINAL ORIGINAL_PID=1752`, `WATCHDOG=NOT_RUNNING`). No `SmartHost=1` acceptance or automated cleaning behaviour was demonstrated. **Do not repeat the hardware trials by default.**
 
 **This file is a binding project instruction, not an optional research suggestion.**
 The owner has repeatedly asked for an actually working X40 CleanGenius feature and has explicitly objected to the same firmware-decoding rabbit hole occurring four times. Do not waste their time by repeating it.
@@ -28,7 +28,7 @@ The owner has repeatedly asked for an actually working X40 CleanGenius feature a
 - The feature branch based on `research/x40-cleangenius-v229-sensor-retention-20261027` already contains three opt-in X40 quirks for `SmartHost`, `SmartAutoMop`, and `SmartAutoWash`. The normal Gen2 parser intentionally writes `SmartHost=0` unless the X40 opt-in bypass is active.
 - `SmartHost=0`, `SmartAutoMop=-1`, `SmartAutoWash=0`, and `StainIdentify=1` were observed in a prior read-only X40 MIOT 4:50 response. The auto-reclean sentinel `-1` is unsupported by the existing setter; **never use this as evidence to turn it on**.
 - v290 establishes neither production scheduler enqueue, physical second floor pass, nor dock rewash. No X40 hardware activation was performed in this work.
-- The guarded **single-key SmartHost manual opt-in**, fresh idle check, verified readback, separate advanced-control gating, and explicit config-path compatibility are implemented and passed full CI at `ccaa64d`. The next action is to stage/verify the matching corrected candidate **separately** and agree on a safe, supervised one-session activation/rollback procedure. Do **not** start the older staged `99c984c` build.
+- The guarded **single-key SmartHost manual opt-in**, fresh idle check, verified readback, separate advanced-control gating, and explicit config-path compatibility are implemented and were CI-tested at `ccaa64d`. The experimental quirk appeared on a supervised robot, but no SmartHost activation was accepted. A later read-only `20377ec` trial produced unavailable cached observations; original recovery was confirmed. Subsequent source-only work must distinguish normal polling lifecycle from missing/invalid observations without weakening write safeguards, and receive CI verification before any deployment decision. Do not install older staged `99c984c` build.
 
 ## Acceptance criteria for next change
 
