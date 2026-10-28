@@ -130,3 +130,67 @@ test("X40 poll failure after a success clears prior readings and reports failed"
     assert.equal(output.cachedIdle.cachedGuardMatch, false);
     assert.equal(JSON.stringify(output).includes("PRIVATE_DEVICE_FAILURE"), false);
 });
+
+test("an older failed poll cannot erase newer completed health or cached readings", async () => {
+    const robot = Object.create(DreameX40UltraValetudoRobot.prototype);
+    robot.state = {attributes: []};
+    robot.statePropertiesToPoll = [];
+    robot.x40CleanGeniusObservation = null;
+    robot.x40DockWashObservation = null;
+    robot.x40CachedIdleObservation = null;
+    robot.parseAndUpdateState = () => {};
+    let rejectOlder;
+    const olderResponse = new Promise((resolve, reject) => {
+        rejectOlder = reject;
+    });
+    let calls = 0;
+    robot.miotHelper = {readProperties: async () => {
+        calls++;
+        return calls === 1 ? olderResponse : [];
+    }};
+
+    const older = robot.pollState();
+    await robot.pollState();
+    assert.equal(robot.getCleanGeniusReadOnlyStatus().pollHealth.state, "succeeded");
+    const latestObservation = {observedAtMs: Date.now(), mode: 6, taskStatus: 0};
+    robot.x40CachedIdleObservation = latestObservation;
+
+    const olderRejection = assert.rejects(older, /Older simulated transport failure/);
+    rejectOlder(new Error("Older simulated transport failure"));
+    await olderRejection;
+
+    assert.equal(calls, 2);
+    assert.equal(robot.getCleanGeniusReadOnlyStatus().pollHealth.state, "succeeded");
+    assert.equal(robot.x40CachedIdleObservation, latestObservation);
+});
+
+test("an older successful poll cannot overwrite a newer failed poll health state", async () => {
+    const robot = Object.create(DreameX40UltraValetudoRobot.prototype);
+    robot.state = {attributes: []};
+    robot.statePropertiesToPoll = [];
+    robot.x40CleanGeniusObservation = null;
+    robot.x40DockWashObservation = null;
+    robot.x40CachedIdleObservation = null;
+    robot.parseAndUpdateState = () => {};
+    let resolveOlder;
+    const olderResponse = new Promise(resolve => {
+        resolveOlder = resolve;
+    });
+    let calls = 0;
+    robot.miotHelper = {readProperties: async () => {
+        calls++;
+        if (calls === 1) {
+            return olderResponse;
+        }
+        throw new Error("Latest simulated poll failed");
+    }};
+
+    const older = robot.pollState();
+    await assert.rejects(() => robot.pollState(), /Latest simulated poll failed/);
+    assert.equal(robot.getCleanGeniusReadOnlyStatus().pollHealth.state, "failed");
+    resolveOlder([]);
+    await older;
+    assert.equal(calls, 2);
+    assert.equal(robot.getCleanGeniusReadOnlyStatus().pollHealth.state, "failed");
+    assert.equal(robot.getCleanGeniusReadOnlyStatus().cachedIdle.cachedGuardMatch, false);
+});
