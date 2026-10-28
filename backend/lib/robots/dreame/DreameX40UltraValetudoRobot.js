@@ -353,6 +353,9 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
         this.x40CleanGeniusObservation = null;
         this.x40DockWashObservation = null;
         this.x40CachedIdleObservation = null;
+        // Tracks existing normal state polls only. The read-only status route
+        // never initiates MIOT calls or reveals transport errors/credentials.
+        this.x40PollHealth = {state: "not_started", lastAttemptAtMs: null};
         this.allowExperimentalCleanGenius = X40CleanGeniusResearch.isEnabled();
         const experimentalQuirks = this.allowExperimentalCleanGenius ?
             X40CleanGeniusResearch.createQuirks(this, {
@@ -392,16 +395,22 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
     }
 
     async pollState() {
+        // This is the existing state polling path. Observing its lifecycle
+        // does not add any MIOT reads, retries, or changes to the idle guard.
+        this.x40PollHealth = {state: "in_progress", lastAttemptAtMs: Date.now()};
         try {
-            return await super.pollState();
+            const state = await super.pollState();
+            // Success only means the existing transport poll completed.
+            // Missing or invalid 4:50/4:1/4:7 data stays unavailable.
+            this.x40PollHealth = {state: "succeeded", lastAttemptAtMs: Date.now()};
+            return state;
         } catch (err) {
-            // A failed MIOT transport poll must immediately invalidate both
-            // read-only snapshots, rather than leave their former values looking
-            // current during the freshness grace period. Preserve the error
-            // for the existing Valetudo polling/error handling.
+            // Clear cached observations on transport/parse errors; don't expose
+            // private error strings or imply a valid state after failure.
             this.x40CleanGeniusObservation = null;
             this.x40DockWashObservation = null;
             this.x40CachedIdleObservation = null;
+            this.x40PollHealth = {state: "failed", lastAttemptAtMs: Date.now()};
             throw err;
         }
     }
@@ -413,7 +422,14 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
                 experimentalEnabled: this.allowExperimentalCleanGenius
             }),
             dockWashActivity: X40DockWashReadOnlyStatus.buildStatus(this.x40DockWashObservation, nowMs),
-            cachedIdle: X40CachedIdleReadOnlyStatus.buildStatus(this.x40CachedIdleObservation, nowMs)
+            cachedIdle: X40CachedIdleReadOnlyStatus.buildStatus(this.x40CachedIdleObservation, nowMs),
+            // No robot I/O. Deliberately show poll success separately from the
+            // two cached observation validity/freshness states.
+            pollHealth: {
+                state: this.x40PollHealth?.state ?? "not_started",
+                lastAttemptAt: Number.isSafeInteger(this.x40PollHealth?.lastAttemptAtMs) ?
+                    new Date(this.x40PollHealth.lastAttemptAtMs).toISOString() : null
+            }
         };
     }
 
