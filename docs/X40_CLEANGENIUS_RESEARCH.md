@@ -1,5 +1,7 @@
 # Experimental X40 native CleanGenius research
 
+> **2026-10-28 DELIVERY OVERRIDE:** The owner has rejected further serial firmware-decoding loops after v290. All older “next investigation” sections below are historical research notes, **not an active task list**. Future work MUST follow [AGENTS.md](../AGENTS.md) and the [supervised activation implementation plan](./X40_CLEANGENIUS_SUPERVISED_ENABLEMENT.md). No v291-style offline collector chain. Work only on X40 native mode code, tests, one supervised user-authorized acceptance test, or a clear stop decision. Native SmartHost toggle support is code-implemented but **not hardware-validated**. Auto-reclean, scheduler enqueue, second pass and dock rewash are not proven.
+
 This branch is derived from Valetudo+ and remains synced to its upstream Valetudo ancestor at the fork point. No automatic firmware flashing, native process replacement, cloud access, or device actions are added.
 
 ## Default behaviour
