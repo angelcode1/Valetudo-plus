@@ -53,9 +53,15 @@ test("docked-looking cached mode remains blocked with bounded diagnostic, no MIO
     const robot = {
         ephemeralState: {mode: 6, taskStatus: 0},
         miotHelper: {
-            readProperty: async () => { calls++; },
-            readProperties: async () => { calls++; },
-            writeProperty: async () => { calls++; }
+            readProperty: async () => {
+                calls++;
+            },
+            readProperties: async () => {
+                calls++;
+            },
+            writeProperty: async () => {
+                calls++;
+            }
         }
     };
     await assert.rejects(
@@ -70,9 +76,15 @@ test("string-typed cached status is reported but not accepted or written", async
     const robot = {
         ephemeralState: {mode: "0", taskStatus: "0"},
         miotHelper: {
-            readProperty: async () => { calls++; },
-            readProperties: async () => { calls++; },
-            writeProperty: async () => { calls++; }
+            readProperty: async () => {
+                calls++;
+            },
+            readProperties: async () => {
+                calls++;
+            },
+            writeProperty: async () => {
+                calls++;
+            }
         }
     };
     await assert.rejects(
