@@ -54,7 +54,7 @@
     "get": {
       "tags": ["Robot"],
       "summary": "Get cached X40 CleanGenius settings (read-only)",
-      "description": "X40 Ultra only (404 on other models). Uses the normal MIOT 4:50 state poll cache; does not perform an additional robot read or any write. Values represent observed native settings, not live mop dirtiness or wash-water turbidity. Unknown numeric sentinels are preserved as unknown. Stale observations are explicitly marked.",
+      "description": "X40 Ultra only (404 on other models). Returns passive normal-poll lifecycle (not started, in progress, succeeded, failed) and cached 4:50/4:1/4:7 state without robot I/O. Successful poll completion does not imply valid MIOT settings or idle state. Unknown numeric sentinels are preserved; stale observations are explicitly marked. Does not perform any additional read or write.",
       "responses": {
         "200": {
           "description": "A redacted allowlisted status observation or unavailable state",
@@ -76,6 +76,14 @@
                     "description": "Only cleanGenius, autoReclean, autoRewash, stainIdentification, hotWash; each has value (integer or null) and state (known interpretation or unknown/unavailable)"
                   },
                   "nativeMopDirtiness": {"type": "string"},
+                  "pollHealth": {
+                    "type": "object",
+                    "description": "Read-only lifecycle of existing normal state polls; this status route does not trigger a new MIOT request. A completed poll does not prove individual properties valid.",
+                    "properties": {
+                      "state": {"type": "string", "enum": ["not_started", "in_progress", "succeeded", "failed"]},
+                      "lastAttemptAt": {"type": "string", "nullable": true, "format": "date-time"}
+                    }
+                  },
                   "cachedIdle": {
                     "type": "object",
                     "description": "Passive allowlisted raw MODE 4:1 and TASK_STATUS 4:7 from existing poll cache only. NOT authorization to write; does not make a new MIOT read.",
