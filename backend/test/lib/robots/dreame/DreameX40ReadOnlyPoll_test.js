@@ -58,6 +58,8 @@ test("X40 read-only status distinguishes no poll from a completed poll missing o
     robot.x40CleanGeniusObservation = null;
     robot.x40DockWashObservation = null;
     robot.x40CachedIdleObservation = null;
+    // This test exercises poll lifecycle, not the Gen2 state/event parser.
+    robot.parseAndUpdateState = () => {};
     const before = robot.getCleanGeniusReadOnlyStatus();
     assert.equal(before.pollHealth.state, "not_started");
     assert.equal(before.pollHealth.lastAttemptAt, null);
@@ -82,6 +84,8 @@ test("X40 read-only status shows poll in progress without a second MIOT request"
     robot.x40CleanGeniusObservation = null;
     robot.x40DockWashObservation = null;
     robot.x40CachedIdleObservation = null;
+    // This test exercises poll lifecycle, not the Gen2 state/event parser.
+    robot.parseAndUpdateState = () => {};
     let calls = 0;
     let release;
     const gated = new Promise(resolve => {
@@ -111,6 +115,8 @@ test("X40 poll failure after a success clears prior readings and reports failed"
     robot.x40CleanGeniusObservation = null;
     robot.x40DockWashObservation = null;
     robot.x40CachedIdleObservation = null;
+    // This test exercises poll lifecycle, not the Gen2 state/event parser.
+    robot.parseAndUpdateState = () => {};
     robot.miotHelper = {readProperties: async () => []};
     await robot.pollState();
     assert.equal(robot.getCleanGeniusReadOnlyStatus().pollHealth.state, "succeeded");
