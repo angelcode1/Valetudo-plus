@@ -76,6 +76,19 @@
                     "description": "Only cleanGenius, autoReclean, autoRewash, stainIdentification, hotWash; each has value (integer or null) and state (known interpretation or unknown/unavailable)"
                   },
                   "nativeMopDirtiness": {"type": "string"},
+                  "cachedIdle": {
+                    "type": "object",
+                    "description": "Passive allowlisted raw MODE 4:1 and TASK_STATUS 4:7 from existing poll cache only. NOT authorization to write; does not make a new MIOT read.",
+                    "properties": {
+                      "source": {"type": "string", "enum": ["cached_miot_4_1_4_7"]},
+                      "state": {"type": "string", "enum": ["observed", "stale", "unavailable"]},
+                      "observedAt": {"type": "string", "nullable": true, "format": "date-time"},
+                      "ageMs": {"type": "integer", "nullable": true},
+                      "mode": {"type": "integer", "nullable": true},
+                      "taskStatus": {"type": "integer", "nullable": true},
+                      "cachedGuardMatch": {"type": "boolean"}
+                    }
+                  },
                   "dockWashActivity": {
                     "type": "object",
                     "description": "Read-only, bounded changes in already-polled MIOT mop-dock status. NOT measured mop dirtiness, water turbidity or proven rewash decisions.",
