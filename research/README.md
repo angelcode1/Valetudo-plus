@@ -24,7 +24,7 @@
 | Workflow files preserved | `nodejs.yml`, `manual_build.yml`, `release.yml`, `codeql-analysis.yml` |
 | Code/CI checkpoint | `177aa2526a0144f584475862fe8f087012e68d75` passed [full Node.js CI 40657258670](https://github.com/angelcode1/Valetudo-plus/actions/runs/40657258670); parent `master` moved just one **documentation-only** commit to `ef49d2e` |
 
-**No stale branches remain to delete from the pre-cleanup set.** Preserve `master` and this branch. If future stale branches appear, archive their complete tip SHAs and verify ancestry/unique files, CI and PR dependencies *before* deleting any ref; do not force-push either of these two retained branches.
+**No stale branches remain to delete from the pre-cleanup set.** Preserve `master` and this branch. An independent 2026-10-29 ancestry spot-check confirmed three former branch tips are exact merge bases (behind=0): `190aae591d90daa944eecce66bc0cd6fc1376829`, `661fd0184e728edc80d42d40e856c3e5f32e4dea`, and `49fa743d4bb9f54d84a2d2ea0ff0d779bd632f73`. If future stale branches appear, archive their complete tip SHAs and verify ancestry/unique files, CI and PR dependencies *before* deleting any ref; do not force-push either of these two retained branches.
 
 ## Current X40 CleanGenius verdict (highest-priority finding)
 
@@ -68,9 +68,10 @@ git branch -r
 git merge-base --is-ancestor ef49d2e558e4c190d5c4a0f9d7e985d356d0a0f4 origin/research/consolidated
 git diff --stat origin/master...origin/research/consolidated
 git log --format='%h %s' --max-count=12 origin/research/consolidated
-# Optional: inspect any original branch tip from docs/BRANCH_CONSOLIDATION_20261028.md
-git cat-file -t <old-tip-sha>
-git merge-base --is-ancestor <old-tip-sha> origin/research/consolidated
+# Optional: set OLD_SHA to a captured hash from the preservation manifest
+OLD_SHA=190aae591d90daa944eecce66bc0cd6fc1376829
+git cat-file -t "$OLD_SHA"
+git merge-base --is-ancestor "$OLD_SHA" origin/research/consolidated
 ```
 
 Research commits belong on this branch; do not re-add superseded workflow files, branch proliferation, private firmware blobs, credentials, raw vacuum config, maps, cameras, or robot artifacts. Any future findings should update **this page first** with a dated decision and link to a sanitized, reproducible technical record.
