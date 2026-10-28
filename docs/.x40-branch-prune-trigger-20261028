@@ -1,0 +1,4 @@
+One-time trigger for 2026-10-28 branch consolidation.
+Verified consolidated tree: 71ce9f2ddc63d01d9afc49463cc8df276ab2bfd3
+Reference snapshot: docs/BRANCH_CONSOLIDATION_20261028.md
+Do not repeat the branch-prune workflow without explicit review.
