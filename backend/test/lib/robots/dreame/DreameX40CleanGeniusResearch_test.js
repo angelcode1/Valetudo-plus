@@ -76,7 +76,9 @@ test("MIOT accepted write without matching readback is an error; no retry", asyn
         miotHelper: {
             readProperties: async properties => properties.map(p => ({...p, code: 0, value: 0})),
             readProperty: async () => JSON.stringify([{k: "SmartHost", v: 0}]),
-            writeProperty: async () => { writes++; }
+            writeProperty: async () => {
+                writes++;
+            }
         }
     };
     await assert.rejects(
@@ -98,7 +100,9 @@ test("readback transport failure is surfaced without writing twice", async () =>
                 if (reads === 2) { throw new Error("readback unavailable"); }
                 return JSON.stringify([{k: "SmartHost", v: 0}]);
             },
-            writeProperty: async () => { writes++; }
+            writeProperty: async () => {
+                writes++;
+            }
         }
     };
     await assert.rejects(
@@ -118,7 +122,9 @@ test("state changing during initial read blocks a write", async () => {
                 robot.ephemeralState.taskStatus = 1;
                 return JSON.stringify([{k: "SmartHost", v: 0}]);
             },
-            writeProperty: async () => { writes++; }
+            writeProperty: async () => {
+                writes++;
+            }
         }
     };
     await assert.rejects(
@@ -130,7 +136,9 @@ test("state changing during initial read blocks a write", async () => {
 
 test("concurrent selector writes are blocked across all three X40 quirks", async () => {
     let releaseRead;
-    const gate = new Promise(resolve => { releaseRead = resolve; });
+    const gate = new Promise(resolve => {
+        releaseRead = resolve;
+    });
     let writes = 0;
     const robot = {
         ephemeralState: {mode: 0, taskStatus: 0},
@@ -143,7 +151,9 @@ test("concurrent selector writes are blocked across all three X40 quirks", async
                     {k: "SmartAutoWash", v: 0}
                 ]);
             },
-            writeProperty: async () => { writes++; }
+            writeProperty: async () => {
+                writes++;
+            }
         }
     };
     const quirks = research.createQuirks(robot);
@@ -213,7 +223,9 @@ test("fresh status validation prevents writes from constructor's unobserved idle
             readProperties: async properties => properties.map(p => ({
                 ...p, code: 0, value: p.piid === 7 ? 1 : 0
             })),
-            writeProperty: async () => { writes++; }
+            writeProperty: async () => {
+                writes++;
+            }
         }
     };
     await assert.rejects(
@@ -229,8 +241,12 @@ test("unavailable fresh status aborts without modifying the robot", async () => 
         ephemeralState: {mode: 0, taskStatus: 0},
         miotHelper: {
             readProperty: async () => JSON.stringify([{k: "SmartHost", v: 0}]),
-            readProperties: async () => { throw new Error("get_properties unavailable"); },
-            writeProperty: async () => { writes++; }
+            readProperties: async () => {
+                throw new Error("get_properties unavailable");
+            },
+            writeProperty: async () => {
+                writes++;
+            }
         }
     };
     await assert.rejects(
@@ -254,7 +270,9 @@ test("malformed or mismatched fresh status response cannot enable SmartHost", as
             miotHelper: {
                 readProperty: async () => JSON.stringify([{k: "SmartHost", v: 0}]),
                 readProperties: async () => observations,
-                writeProperty: async () => { writes++; }
+                writeProperty: async () => {
+                    writes++;
+                }
             }
         };
         await assert.rejects(
