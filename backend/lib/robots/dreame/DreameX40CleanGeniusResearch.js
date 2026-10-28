@@ -68,6 +68,10 @@ async function readSettings(robot) {
 }
 
 function createQuirks(robot) {
+    // All three selectors share one MIOT 4:50 property; serialize UI writes.
+    // This is a manual, supervised operation. It never runs at startup.
+    let changeInProgress = false;
+
     return SETTINGS.map(definition => {
         return new Quirk({
             id: definition.id,
@@ -80,32 +84,63 @@ function createQuirks(robot) {
                 return decodeValue(data[definition.key], definition);
             },
             setter: async value => {
-                // Never write with an unsupported setting, unknown status or active task.
                 if (!Object.prototype.hasOwnProperty.call(definition.values, value)) {
                     throw new Error(`Invalid ${definition.key} selection: ${value}`);
                 }
                 if (!isIdle(robot)) {
                     throw new Error(`The X40 must be idle before changing ${definition.key}`);
                 }
-
-                // Ensure this particular firmware advertises the property and value.
-                const current = await readSettings(robot);
-                decodeValue(current[definition.key], definition);
-
-                const target = definition.values[value];
-                if (current[definition.key] === target) {
-                    return;
+                if (changeInProgress) {
+                    throw new Error("Another X40 CleanGenius setting change is in progress");
                 }
 
-                // Single-key delta, not a write of the entire AutoSwitch blob.
-                // Matches Valetudo's existing Dreame quirks and Tasshack's protocol.
-                await robot.miotHelper.writeProperty(
-                    SIID,
-                    PIID,
-                    DreameUtils.SERIALIZE_MISC_TUNABLES_SINGLE_TUNABLE({
-                        [definition.key]: target
-                    })
-                );
+                changeInProgress = true;
+                try {
+                    // Do not write unsupported firmware values (including -1
+                    // SmartAutoMop) or an absent setting.
+                    const current = await readSettings(robot);
+                    decodeValue(current[definition.key], definition);
+
+                    // Polls are asynchronous: a cleaning task may begin during
+                    // the MIOT read. Re-check immediately before the write.
+                    if (!isIdle(robot)) {
+                        throw new Error(`The X40 is no longer idle; ${definition.key} was not written`);
+                    }
+
+                    const target = definition.values[value];
+                    if (current[definition.key] === target) {
+                        return;
+                    }
+
+                    // Never send a whole AutoSwitch blob or retry on error.
+                    await robot.miotHelper.writeProperty(
+                        SIID,
+                        PIID,
+                        DreameUtils.SERIALIZE_MISC_TUNABLES_SINGLE_TUNABLE({
+                            [definition.key]: target
+                        })
+                    );
+
+                    // A MIOT transport acknowledgement is not confirmation
+                    // that the new setting has actually persisted.
+                    // If readback fails, the write may still have applied;
+                    // do not retry automatically or attempt blind rollback.
+                    const observed = await readSettings(robot);
+                    if (observed[definition.key] !== target) {
+                        throw new Error(
+                            `X40 ${definition.key} readback mismatch after write; ` +
+                            "actual firmware setting is unverified"
+                        );
+                    }
+                    if (!isIdle(robot)) {
+                        throw new Error(
+                            `X40 ${definition.key} read back, but task state changed; ` +
+                            "check the robot before continuing"
+                        );
+                    }
+                } finally {
+                    changeInProgress = false;
+                }
             }
         });
     });
