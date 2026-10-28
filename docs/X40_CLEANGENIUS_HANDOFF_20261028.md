@@ -2,6 +2,20 @@
 
 **Read this before doing any work on X40 CleanGenius.** This handoff supplements the binding [AGENTS.md](../AGENTS.md) anti-rabbit-hole instructions and [supervised enablement runbook](./X40_CLEANGENIUS_SUPERVISED_ENABLEMENT.md). It records actual owner-confirmed device results and code/build status. Do **not** restart v291-style binary reverse-engineering, run more firmware collector kits, overwrite the live Valetudo installation, or assume an artifact was installed because CI passed.
 
+## Latest supervised device result — 2026-10-28 (supersedes earlier pending-install status)
+
+The user completed the staged `ccaa64d` supervised X40 trial and successfully restored the original service. These results are newer than the initial handoff below.
+
+- Original boot recovery was verified through an actual reboot (original PID changed 1814 to 1773, checksums remained intact). The corrected `ccaa64d` candidate was staged with SHA-256 `28203537e31913f2ad94901e780fa23da3036dbb8e0e9f6b669116c51ef44cc8`.
+- Isolated trial config/data copies passed integrity checks; the original executable, configuration and postboot remained unchanged.
+- The independent detached-watchdog smoke test passed. The attended switch reported `TRIAL_STARTED=PASS CANDIDATE_PID=6547` and armed a bounded normal-reboot watchdog. The X40 experimental CleanGenius selector appeared under Quirks.
+- **The one attempted Routine selection was blocked before any MIOT write:** `The X40 must be idle before changing SmartHost`. The UI still displayed `off`. Read-only page showed `SmartHost=0`, `SmartAutoMop=-1`, `SmartAutoWash=0`, `StainIdentify=1`, and mop dock idle; this dock observation does **not** establish native mode/task status or a successful mode transition.
+- **Original recovery confirmed** from the user: `STATE=ORIGINAL ORIGINAL_PID=1788`, `WATCHDOG=NOT_RUNNING`. **Do not ask to run restore again for that completed session**. No accepted SmartHost transition, physical second pass, or automatic rewash was demonstrated.
+- **Source insight:** Gen2 `STATUS_MAP` may present nonzero raw mode values as *docked*/*idle*, while the experimental `isIdle` requires cached raw `mode===0 && taskStatus===0`. The actual cached raw values at rejection were not captured; do not assume the robot was truly idle or weaken this safety gate based on the UI alone.
+- After this result a strictly diagnostic-only change was committed to the draft feature PR: cache-only numeric mode/task reporting on idle rejection, and two no-MIOT-call regression tests. Latest diagnostic/test source commit: `73312a862a0db897f8f56806bf59b262d6441bf5`. **This commit's CI/artifact must be independently verified before any future hardware test.** The original `ccaa64d` CI artifact remains the validated source of the first trial, but cannot produce the new error details.
+
+**Next decision:** Use at most one new bounded, supervised run with a freshly CI-verified diagnostic candidate to identify the raw cached mode/task; if the firmware reports a legitimate active task, park until idle. If the firmware reports a nonzero docked mode, determine the safe semantics before considering a guarded implementation change. No automatic MIOT writes, no repeated blind attempts, no new firmware collector loop. Maintain original executable, isolated config, watchdog and verified reboot recovery.
+
 ## Immediate objective and boundary
 
 Move from an offline-tested native mode selector to **one bounded, supervised, reversible X40 R2416 hardware acceptance test**. Demonstrate `SmartHost=1` accepts and reads back, verify ordinary robot controls remain operational, then restore `SmartHost=0` and the working Valetudo process. This is **not** proof of stain-triggered second-pass cleaning or dock rewash, which remain unimplemented/unverified. No automatic robot commands or new research detour without an implementation decision.
