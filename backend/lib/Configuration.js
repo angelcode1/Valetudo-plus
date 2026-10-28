@@ -2,11 +2,10 @@ const Ajv = require("ajv");
 const EventEmitter = require("events").EventEmitter;
 const fs = require("fs");
 const nestedObjectAssign = require("nested-object-assign");
-const os = require("os");
 const path = require("path");
 
 const DEFAULT_SETTINGS = require("./res/default_config.json");
-const env = require("./res/env");
+const resolveConfigLocation = require("./res/resolveConfigLocation");
 const Logger = require("./Logger");
 const SCHEMAS = require("./doc/Configuration.openapi.json");
 const Tools = require("./utils/Tools");
@@ -18,7 +17,7 @@ class Configuration {
         this.eventEmitter = new EventEmitter();
         this.settings = structuredClone(DEFAULT_SETTINGS);
 
-        this.location = path.join(process.env[env.DataPath] ?? os.tmpdir(), "valetudo_config.json");
+        this.location = resolveConfigLocation();
 
         this.loadConfig();
     }
