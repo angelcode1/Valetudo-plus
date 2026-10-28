@@ -759,6 +759,11 @@ export interface X40CachedIdleStatus {
     cachedGuardMatch: boolean;
 }
 
+export interface X40StatePollHealth {
+    state: "not_started" | "in_progress" | "succeeded" | "failed";
+    lastAttemptAt: string | null;
+}
+
 export interface X40CleanGeniusReadOnlyStatus {
     source: "miot_4_50";
     readOnly: true;
@@ -778,4 +783,5 @@ export interface X40CleanGeniusReadOnlyStatus {
     nativeMopDirtiness: "unavailable_no_verified_local_status_interface";
     dockWashActivity: X40DockWashActivity;
     cachedIdle: X40CachedIdleStatus;
+    pollHealth: X40StatePollHealth;
 }
