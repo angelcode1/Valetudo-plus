@@ -2,6 +2,16 @@
 
 **Read this before doing any work on X40 CleanGenius.** This handoff supplements the binding [AGENTS.md](../AGENTS.md) anti-rabbit-hole instructions and [supervised enablement runbook](./X40_CLEANGENIUS_SUPERVISED_ENABLEMENT.md). It records actual owner-confirmed device results and code/build status. Do **not** restart v291-style binary reverse-engineering, run more firmware collector kits, overwrite the live Valetudo installation, or assume an artifact was installed because CI passed.
 
+## New code-only fix: report normal MIOT poll lifecycle — 2026-10-28
+
+The original X40 is **still confirmed restored** after the second trial (`STATE=ORIGINAL ORIGINAL_PID=1752`, `WATCHDOG=NOT_RUNNING`). No new robot operations were run for this change.
+
+- Issue: the read-only `/api/v2/robot/clean-genius/status` route does not initiate a normal MIOT poll. An empty status page on a newly started Valetudo process cannot distinguish "never polled" from a transport failure or a completed but incomplete/invalid reading.
+- Implemented source change (pinned functional commit `c2ca9b9554d2016bfec97050f0220f0ec07978ed`): X40's existing `pollState()` now tracks `not_started`, `in_progress`, `succeeded`, `failed`, and last-attempt timestamp **without any new MIOT calls**. On error it still invalidates all three X40 cached observations and rethrows the original error; neither error text nor credentials appear in the status API. Success records poll completion **not** proof of valid 4:50/4:1/4:7 observations.
+- API adds a passive `pollHealth` property to CleanGenius read-only status; TypeScript API types, OpenAPI and the CleanGenius Status UI reflect the same contract. UI explicitly warns if a poll succeeded but settings or cached mode/task readings remain absent, invalid or stale. It does not send a separate state poll or CleanGenius command.
+- Backend fake-helper regression tests cover never-polled, pending poll, completed-without-valid-readings, failed after success with snapshot invalidation, and privacy of error reporting. Safety-critical `SmartHost` cached/fresh-idle guards, one-key writes, opt-in default and advanced controls remain unchanged.
+- <https://github.com/angelcode1/Valetudo-plus/actions/runs/40651539474> is the corresponding full Node.js CI run; **verify its final conclusion before treating the new code as built**. No artifact from this update is authorized for hardware deployment. The draft PR remains unmerged and device acceptance is still blocked pending a separate, justified decision. No more automatic collector or supervised repetition is planned.
+
 ## Read-only 20377ec hardware trial — recovered, diagnostic inconclusive (2026-10-28)
 
 The owner reported the following exact checks for the already-validated `20377ec` candidate: local ZIP/executable SHA-256 PASS, separate staging under `/data/valetudo.cg-20377ec`, isolated config/data preparation PASS, readiness PASS on original PID 1788, detached watchdog smoke PASS, and an attended trial start reporting `TRIAL_STARTED=PASS CANDIDATE_PID=7402`, `WATCHDOG_ARMED=YES`. No MIOT write or CleanGenius mode change was reported for this session.
