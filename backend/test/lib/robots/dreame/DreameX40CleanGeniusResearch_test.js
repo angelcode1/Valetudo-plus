@@ -47,6 +47,41 @@ test("fails closed when task or mode is unknown/active", () => {
     assert.equal(research.isIdle({ephemeralState: {mode: 0, taskStatus: 1}}), false);
 });
 
+
+test("docked-looking cached mode remains blocked with bounded diagnostic, no MIOT calls", async () => {
+    let calls = 0;
+    const robot = {
+        ephemeralState: {mode: 6, taskStatus: 0},
+        miotHelper: {
+            readProperty: async () => { calls++; },
+            readProperties: async () => { calls++; },
+            writeProperty: async () => { calls++; }
+        }
+    };
+    await assert.rejects(
+        () => research.createQuirks(robot)[0].setter("routine"),
+        /cached mode=6, taskStatus=0; no write attempted/
+    );
+    assert.equal(calls, 0);
+});
+
+test("string-typed cached status is reported but not accepted or written", async () => {
+    let calls = 0;
+    const robot = {
+        ephemeralState: {mode: "0", taskStatus: "0"},
+        miotHelper: {
+            readProperty: async () => { calls++; },
+            readProperties: async () => { calls++; },
+            writeProperty: async () => { calls++; }
+        }
+    };
+    await assert.rejects(
+        () => research.createQuirks(robot)[0].setter("routine"),
+        /cached mode=0 \\(string\\), taskStatus=0 \\(string\\); no write attempted/
+    );
+    assert.equal(calls, 0);
+});
+
 test("quirk rejects active cleaning without writing", async () => {
     let writes = 0;
     const robot = {
