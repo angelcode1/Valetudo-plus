@@ -353,7 +353,9 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
         this.x40DockWashObservation = null;
         this.allowExperimentalCleanGenius = X40CleanGeniusResearch.isEnabled();
         const experimentalQuirks = this.allowExperimentalCleanGenius ?
-            X40CleanGeniusResearch.createQuirks(this) : [];
+            X40CleanGeniusResearch.createQuirks(this, {
+                advanced: X40CleanGeniusResearch.isAdvancedEnabled()
+            }) : [];
 
         this.registerCapability(new QuirksCapability({
             robot: this,
