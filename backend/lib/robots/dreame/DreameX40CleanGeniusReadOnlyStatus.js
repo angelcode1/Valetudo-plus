@@ -95,7 +95,8 @@ function buildStatus(observation, options = {}) {
         ageMs: ageMs,
         stale: stale,
         valetudoPolicy: options.experimentalEnabled === true ?
-            "experimental_controls_opted_in" : "auto_disable_smart_host_when_positive",
+            "experimental_controls_opted_in" : (options.observeOnly === true ?
+                "observe_only_preserve_smart_host" : "auto_disable_smart_host_when_positive"),
         // The native controller may have been commanded off after this poll;
         // these are observed settings, not a verified effective cleaning mode.
         settings: ageMs === null ? unavailableFields() : (observation?.fields ?? unavailableFields()),

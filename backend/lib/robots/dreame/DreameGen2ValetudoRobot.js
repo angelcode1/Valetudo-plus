@@ -47,6 +47,7 @@ class DreameGen2ValetudoRobot extends DreameValetudoRobot {
         // Default safety policy: Gen2 disables native SmartHost when observed
         // positive. Only the X40 research implementation may explicitly opt in.
         this.allowExperimentalCleanGenius = false;
+        this.allowCleanGeniusObserveOnly = false;
 
         this.highResolutionWaterGrades = !!options.highResolutionWaterGrades;
         this.waterGrades = this.highResolutionWaterGrades ? DreameGen2ValetudoRobot.HIGH_RESOLUTION_WATER_GRADES : DreameValetudoRobot.WATER_GRADES;
@@ -562,7 +563,8 @@ class DreameGen2ValetudoRobot extends DreameValetudoRobot {
                         case DreameGen2ValetudoRobot.MIOT_SERVICES.VACUUM_2.PROPERTIES.MISC_TUNABLES.PIID: {
                             const deserializedTunables = DreameUtils.DESERIALIZE_MISC_TUNABLES(elem.value);
 
-                            if (deserializedTunables.SmartHost > 0 && !this.allowExperimentalCleanGenius) {
+                            if (deserializedTunables.SmartHost > 0 && !this.allowExperimentalCleanGenius &&
+                                !this.allowCleanGeniusObserveOnly) {
                                 Logger.info("Disabling CleanGenius");
                                 // CleanGenius breaks most controls in Valetudo without any user feedback
                                 // Thus, we just automatically disable it instead of making every functionality aware of it

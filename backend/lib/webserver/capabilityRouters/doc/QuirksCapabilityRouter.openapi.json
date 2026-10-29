@@ -11,25 +11,39 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string"
-                  },
-                  "options": {
-                    "type": "array",
-                    "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
                       "type": "string"
+                    },
+                    "options": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    },
+                    "readOnly": {
+                      "type": "boolean"
+                    },
+                    "rawValue": {
+                      "type": "integer",
+                      "nullable": true
+                    },
+                    "unavailableReason": {
+                      "type": "string",
+                      "nullable": true
                     }
-                  },
-                  "title": {
-                    "type": "string"
-                  },
-                  "description": {
-                    "type": "string"
-                  },
-                  "value": {
-                    "type": "string"
                   }
                 }
               }

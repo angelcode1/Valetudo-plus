@@ -1,5 +1,5 @@
 import axios from "axios";
-import type {X40CleanGeniusReadOnlyStatus} from "./types";
+import type {X40CleanGeniusPreflight, X40CleanGeniusReadOnlyStatus} from "./types";
 import { RawMapData } from "./RawMapData";
 import {PresetSelectionState, PresetValue, RobotAttribute} from "./RawRobotState";
 import {
@@ -1530,4 +1530,9 @@ export const fetchX40CleanGeniusStatus = async (): Promise<X40CleanGeniusReadOnl
     return valetudoAPI.get<X40CleanGeniusReadOnlyStatus>("/robot/clean-genius/status").then(({data}) => {
         return data;
     });
+};
+
+/** One explicit read-only X40 preflight; never used as write authorization. */
+export const fetchX40CleanGeniusPreflight = async (): Promise<X40CleanGeniusPreflight> => {
+    return valetudoAPI.get<X40CleanGeniusPreflight>("/robot/clean-genius/preflight").then(({data}) => data);
 };

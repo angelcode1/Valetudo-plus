@@ -1,10 +1,11 @@
 const capabilities = require("./capabilities");
-const X40CleanGeniusResearch = require("./DreameX40CleanGeniusResearch");
-const X40CleanGeniusReadOnlyStatus = require("./DreameX40CleanGeniusReadOnlyStatus");
-const X40CachedIdleReadOnlyStatus = require("./DreameX40CachedIdleReadOnlyStatus");
-const X40DockWashReadOnlyStatus = require("./DreameX40DockWashReadOnlyStatus");
 const DreameGen2ValetudoRobot = require("./DreameGen2ValetudoRobot");
 const DreameGen4ValetudoRobot = require("./DreameGen4ValetudoRobot");
+const X40CachedIdleReadOnlyStatus = require("./DreameX40CachedIdleReadOnlyStatus");
+const X40CleanGeniusPreflight = require("./DreameX40CleanGeniusPreflight");
+const X40CleanGeniusReadOnlyStatus = require("./DreameX40CleanGeniusReadOnlyStatus");
+const X40CleanGeniusResearch = require("./DreameX40CleanGeniusResearch");
+const X40DockWashReadOnlyStatus = require("./DreameX40DockWashReadOnlyStatus");
 
 const DreameQuirkFactory = require("./DreameQuirkFactory");
 const DreameValetudoRobot = require("./DreameValetudoRobot");
@@ -357,9 +358,11 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
         // never initiates MIOT calls or reveals transport errors/credentials.
         this.x40PollHealth = {state: "not_started", lastAttemptAtMs: null};
         this.allowExperimentalCleanGenius = X40CleanGeniusResearch.isEnabled();
+        this.allowCleanGeniusObserveOnly = process.env.VALETUDO_X40_CLEANGENIUS_OBSERVE_ONLY === "1";
         const experimentalQuirks = this.allowExperimentalCleanGenius ?
             X40CleanGeniusResearch.createQuirks(this, {
-                advanced: X40CleanGeniusResearch.isAdvancedEnabled()
+                advanced: X40CleanGeniusResearch.isAdvancedEnabled(),
+                signedProtocol: X40CleanGeniusResearch.isSignedEnabled()
             }) : [];
 
         this.registerCapability(new QuirksCapability({
@@ -427,7 +430,8 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
         return {
             ...X40CleanGeniusReadOnlyStatus.buildStatus(this.x40CleanGeniusObservation, {
                 nowMs: nowMs,
-                experimentalEnabled: this.allowExperimentalCleanGenius
+                experimentalEnabled: this.allowExperimentalCleanGenius,
+                observeOnly: this.allowCleanGeniusObserveOnly
             }),
             dockWashActivity: X40DockWashReadOnlyStatus.buildStatus(this.x40DockWashObservation, nowMs),
             cachedIdle: X40CachedIdleReadOnlyStatus.buildStatus(this.x40CachedIdleObservation, nowMs),
@@ -439,6 +443,14 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
                     new Date(this.x40PollHealth.lastAttemptAtMs).toISOString() : null
             }
         };
+    }
+
+    async getCleanGeniusPreflightReadOnly() {
+        return X40CleanGeniusPreflight.readFresh(this);
+    }
+
+    async getCleanGeniusNativeSettingsFreshReadOnly() {
+        return X40CleanGeniusPreflight.readSettings(this);
     }
 
     parseAndUpdateState(data) {
