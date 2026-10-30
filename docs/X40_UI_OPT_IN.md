@@ -17,6 +17,7 @@ The CleanGenius Status page supplies observations; it does not register controls
 | `VALETUDO_X40_CLEANGENIUS_OBSERVE_ONLY=1` without the main opt-in | Preserves positive SmartHost observations without registering writable experimental controls |
 | Main opt-in plus `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_ADVANCED=1` | Registers additional experimental Reclean/Rewash controls |
 | Advanced controls without `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_SIGNED=1` | Keeps their writes disabled |
+| Main opt-in plus `VALETUDO_X40_EXPERIMENTAL_STAIN_AVOIDANCE=1` | Registers a separate experimental stain-avoidance selector using reference values 1/2; hardware acceptance remains unverified |
 
 Default behavior remains off. The main opt-in is a code-level permission to show
 manual controls, not a command to select a native mode or start cleaning.
@@ -57,7 +58,7 @@ acceptance or a recommendation to enable additional protocol flags.
 | --- | --- | --- |
 | CleanGenius Off / Routine / Deep | Guarded SmartHost selector under Options → Robot → Quirks | Main opt-in required; exact readback confirms only the requested setting |
 | Auto Reclean / Auto Rewash | Additional experimental quirks | Advanced opt-in required for registration, signed opt-in for writes; unknown or negative current values remain blocked |
-| Stain Identification | Read-only CleanGenius Status field | No setter is implemented |
+| Stain handling / avoidance | Read-only status field; separate experimental Stain Avoidance quirk | Separate stain opt-in required; reference 1/2 mapping is not a boolean identification switch or X40 hardware acceptance |
 | Mop wash temperature | Existing Options → Robot → Mop Wash Temperature control | X40's V2 capability exposes Cold, Warm, Hot and Scalding; setting it does not prove a wash occurred |
 | HotWash flag | Read-only CleanGenius Status field from MIOT 4:50 | Separate from the V2 heater temperature property; it cannot establish the selected temperature |
 
@@ -73,6 +74,11 @@ or normalizing unsupported values would not establish their firmware semantics;
 keep those writes blocked until a separately justified validation decision.
 No firmware/app collection or repeat hardware trial is required to reach this
 source-level scope decision.
+
+The [stain-avoidance implementation notes](X40_STAIN_AVOIDANCE.md) explain the
+reference mapping, corrected observation labels and separate validation boundary.
+The generic guarded launcher uses a clean environment and does not set the new
+stain opt-in, so its normal candidate profile still exposes only the main mode.
 
 ## Source references
 

@@ -34,8 +34,8 @@ const DISPLAY_FIELDS: Array<{
     },
     {
         key: "stainIdentification",
-        title: "Stain Identification setting",
-        description: "Whether StainIdentify is configured on; not a live stain detection."
+        title: "Stain handling setting",
+        description: "Native StainIdentify value. The reference uses 1/2 for avoidance disabled/enabled; X40 behavior remains unverified."
     },
     {
         key: "hotWash",

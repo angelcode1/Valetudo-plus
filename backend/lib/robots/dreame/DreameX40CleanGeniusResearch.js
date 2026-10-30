@@ -13,6 +13,7 @@ const PIID = MIOT.PROPERTIES.MISC_TUNABLES.PIID;
 const EXPERIMENTAL_ENV = "VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS";
 const ADVANCED_ENV = "VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_ADVANCED";
 const SIGNED_ENV = "VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_SIGNED";
+const STAIN_AVOIDANCE_ENV = "VALETUDO_X40_EXPERIMENTAL_STAIN_AVOIDANCE";
 
 const SETTINGS = Object.freeze([
     Object.freeze({
@@ -20,6 +21,7 @@ const SETTINGS = Object.freeze([
         title: "EXPERIMENTAL CleanGenius",
         description: "Unverified X40 native CleanGenius mode. Manual cleaning controls may be ignored in Routine/Deep. Change only while idle.",
         key: "SmartHost",
+        signed: false,
         values: Object.freeze({off: 0, routine: 1, deep: 2})
     }),
     Object.freeze({
@@ -27,6 +29,7 @@ const SETTINGS = Object.freeze([
         title: "EXPERIMENTAL Auto Reclean",
         description: "Native SmartAutoMop setting, if exposed by the firmware. The robot must be idle to change it.",
         key: "SmartAutoMop",
+        signed: true,
         values: Object.freeze({off: 0, deep_only: 1, all_modes: 2})
     }),
     Object.freeze({
@@ -34,9 +37,22 @@ const SETTINGS = Object.freeze([
         title: "EXPERIMENTAL Auto Rewash",
         description: "Native SmartAutoWash setting, if exposed by the firmware. The robot must be idle to change it.",
         key: "SmartAutoWash",
+        signed: true,
         values: Object.freeze({off: 0, deep_only: 1, all_modes: 2})
     })
 ]);
+
+// Reference integration uses StainIdentify for stain avoidance, with 1/2
+// meaning disabled/enabled. This is not a boolean stain-identification switch.
+// Keep this protocol separate from the main mode and signed auto-mode opt-ins.
+const STAIN_AVOIDANCE = Object.freeze({
+    id: "d14996e9-e8da-4cc4-9a67-1c52b07b83c5",
+    title: "EXPERIMENTAL Stain Avoidance",
+    description: "Reference stain-avoidance setting; X40 acceptance is unverified. Change only while idle. This does not enable CleanGenius or confirm stain detection.",
+    key: "StainIdentify",
+    signed: false,
+    values: Object.freeze({disabled: 1, enabled: 2})
+});
 
 function isEnabled(env = process.env) {
     return env[EXPERIMENTAL_ENV] === "1";
@@ -50,6 +66,10 @@ function isAdvancedEnabled(env = process.env) {
 
 function isSignedEnabled(env = process.env) {
     return isAdvancedEnabled(env) && env[SIGNED_ENV] === "1";
+}
+
+function isStainAvoidanceEnabled(env = process.env) {
+    return isEnabled(env) && env[STAIN_AVOIDANCE_ENV] === "1";
 }
 
 function isIdle(robot) {
@@ -90,7 +110,8 @@ async function readSettings(robot) {
     return {
         SmartHost: snapshot.settings.cleanGenius.value,
         SmartAutoMop: snapshot.settings.autoReclean.value,
-        SmartAutoWash: snapshot.settings.autoRewash.value
+        SmartAutoWash: snapshot.settings.autoRewash.value,
+        StainIdentify: snapshot.settings.stainIdentification.value
     };
 }
 
@@ -102,11 +123,14 @@ async function requireFreshIdle(robot) {
 }
 
 function createQuirks(robot, options = {}) {
-    // All three selectors share one MIOT 4:50 property; serialize UI writes.
+    // All selectors share one MIOT 4:50 property; serialize UI writes.
     // This is a manual, supervised operation. It never runs at startup.
     let changeInProgress = false;
 
-    const definitions = options.advanced === true ? SETTINGS : SETTINGS.slice(0, 1);
+    const definitions = [
+        ...(options.advanced === true ? SETTINGS : SETTINGS.slice(0, 1)),
+        ...(options.stainAvoidance === true ? [STAIN_AVOIDANCE] : [])
+    ];
     return definitions.map(definition => {
         const quirk = new Quirk({
             id: definition.id,
@@ -126,7 +150,7 @@ function createQuirks(robot, options = {}) {
                 if (!recovery && !isIdle(robot)) {
                     throw new Error(`The X40 must be idle before changing ${definition.key}; ${describeCachedIdleState(robot)}; no write attempted`);
                 }
-                if (definition.key !== "SmartHost" && options.signedProtocol !== true) {
+                if (definition.signed === true && options.signedProtocol !== true) {
                     throw new Error("Signed Reclean/Rewash protocol is not opted in; no write attempted");
                 }
                 if (changeInProgress) {
@@ -155,7 +179,7 @@ function createQuirks(robot, options = {}) {
                     // Reference protocol: disabling a positive auto mode preserves
                     // its selection as a signed negative. Still separately opted in
                     // and hardware-unverified. Unknown current values stay blocked.
-                    const target = definition.key !== "SmartHost" && value === "off" && current[definition.key] > 0 ?
+                    const target = definition.signed === true && value === "off" && current[definition.key] > 0 ?
                         -current[definition.key] : definition.values[value];
                     if (current[definition.key] === target) {
                         return;
@@ -201,7 +225,7 @@ function createQuirks(robot, options = {}) {
                 raw = current[definition.key];
                 try {
                     value = decodeValue(raw, definition);
-                    reason = definition.key !== "SmartHost" && options.signedProtocol !== true ?
+                    reason = definition.signed === true && options.signedProtocol !== true ?
                         "signed_protocol_not_opted_in" : null;
                 } catch {
                     value = "unsupported";
@@ -229,6 +253,8 @@ module.exports = {
     EXPERIMENTAL_ENV: EXPERIMENTAL_ENV,
     ADVANCED_ENV: ADVANCED_ENV,
     SIGNED_ENV: SIGNED_ENV,
+    STAIN_AVOIDANCE_ENV: STAIN_AVOIDANCE_ENV,
+    isStainAvoidanceEnabled: isStainAvoidanceEnabled,
     isSignedEnabled: isSignedEnabled,
     isAdvancedEnabled: isAdvancedEnabled,
     SETTINGS: SETTINGS,

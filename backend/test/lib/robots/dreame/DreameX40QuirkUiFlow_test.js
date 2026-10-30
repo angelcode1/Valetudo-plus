@@ -47,7 +47,8 @@ async function fixture(options) {
     const errors = [];
     const refreshStarted = deferred();
     const releaseRefresh = deferred();
-    let current = 0;
+    const key = options.stainAvoidance ? "StainIdentify" : "SmartHost";
+    let current = options.stainAvoidance ? 1 : 0;
     let readbackFailed = false;
     const robot = {
         ephemeralState: {mode: options.blocked ? 14 : 6, taskStatus: 0},
@@ -63,7 +64,7 @@ async function fixture(options) {
                 if (readbackFailed && options.nativeRefreshFailure) {
                     throw new Error("Simulated native settings unavailable");
                 }
-                return JSON.stringify([{k: "SmartHost", v: current}]);
+                return JSON.stringify([{k: key, v: current}]);
             },
             writeProperty: async (siid, piid, value) => {
                 writes.push([siid, piid, value]);
@@ -71,7 +72,7 @@ async function fixture(options) {
             }
         }
     };
-    const quirks = Research.createQuirks(robot);
+    const quirks = Research.createQuirks(robot, {stainAvoidance: options.stainAvoidance === true});
     const capability = new QuirksCapability({robot: robot, quirks: quirks});
     const router = new QuirksRouter({capability: capability, validator: (req, res, next) => next()});
     const app = express();
@@ -118,7 +119,7 @@ async function fixture(options) {
         }
     });
     return {
-        id: quirks[0].id,
+        id: quirks[options.stainAvoidance ? 1 : 0].id,
         mutation: mutation,
         query: query,
         errors: errors,
@@ -143,12 +144,17 @@ for (const scenario of [
     {name: "failed HTTP refresh sets the query error flag instead of confirming cached settings", readbackFailure: true, httpRefreshFailure: true},
     {name: "blocked activation refreshes Off without sending any native write", blocked: true},
     {name: "successful change remains pending until its displayed settings refresh finishes"}
-]) {
-    test(`X40 UI/API flow: ${scenario.name}`, {timeout: 5000}, async () => {
+].flatMap(scenario => [scenario, {...scenario, stainAvoidance: true}])) {
+    test(`X40 ${scenario.stainAvoidance ? "stain" : "mode"} UI/API flow: ${scenario.name}`, {timeout: 5000}, async () => {
         const state = await fixture(scenario);
+        const before = scenario.stainAvoidance ? "disabled" : "off";
+        const after = scenario.stainAvoidance ? "enabled" : "routine";
+        const rawBefore = scenario.stainAvoidance ? 1 : 0;
+        const rawAfter = scenario.stainAvoidance ? 2 : 1;
+        const visibleSetting = result => result.data.find(item => item.id === state.id);
         try {
-            assert.equal(state.query.getCurrentResult().data[0].value, "off");
-            const completed = state.mutation.mutate({id: state.id, value: "routine"}).then(
+            assert.equal(visibleSetting(state.query.getCurrentResult()).value, before);
+            const completed = state.mutation.mutate({id: state.id, value: after}).then(
                 () => ({ok: true}), error => ({ok: false, error: error})
             );
             await Promise.race([
@@ -156,7 +162,7 @@ for (const scenario of [
                 completed.then(() => assert.fail("The command settled before requesting a settings refresh"))
             ]);
             assert.equal(state.mutation.getCurrentResult().isPending, true);
-            assert.equal(state.query.getCurrentResult().data[0].value, "off");
+            assert.equal(visibleSetting(state.query.getCurrentResult()).value, before);
             state.releaseRefresh.resolve();
             const outcome = await completed;
             const expectedError = !!(scenario.readbackFailure || scenario.blocked);
@@ -164,7 +170,9 @@ for (const scenario of [
             assert.equal(state.errors.length, expectedError ? 1 : 0);
             assert.equal(state.mutation.getCurrentResult().status, expectedError ? "error" : "success");
             assert.deepEqual(state.requests, ["GET", "PUT", "GET"]);
-            assert.deepEqual(state.writes, scenario.blocked ? [] : [[4, 50, '{"k":"SmartHost","v":1}']]);
+            assert.deepEqual(state.writes, scenario.blocked ? [] : [[4, 50, JSON.stringify({
+                k: scenario.stainAvoidance ? "StainIdentify" : "SmartHost", v: rawAfter
+            })]]);
 
             const refreshed = state.query.getCurrentResult();
             if (scenario.httpRefreshFailure) {
@@ -174,10 +182,10 @@ for (const scenario of [
                 assert.equal(refreshed.isRefetchError, true);
             } else {
                 assert.equal(refreshed.isError, false);
-                const visible = refreshed.data[0];
-                assert.equal(visible.value, scenario.nativeRefreshFailure ? "unavailable" : scenario.blocked ? "off" : "routine");
+                const visible = visibleSetting(refreshed);
+                assert.equal(visible.value, scenario.nativeRefreshFailure ? "unavailable" : scenario.blocked ? before : after);
                 assert.equal(visible.readOnly, !!scenario.nativeRefreshFailure);
-                assert.equal(visible.rawValue, scenario.nativeRefreshFailure ? null : scenario.blocked ? 0 : 1);
+                assert.equal(visible.rawValue, scenario.nativeRefreshFailure ? null : scenario.blocked ? rawBefore : rawAfter);
             }
         } finally {
             await state.close();
