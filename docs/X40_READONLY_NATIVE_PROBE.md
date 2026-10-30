@@ -40,6 +40,10 @@ The build produces `build/x40-readonly-probe`. The package is compiled separatel
 
 The identity correction passed all 164 backend tests under Node 22.17.1, backend type checking and lint (six existing warnings), and standalone ARM64 packaging. These are offline results. They do not establish which identity check failed on the owner's device, that the corrected executable runs there, or that any CleanGenius write is accepted.
 
+The owner's subsequent macOS test run passed 162 tests and failed the two CLI fixtures with `linux_arm64_required`: those fixtures mocked ARM64 but inherited the Mac's OS. Both now simulate Linux **and** ARM64 inside their isolated child processes. A separate refusal regression covers macOS/ARM64 and Linux/x64; the production platform guard is unchanged. This corrects host-test portability, not the earlier robot identity failure.
+
+After the fixture fix, all 165 backend tests pass under Node 22.17.1. All nine probe tests also pass with a `NODE_OPTIONS` preload making both the test host and its spawned Node children initially report `process.platform=darwin`, so the isolated firmware fixtures must explicitly override it. This is a platform-value simulation on Linux, not a claim of an actual macOS run. Backend lint passes with the same six existing warnings. Runtime source and the packaged probe executable are unchanged by this fixture correction.
+
 ## Completed owner-run read checkpoint — 2026-10-30
 
 The owner supplied `x40-readonly-result-3gjfr1_u.zip` from the delivered probe with executable SHA-256 `0cc7faad74367e9d4f1f28f3a1c443542ad5982c8de5407b2ffb89b718352524`. Its result was **blocked during identity loading**, with `local_read_unavailable`, `phase=identity`, zero property requests and zero native writes. No handshake was reached, so this result does not test or reject the firmware transport, preflight parser, settings parser or CleanGenius itself.

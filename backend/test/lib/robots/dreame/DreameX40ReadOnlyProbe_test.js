@@ -178,6 +178,7 @@ test("actual probe CLI uses loopback encrypted reads only and suppresses private
     // Fake only the machine identity and credential reads in this child. The
     // actual CLI, encrypted socket, bounded adapter and shared parsers execute.
     const code = `
+        Object.defineProperty(process, "platform", {value: "linux"});
         Object.defineProperty(process, "arch", {value: "arm64"});
         const fs = require("fs");
         const read = fs.readFileSync;
@@ -230,6 +231,7 @@ test("actual CLI identity failures identify the failed check without opening a s
         [validConfig, "PRIVATE_FIXTURE", "identity_token_invalid"]
     ]) {
         const code = `
+            Object.defineProperty(process, "platform", {value: "linux"});
             Object.defineProperty(process, "arch", {value: "arm64"});
             require("dgram").createSocket = () => { throw new Error("SOCKET_MUST_NOT_OPEN"); };
             const fs = require("fs");
@@ -265,6 +267,46 @@ test("actual CLI identity failures identify the failed check without opening a s
             assert.deepEqual(JSON.parse(stdout), {state: "failed", reason: reason, phase: "identity",
                 getPropertiesRequests: 0, nativeWritesRequested: 0});
             assert.equal(stdout.includes("PRIVATE_FIXTURE"), false);
+        } finally {
+            clearTimeout(deadline);
+            if (child.exitCode === null) {
+                child.kill("SIGKILL");
+            }
+        }
+    }
+});
+
+test("real CLI retains its Linux ARM64 requirement outside the simulated firmware fixtures", async () => {
+    const entry = path.resolve(__dirname, "../../../../x40-readonly-probe.js");
+    for (const [platform, arch] of [["darwin", "arm64"], ["linux", "x64"]]) {
+        const code = `
+            Object.defineProperty(process, "platform", {value: ${JSON.stringify(platform)}});
+            Object.defineProperty(process, "arch", {value: ${JSON.stringify(arch)}});
+            const fs = require("fs");
+            const read = fs.readFileSync;
+            fs.readFileSync = function(file, ...args) {
+                if (String(file).startsWith("/data/config/miio/")) throw new Error("IDENTITY_MUST_NOT_LOAD");
+                return read.call(this, file, ...args);
+            };
+            require("dgram").createSocket = () => { throw new Error("SOCKET_MUST_NOT_OPEN"); };
+            process.argv = [process.execPath, ${JSON.stringify(entry)}, "--readonly-x40-probe"];
+            require(${JSON.stringify(entry)});
+        `;
+        const child = spawn(process.execPath, ["-e", code]);
+        let stdout = "";
+        let stderr = "";
+        child.stdout.on("data", d => {
+            stdout += d;
+        });
+        child.stderr.on("data", d => {
+            stderr += d;
+        });
+        const deadline = setTimeout(() => child.kill("SIGKILL"), 5000);
+        try {
+            const [exit] = await once(child, "close");
+            assert.equal(exit, 2);
+            assert.equal(stderr, "");
+            assert.deepEqual(JSON.parse(stdout), {state: "refused", reason: "linux_arm64_required"});
         } finally {
             clearTimeout(deadline);
             if (child.exitCode === null) {
