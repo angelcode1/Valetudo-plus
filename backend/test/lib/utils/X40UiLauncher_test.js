@@ -47,7 +47,9 @@ function fixture(t) {
     tool("nohup", "[ \"${TEST_NO_READY-0}\" = 0 ] || exit 0\n" +
         "printf '%s\\n' \"$@\" > \"${5}/spawn.args\"\n" +
         "printf '%s\\n%s\\n' \"$PPID\" \"${9}\" > \"${5}/watch.ready\"\n");
-    tool("sleep", "if [ \"$1\" = 900 ]; then exit 0; fi\nexec /bin/sleep 0.01\n");
+    tool("sleep", "if [ \"$1\" = 900 ]; then\n" +
+        " if [ \"${TEST_STALE_TEMP-0}\" = 1 ]; then printf stale > " + quote(state) + "/.rollback.$PPID; fi\n" +
+        " exit 0\nfi\nexec /bin/sleep 0.01\n");
     tool("sync", "printf sync > " + quote(path.join(root, "sync.called")) + "\n");
     tool("reboot", "printf reboot > " + quote(path.join(root, "reboot.called")) + "\n");
 
@@ -190,6 +192,13 @@ test("X40 watch: acceptance disarms the pending reboot", t => {
     assert.equal(f.run("watch").status, 0);
     assert.equal(f.exists("rollback"), false);
     assert.equal(fs.existsSync(path.join(f.root, "reboot.called")), false);
+});
+
+test("X40 watch: stale process-named temporary files cannot prevent fallback", t => {
+    const f = fixture(t);
+    assert.equal(f.run("watch", {TEST_STALE_TEMP: "1"}).status, 0);
+    assert.equal(f.exists("rollback"), true);
+    assert.equal(fs.readFileSync(path.join(f.root, "reboot.called"), "utf8"), "reboot");
 });
 
 test("X40 watch: existing rollback marker does not cause a second reboot", t => {

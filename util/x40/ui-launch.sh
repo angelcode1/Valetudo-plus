@@ -29,9 +29,8 @@ marker() {
 mark_rollback() {
     (
         set -C
-        printf '%s\n' "$release_id" > "$state_dir/.rollback.$$"
-    )
-    mv "$state_dir/.rollback.$$" "$state_dir/rollback"
+        printf '%s\n' "$release_id" > "$state_dir/rollback"
+    ) || [ -e "$state_dir/rollback" ] || [ -L "$state_dir/rollback" ]
 }
 original() {
     # The calling startup command supplies its original config/data/log values.
@@ -60,7 +59,7 @@ if [ "$launch_mode" = watch ]; then
     # A rollback request always wins. Never undo it by accepting a release.
     [ ! -e "$state_dir/rollback" ] && [ ! -L "$state_dir/rollback" ] || exit 0
     marker accepted && exit 0
-    mark_rollback
+    mark_rollback || true
     sync
     reboot
     exit 0
@@ -80,11 +79,11 @@ if ! marker accepted; then
     # An unconfirmed release gets only one boot attempt. A reboot or power loss
     # before acceptance selects the original service on the following boot.
     if ! mkdir "$state_dir/boot-attempt"; then
-        mark_rollback
+        mark_rollback || true
         original
     fi
     if [ -e "$state_dir/watch.ready" ] || [ -L "$state_dir/watch.ready" ]; then
-        mark_rollback
+        mark_rollback || true
         original
     fi
     nohup setsid sh "$0" watch "$@" > "$state_dir/watch.log" 2>&1 </dev/null &
@@ -92,16 +91,16 @@ if ! marker accepted; then
     while [ ! -f "$state_dir/watch.ready" ]; do
         watch_count=$((watch_count+1))
         if [ "$watch_count" -ge 6 ]; then
-            mark_rollback
+            mark_rollback || true
             original
         fi
         sleep 1
     done
     watch_pid="$(sed -n '1p' "$state_dir/watch.ready")"
     watch_release="$(sed -n '2p' "$state_dir/watch.ready")"
-    case "$watch_pid" in ""|*[!0-9]*) mark_rollback; original ;; esac
+    case "$watch_pid" in ""|*[!0-9]*) mark_rollback || true; original ;; esac
     if [ "$watch_release" != "$release_id" ] || ! kill -0 "$watch_pid"; then
-        mark_rollback
+        mark_rollback || true
         original
     fi
 fi
