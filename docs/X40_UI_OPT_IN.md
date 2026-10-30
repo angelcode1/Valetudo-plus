@@ -47,6 +47,33 @@ an applied native write, so its old cached display cannot prove that the setting
 stayed unchanged. A later Off observation also cannot reconstruct an earlier
 Routine observation; capture each required outcome at the time it occurs.
 
+## Scope of app-style settings
+
+The mode selector does not provide every setting offered by a vendor app.
+The following table describes the X40 source implementation, not device
+acceptance or a recommendation to enable additional protocol flags.
+
+| Setting | UI and implementation | Remaining boundary |
+| --- | --- | --- |
+| CleanGenius Off / Routine / Deep | Guarded SmartHost selector under Options → Robot → Quirks | Main opt-in required; exact readback confirms only the requested setting |
+| Auto Reclean / Auto Rewash | Additional experimental quirks | Advanced opt-in required for registration, signed opt-in for writes; unknown or negative current values remain blocked |
+| Stain Identification | Read-only CleanGenius Status field | No setter is implemented |
+| Mop wash temperature | Existing Options → Robot → Mop Wash Temperature control | X40's V2 capability exposes Cold, Warm, Hot and Scalding; setting it does not prove a wash occurred |
+| HotWash flag | Read-only CleanGenius Status field from MIOT 4:50 | Separate from the V2 heater temperature property; it cannot establish the selected temperature |
+
+X40 already registers
+[MopDockMopWashTemperatureControlCapabilityV2](../backend/lib/robots/dreame/capabilities/DreameMopDockMopWashTemperatureControlCapabilityV2.js).
+It reads and writes `HIGH_RES_MOP_DOCK_HEATER`, while the observed `HotWash`
+flag is decoded by the read-only settings parser. Do not add a duplicate
+temperature control by assuming these two properties are interchangeable.
+
+**Decision:** the existing controlled UI path covers manual native mode
+selection. Broader app parity remains incomplete. Exposing advanced selectors
+or normalizing unsupported values would not establish their firmware semantics;
+keep those writes blocked until a separately justified validation decision.
+No firmware/app collection or repeat hardware trial is required to reach this
+source-level scope decision.
+
 ## Source references
 
 - [X40 constructor and registration](../backend/lib/robots/dreame/DreameX40UltraValetudoRobot.js)
