@@ -24,6 +24,85 @@ function transport() {
     };
 }
 
+function identityFiles(config = "model=dreame.vacuum.r2416\ndid=123\n", token = Buffer.alloc(16, 0x42)) {
+    const calls = [];
+    return {
+        calls: calls,
+        readFileSync: (file, encoding) => {
+            calls.push(file);
+            if (file === "/data/config/miio/device.conf") {
+                assert.equal(encoding, "utf8");
+                if (config instanceof Error) {
+                    throw config;
+                }
+                return config;
+            }
+            assert.equal(file, "/data/config/miio/device.token");
+            if (token instanceof Error) {
+                throw token;
+            }
+            return token;
+        }
+    };
+}
+
+test("probe identity accepts R2416 regional models and preserves binary/hex tokens with bounded line endings", () => {
+    const binary = Buffer.from([0, 255, 128, 66, 10, 13, 65, 66, 67, 68, 69, 70, 71, 72, 13, 10]);
+    for (const model of ["r2416", "r2416a", "r2416c"]) {
+        for (const representation of [binary, Buffer.from(binary.toString("hex").toUpperCase())]) {
+            for (const suffix of ["", "\n", "\r\n"]) {
+                const files = identityFiles(`model = dreame.vacuum.${model}\r\ndid = 123\r\n`,
+                    Buffer.concat([representation, Buffer.from(suffix)]));
+                const identity = Probe.readIdentity(files);
+                assert.equal(identity.deviceId, 123);
+                assert.deepEqual(identity.token, binary);
+                assert.deepEqual(files.calls, ["/data/config/miio/device.conf", "/data/config/miio/device.token"]);
+            }
+        }
+    }
+});
+
+test("probe identity rejects ambiguous models and device IDs before reading credentials", () => {
+    const cases = [
+        ["did=123\n", "identity_model_invalid"],
+        ["model=dreame.vacuum.r2449a\ndid=123\n", "identity_model_invalid"],
+        ["model=dreame.vacuum.r2416evil\ndid=123\n", "identity_model_invalid"],
+        ["model=dreame.vacuum.r2416\nmodel=dreame.vacuum.r2416\ndid=123\n", "identity_model_invalid"],
+        ["model=dreame.vacuum.r2416\ndid=123\ndid=124\n", "identity_device_id_invalid"]
+    ];
+    for (const did of ["", "0", "-1", "1.2", "1e3", "0x7b", "NaN", "4294967295", "9007199254740993", "123private"]) {
+        cases.push([`model=dreame.vacuum.r2416\ndid=${did}\n`, "identity_device_id_invalid"]);
+    }
+    for (const [config, reason] of cases) {
+        const files = identityFiles(config);
+        assert.throws(() => Probe.readIdentity(files), error => Probe.identityFailureReason(error) === reason);
+        assert.deepEqual(files.calls, ["/data/config/miio/device.conf"]);
+    }
+    for (const did of ["1", "4294967294"]) {
+        assert.equal(Probe.readIdentity(identityFiles(`model=dreame.vacuum.r2416\ndid=${did}\n`)).deviceId, Number(did));
+    }
+});
+
+test("probe identity sanitizes file failures and rejects malformed token suffixes rather than truncating them", () => {
+    for (const [files, reason] of [
+        [identityFiles(new Error("PRIVATE_FIXTURE")), "identity_config_unavailable"],
+        [identityFiles(undefined, new Error("PRIVATE_FIXTURE")), "identity_token_unavailable"],
+        ...[Buffer.alloc(0), Buffer.alloc(15), Buffer.alloc(17, 0x42), Buffer.alloc(32, 0xff),
+            Buffer.from("z".repeat(32)), Buffer.from("a".repeat(32) + "private"),
+            Buffer.from("a".repeat(32) + "\n\n"), Buffer.from("a".repeat(16) + "\nprivate")]
+            .map(token => [identityFiles(undefined, token), "identity_token_invalid"])
+    ]) {
+        assert.throws(() => Probe.readIdentity(files), error => {
+            assert.equal(Probe.identityFailureReason(error), reason);
+            assert.equal(String(error).includes("PRIVATE_FIXTURE"), false);
+            assert.equal(JSON.stringify(error).includes("PRIVATE_FIXTURE"), false);
+            return true;
+        });
+    }
+    assert.equal(Probe.identityFailureReason(new Error("PRIVATE_FIXTURE")), undefined);
+    assert.equal(Probe.identityFailureReason({reason: "identity_token_invalid"}), undefined);
+});
+
 test("probe permits exactly the two fixed get_properties requests and retains signed raw values", async () => {
     const wire = transport();
     const robot = Probe.createReadOnlyRobot(wire, 123);
@@ -103,8 +182,8 @@ test("actual probe CLI uses loopback encrypted reads only and suppresses private
         const fs = require("fs");
         const read = fs.readFileSync;
         fs.readFileSync = function(file, ...args) {
-            if (file === "/data/config/miio/device.conf") return "model=dreame.vacuum.r2416\\ndid=123\\n";
-            if (file === "/data/config/miio/device.token") return Buffer.alloc(16, 0x42);
+            if (file === "/data/config/miio/device.conf") return "model=dreame.vacuum.r2416a\\r\\ndid=123\\r\\n";
+            if (file === "/data/config/miio/device.token") return Buffer.concat([Buffer.alloc(16, 0x42), Buffer.from("\\n")]);
             return read.call(this, file, ...args);
         };
         process.argv = [process.execPath, ${JSON.stringify(entry)}, "--readonly-x40-probe"];
@@ -137,5 +216,60 @@ test("actual probe CLI uses loopback encrypted reads only and suppresses private
             child.kill("SIGKILL");
         }
         await new Promise(resolve => server.close(resolve));
+    }
+});
+
+test("actual CLI identity failures identify the failed check without opening a socket or printing private data", async () => {
+    const entry = path.resolve(__dirname, "../../../../x40-readonly-probe.js");
+    const validConfig = "model=dreame.vacuum.r2416\ndid=123\n";
+    for (const [config, token, reason] of [
+        [null, "B".repeat(16), "identity_config_unavailable"],
+        ["model=PRIVATE_FIXTURE\ndid=123\n", "B".repeat(16), "identity_model_invalid"],
+        ["model=dreame.vacuum.r2416\ndid=PRIVATE_FIXTURE\n", "B".repeat(16), "identity_device_id_invalid"],
+        [validConfig, null, "identity_token_unavailable"],
+        [validConfig, "PRIVATE_FIXTURE", "identity_token_invalid"]
+    ]) {
+        const code = `
+            Object.defineProperty(process, "arch", {value: "arm64"});
+            require("dgram").createSocket = () => { throw new Error("SOCKET_MUST_NOT_OPEN"); };
+            const fs = require("fs");
+            const read = fs.readFileSync;
+            fs.readFileSync = function(file, ...args) {
+                if (file === "/data/config/miio/device.conf") {
+                    if (${JSON.stringify(config)} === null) throw new Error("PRIVATE_FIXTURE");
+                    return ${JSON.stringify(config)};
+                }
+                if (file === "/data/config/miio/device.token") {
+                    if (${JSON.stringify(token)} === null) throw new Error("PRIVATE_FIXTURE");
+                    return Buffer.from(${JSON.stringify(token)});
+                }
+                return read.call(this, file, ...args);
+            };
+            process.argv = [process.execPath, ${JSON.stringify(entry)}, "--readonly-x40-probe"];
+            require(${JSON.stringify(entry)});
+        `;
+        const child = spawn(process.execPath, ["-e", code]);
+        let stdout = "";
+        let stderr = "";
+        child.stdout.on("data", d => {
+            stdout += d;
+        });
+        child.stderr.on("data", d => {
+            stderr += d;
+        });
+        const deadline = setTimeout(() => child.kill("SIGKILL"), 5000);
+        try {
+            const [exit] = await once(child, "close");
+            assert.equal(exit, 3);
+            assert.equal(stderr, "");
+            assert.deepEqual(JSON.parse(stdout), {state: "failed", reason: reason, phase: "identity",
+                getPropertiesRequests: 0, nativeWritesRequested: 0});
+            assert.equal(stdout.includes("PRIVATE_FIXTURE"), false);
+        } finally {
+            clearTimeout(deadline);
+            if (child.exitCode === null) {
+                child.kill("SIGKILL");
+            }
+        }
     }
 });

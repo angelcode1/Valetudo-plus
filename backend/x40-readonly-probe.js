@@ -37,24 +37,7 @@ async function main() {
     }, 20000);
     let socket;
     try {
-        const config = fs.readFileSync("/data/config/miio/device.conf", "utf8");
-        const get = key => config.match(new RegExp(`^${key}=([^\\r\\n]+)`, "m"))?.[1];
-        if (get("model") !== "dreame.vacuum.r2416") {
-            throw new Error("Device identity unavailable");
-        }
-        const deviceId = Number(get("did"));
-        const rawToken = fs.readFileSync("/data/config/miio/device.token");
-        let token;
-        if (rawToken.length >= 32 && /^[0-9a-fA-F]{32}$/.test(rawToken.toString().slice(0, 32))) {
-            token = Buffer.from(rawToken.toString().slice(0, 32), "hex");
-        } else if (rawToken.length === 16) {
-            token = Buffer.from(rawToken);
-        } else {
-            throw new Error("Device identity unavailable");
-        }
-        if (!Number.isSafeInteger(deviceId) || deviceId <= 0 || deviceId >= 0xffffffff) {
-            throw new Error("Device identity unavailable");
-        }
+        const {deviceId, token} = Probe.readIdentity(fs);
         phase = "local_socket";
         socket = dgram.createSocket("udp4");
         socket.bind(0, "127.0.0.1");
@@ -95,8 +78,8 @@ async function main() {
         phase = "native_reads";
         robot = Probe.createReadOnlyRobot(transport, deviceId);
         emit(await Probe.readDiagnostic(robot));
-    } catch {
-        emit({state: "failed", reason: "local_read_unavailable", phase: phase,
+    } catch (error) {
+        emit({state: "failed", reason: Probe.identityFailureReason(error) ?? "local_read_unavailable", phase: phase,
             getPropertiesRequests: robot?.requestsSent() ?? 0, nativeWritesRequested: 0});
         process.exitCode = 3;
     } finally {

@@ -4,8 +4,10 @@ This is a separate diagnostic executable, not a second full Valetudo process. It
 
 ## Fixed scope
 
-- Requires Linux ARM64 and explicit `--readonly-x40-probe`; requires device.conf model `dreame.vacuum.r2416`.
+- Requires Linux ARM64 and explicit `--readonly-x40-probe`; accepts only the R2416 device.conf models `dreame.vacuum.r2416`, `dreame.vacuum.r2416a` and `dreame.vacuum.r2416c` already recognised by the X40 implementation. Other X40-family identifiers remain outside this probe's scope.
 - Reads the local device ID and token on the robot only; neither is exported. Logger output is suppressed before transport use because the general codec can log secrets on errors.
+- Identity loading accepts LF/CRLF config lines and optional horizontal whitespace around the separator, rejects duplicate model/device-ID fields, and requires a decimal device ID within the existing MIIO range. Tokens must be exactly 16 binary bytes or 32 ASCII hex characters, with at most one optional LF/CRLF terminator. Arbitrary suffixes are rejected. Binary token bytes are preserved without a UTF-8 conversion. There is no fallback to a running Valetudo config or alternate credential path.
+- Identity failures report only fixed codes: `identity_config_unavailable`, `identity_model_invalid`, `identity_device_id_invalid`, `identity_token_unavailable` or `identity_token_invalid`. Paths, field values, credential bytes and underlying filesystem errors are not included. All identity failures occur before a socket opens.
 - Binds an ephemeral UDP port on 127.0.0.1 and connects only to local firmware port 54321. It does not bind Valetudo HTTP, cloud or map-upload ports.
 - Sends one local handshake, then exactly one get_properties of mode/task/charging/error/dock, then one get_properties of 4:50 settings. The adapter rejects extra fields, unexpected properties, wrong ordering, extra requests and retries. It exposes no write/action method.
 - Has a 20-second process deadline and 3-second per-request timeouts. Failure has a fixed non-sensitive envelope. It never switches to cloud transport or falls back to another command after failure.
@@ -36,8 +38,14 @@ python3 scripts/x40-readonly-probe/test_runner.py
 
 The build produces `build/x40-readonly-probe`. The package is compiled separately from the full Valetudo candidate. Its tests include actual encrypted loopback packet exchange against a fake firmware peer with fake on-device credentials, as well as scope/budget/error checks. This supplies no real hardware acceptance result.
 
-## One owner-run read checkpoint
+The identity correction passed all 164 backend tests under Node 22.17.1, backend type checking and lint (six existing warnings), and standalone ARM64 packaging. These are offline results. They do not establish which identity check failed on the owner's device, that the corrected executable runs there, or that any CleanGenius write is accepted.
 
-Keep the robot physically accessible, docked and free of active cleaning/washing. Run the delivered `RUN.py` once from the Mac. No main/advanced/signed CleanGenius flags need to be enabled, and no full Valetudo candidate is installed. The runner prints a small result ZIP to upload. Hardware is unverified until that result is inspected.
+## Completed owner-run read checkpoint — 2026-10-30
 
-Success criterion: two allowlisted get_properties responses decode through the new helpers, the exact original PID/start time and file hashes remain confirmed, and staging cleanup succeeds. Mode 14 is expected to remain blocked; do not treat a successful diagnostic as activation permission. A local-read failure settles this standalone transport approach as blocked; it does not justify another collector loop, automatic process replacement, guessed write, or unplanned wake/cleaning action.
+The owner supplied `x40-readonly-result-3gjfr1_u.zip` from the delivered probe with executable SHA-256 `0cc7faad74367e9d4f1f28f3a1c443542ad5982c8de5407b2ffb89b718352524`. Its result was **blocked during identity loading**, with `local_read_unavailable`, `phase=identity`, zero property requests and zero native writes. No handshake was reached, so this result does not test or reject the firmware transport, preflight parser, settings parser or CleanGenius itself.
+
+The runner confirmed original PID/start time and binary/config/postboot hashes unchanged, no SSH errors, and successful temporary-file removal. No restore or rerun is required. This is a completed checkpoint, not an instruction to run the kit again.
+
+The original probe grouped all identity failures into one error. Source inspection found narrower R2416 model handling and token-terminator handling than intended. Neither issue is a confirmed root cause of this device result: the report contains no model, device ID, token representation or filesystem failure detail. The offline correction adds strict regional-model/token parsing and fixed failure codes, tested with synthetic credentials. A fake encrypted peer also exercises the real CLI using an R2416a identity, CRLF config and newline-terminated token. Separate real-CLI failure fixtures verify each identity code, zero property requests and refusal before socket creation.
+
+**Go/no-go:** code-only correction and tests; hardware acceptance remains **PARKED**. No replacement owner-run kit or additional hardware trial is authorised by this correction. Keep the original process running and the existing attempted-run receipt. Do not infer activation permission, relax mode 14 or unknown-value guards, switch Valetudo processes, guess a write or launch another collector loop from this result. Any future hardware decision must have a distinct bounded acceptance criterion and explicit owner authorisation.
