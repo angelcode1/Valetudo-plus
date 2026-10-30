@@ -19,11 +19,13 @@ function emit(value) {
 }
 
 async function main() {
-    if (process.argv.length !== 3 || process.argv[2] !== "--readonly-x40-probe") {
+    if (process.argv.length !== 3 ||
+        !["--readonly-x40-probe", "--readonly-x40-stain-prerequisites"].includes(process.argv[2])) {
         emit({state: "refused", reason: "explicit_readonly_probe_argument_required"});
         process.exitCode = 2;
         return;
     }
+    const profile = process.argv[2] === "--readonly-x40-stain-prerequisites" ? "stain" : "settings";
     if (process.platform !== "linux" || process.arch !== "arm64") {
         emit({state: "refused", reason: "linux_arm64_required"});
         process.exitCode = 2;
@@ -76,8 +78,12 @@ async function main() {
             socket.send(packet, 0, packet.length, MiioSocket.PORT, "127.0.0.1");
         });
         phase = "native_reads";
-        robot = Probe.createReadOnlyRobot(transport, deviceId);
-        emit(await Probe.readDiagnostic(robot));
+        robot = Probe.createReadOnlyRobot(transport, deviceId, profile);
+        const result = await Probe.readDiagnostic(robot, profile);
+        emit(result);
+        if (result.state === "stain_prerequisites_unavailable") {
+            process.exitCode = 3;
+        }
     } catch (error) {
         emit({state: "failed", reason: Probe.identityFailureReason(error) ?? "local_read_unavailable", phase: phase,
             getPropertiesRequests: robot?.requestsSent() ?? 0, nativeWritesRequested: 0});

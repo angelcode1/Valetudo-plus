@@ -2,8 +2,8 @@
 
 const Preflight = require("./DreameX40CleanGeniusPreflight");
 
-// Exactly one preflight request followed by one settings request. No caller can
-// turn this adapter into a generic MIIO command client or issue a third read.
+// Fixed preflight/settings sequence. A separate explicit stain profile appends
+// one AI-settings read. Neither profile is a generic MIIO command client.
 const REQUESTS = Object.freeze([
     ["4:1", "4:7", "3:2", "4:18", "4:25"],
     ["4:50"]
@@ -82,15 +82,19 @@ function identityFailureReason(error) {
     return error instanceof IdentityError && IDENTITY_FAILURES.includes(error.reason) ? error.reason : undefined;
 }
 
-function createReadOnlyRobot(transport, deviceId) {
+function createReadOnlyRobot(transport, deviceId, profile = "settings") {
     if (!Number.isSafeInteger(deviceId) || deviceId <= 0 || deviceId >= 0xffffffff) {
         throw new Error("Invalid local device identity");
     }
+    if (!["settings", "stain"].includes(profile)) {
+        throw new Error("Unsupported read-only profile");
+    }
+    const requests = profile === "stain" ? [...REQUESTS, ["4:22"]] : REQUESTS;
     let requestsSent = 0;
     return {
         miotHelper: {
             readProperties: async props => {
-                const expected = REQUESTS[requestsSent];
+                const expected = requests[requestsSent];
                 if (!expected || !Array.isArray(props) || props.length !== expected.length ||
                     !props.every((p, i) => p && `${p.siid}:${p.piid}` === expected[i] &&
                         Object.keys(p).every(k => k === "siid" || k === "piid"))) {
@@ -105,7 +109,7 @@ function createReadOnlyRobot(transport, deviceId) {
                 return response;
             },
             readProperty: async (siid, piid) => {
-                const expected = REQUESTS[requestsSent];
+                const expected = requests[requestsSent];
                 if (!expected || expected.length !== 1 || expected[0] !== `${siid}:${piid}`) {
                     throw new Error("Read-only request scope refused");
                 }
@@ -125,10 +129,13 @@ function createReadOnlyRobot(transport, deviceId) {
     };
 }
 
-async function readDiagnostic(robot) {
+async function readDiagnostic(robot, profile = "settings") {
+    if (!["settings", "stain"].includes(profile)) {
+        throw new Error("Unsupported read-only profile");
+    }
     const preflight = await Preflight.readFresh(robot);
     const settings = await Preflight.readSettings(robot);
-    return {
+    const result = {
         state: "read_only_observations_received",
         readOnly: true,
         nativeWritesRequested: 0,
@@ -136,6 +143,15 @@ async function readDiagnostic(robot) {
         preflight: preflight,
         settings: settings
     };
+    if (profile === "stain") {
+        const prerequisites = await Preflight.readStainAvoidancePrerequisites(robot);
+        return {...result,
+            state: prerequisites.observedAt === null ? "stain_prerequisites_unavailable" : "stain_read_only_observations_received",
+            getPropertiesRequests: robot.requestsSent(),
+            stainAvoidancePrerequisites: prerequisites
+        };
+    }
+    return result;
 }
 
 module.exports = {

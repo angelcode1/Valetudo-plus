@@ -18,7 +18,7 @@ function transport() {
         sendMessage: async msg => {
             calls.push(msg);
             const data = {"4:1": 14, "4:7": 0, "3:2": 1, "4:18": "", "4:25": 0,
-                "4:50": '[{"k":"SmartAutoMop","v":-1},{"k":"secret","v":"PRIVATE_FIXTURE"}]'};
+                "4:50": '[{"k":"SmartAutoMop","v":-1},{"k":"secret","v":"PRIVATE_FIXTURE"}]', "4:22": 0x8000000a};
             return msg.params.map(p => ({...p, code: 0, value: data[`${p.siid}:${p.piid}`]}));
         }
     };
@@ -149,35 +149,38 @@ test("probe consumes failed request budget without retrying", async () => {
     assert.equal(sends, 1);
 });
 
-test("actual probe CLI uses loopback encrypted reads only and suppresses private transport data", async () => {
-    const server = dgram.createSocket("udp4");
-    const token = Buffer.alloc(16, 0x42);
-    const codec = new Codec({token: token});
-    codec.updateStamp(100);
-    const packets = [];
-    server.on("message", (packet, peer) => {
-        if (packet.length === 32) {
-            packets.push("handshake");
-            const reply = createMiioHeader({timestamp: 100, deviceId: 123, unknown: 0});
+for (const profile of ["settings", "stain", "stain_failed"]) {
+    test(`actual ${profile} probe CLI uses loopback encrypted reads only and suppresses private transport data`, async () => {
+        const server = dgram.createSocket("udp4");
+        const token = Buffer.alloc(16, 0x42);
+        const codec = new Codec({token: token});
+        codec.updateStamp(100);
+        const packets = [];
+        server.on("message", (packet, peer) => {
+            if (packet.length === 32) {
+                packets.push("handshake");
+                const reply = createMiioHeader({timestamp: 100, deviceId: 123, unknown: 0});
+                server.send(reply, peer.port, peer.address);
+                return;
+            }
+            const decoded = codec.decodeIncomingMiioPacket(packet);
+            const msg = decoded.msg;
+            packets.push(msg.method);
+            assert.equal(msg.method, "get_properties");
+            const data = {"4:1": 14, "4:7": 0, "3:2": 1, "4:18": "", "4:25": 0,
+                "4:50": '[{"k":"SmartAutoMop","v":-1},{"k":"secret","v":"PRIVATE_FIXTURE"}]', "4:22": 0x8000000a};
+            const result = msg.params.map(p => ({...p,
+                code: profile === "stain_failed" && p.piid === 22 ? -1 : 0,
+                value: data[`${p.siid}:${p.piid}`]}));
+            const reply = codec.encodeOutgoingMiioPacket({id: msg.id, result: result}, 123);
             server.send(reply, peer.port, peer.address);
-            return;
-        }
-        const decoded = codec.decodeIncomingMiioPacket(packet);
-        const msg = decoded.msg;
-        packets.push(msg.method);
-        assert.equal(msg.method, "get_properties");
-        const data = {"4:1": 14, "4:7": 0, "3:2": 1, "4:18": "", "4:25": 0,
-            "4:50": '[{"k":"SmartAutoMop","v":-1},{"k":"secret","v":"PRIVATE_FIXTURE"}]'};
-        const result = msg.params.map(p => ({...p, code: 0, value: data[`${p.siid}:${p.piid}`]}));
-        const reply = codec.encodeOutgoingMiioPacket({id: msg.id, result: result}, 123);
-        server.send(reply, peer.port, peer.address);
-    });
-    server.bind(54321, "127.0.0.1");
-    await once(server, "listening");
-    const entry = path.resolve(__dirname, "../../../../x40-readonly-probe.js");
-    // Fake only the machine identity and credential reads in this child. The
-    // actual CLI, encrypted socket, bounded adapter and shared parsers execute.
-    const code = `
+        });
+        server.bind(54321, "127.0.0.1");
+        await once(server, "listening");
+        const entry = path.resolve(__dirname, "../../../../x40-readonly-probe.js");
+        // Fake only the machine identity and credential reads in this child. The
+        // actual CLI, encrypted socket, bounded adapter and shared parsers execute.
+        const code = `
         Object.defineProperty(process, "platform", {value: "linux"});
         Object.defineProperty(process, "arch", {value: "arm64"});
         const fs = require("fs");
@@ -187,37 +190,88 @@ test("actual probe CLI uses loopback encrypted reads only and suppresses private
             if (file === "/data/config/miio/device.token") return Buffer.concat([Buffer.alloc(16, 0x42), Buffer.from("\\n")]);
             return read.call(this, file, ...args);
         };
-        process.argv = [process.execPath, ${JSON.stringify(entry)}, "--readonly-x40-probe"];
+        process.argv = [process.execPath, ${JSON.stringify(entry)}, ${JSON.stringify(profile !== "settings" ?
+    "--readonly-x40-stain-prerequisites" : "--readonly-x40-probe")}];
         require(${JSON.stringify(entry)});
     `;
-    let child;
-    let deadline;
-    try {
-        child = spawn(process.execPath, ["-e", code]);
-        let stdout = "";
-        let stderr = "";
-        child.stdout.on("data", d => {
-            stdout += d;
-        });
-        child.stderr.on("data", d => {
-            stderr += d;
-        });
-        deadline = setTimeout(() => child.kill("SIGKILL"), 12000);
-        const [exit] = await once(child, "close");
-        assert.equal(exit, 0, stdout + stderr);
-        assert.equal(stderr, "");
-        const result = JSON.parse(stdout);
-        assert.equal(result.state, "read_only_observations_received");
-        assert.equal(result.settings.settings.autoReclean.value, -1);
-        assert.equal(stdout.includes("PRIVATE_FIXTURE"), false);
-        assert.deepEqual(packets, ["handshake", "get_properties", "get_properties"]);
-    } finally {
-        clearTimeout(deadline);
-        if (child && child.exitCode === null) {
-            child.kill("SIGKILL");
+        let child;
+        let deadline;
+        try {
+            child = spawn(process.execPath, ["-e", code]);
+            let stdout = "";
+            let stderr = "";
+            child.stdout.on("data", d => {
+                stdout += d;
+            });
+            child.stderr.on("data", d => {
+                stderr += d;
+            });
+            deadline = setTimeout(() => child.kill("SIGKILL"), 12000);
+            const [exit] = await once(child, "close");
+            assert.equal(exit, profile === "stain_failed" ? 3 : 0, stdout + stderr);
+            assert.equal(stderr, "");
+            const result = JSON.parse(stdout);
+            assert.equal(result.state, profile === "stain_failed" ? "stain_prerequisites_unavailable" :
+                profile === "stain" ? "stain_read_only_observations_received" : "read_only_observations_received");
+            assert.equal(result.settings.settings.autoReclean.value, -1);
+            assert.equal(stdout.includes("PRIVATE_FIXTURE"), false);
+            assert.deepEqual(packets, profile !== "settings" ? ["handshake", "get_properties", "get_properties", "get_properties"] :
+                ["handshake", "get_properties", "get_properties"]);
+            if (profile !== "settings") {
+                assert.equal(result.stainAvoidancePrerequisites.prerequisitesMatch, profile !== "stain_failed");
+                assert.equal(result.stainAvoidancePrerequisites.fluidDetection, profile === "stain_failed" ? null : true);
+                assert.equal(stdout.includes("2147483658"), false);
+                assert.equal(result.getPropertiesRequests, 3);
+            }
+        } finally {
+            clearTimeout(deadline);
+            if (child && child.exitCode === null) {
+                child.kill("SIGKILL");
+            }
+            await new Promise(resolve => server.close(resolve));
         }
-        await new Promise(resolve => server.close(resolve));
-    }
+    });
+}
+
+test("stain probe appends only the fixed AI read and refuses out-of-order or additional reads", async () => {
+    const wire = transport();
+    const robot = Probe.createReadOnlyRobot(wire, 123, "stain");
+    await assert.rejects(() => robot.miotHelper.readProperty(4, 22), /scope refused/);
+    assert.equal(wire.calls.length, 0);
+    const result = await Probe.readDiagnostic(robot, "stain");
+    assert.equal(result.state, "stain_read_only_observations_received");
+    assert.equal(result.getPropertiesRequests, 3);
+    assert.equal(result.nativeWritesRequested, 0);
+    assert.equal(result.preflight.activationAllowed, false);
+    assert.equal(result.stainAvoidancePrerequisites.prerequisitesMatch, true);
+    assert.deepEqual(wire.calls.map(msg => msg.params.map(p => `${p.siid}:${p.piid}`)),
+        [["4:1", "4:7", "3:2", "4:18", "4:25"], ["4:50"], ["4:22"]]);
+    await assert.rejects(() => robot.miotHelper.readProperty(4, 22), /scope refused/);
+    await assert.rejects(() => robot.miotHelper.readProperty(4, 23), /scope refused/);
+    assert.equal(wire.calls.length, 3);
+    assert.equal(robot.miotHelper.writeProperty, undefined);
+    assert.equal(robot.miotHelper.executeAction, undefined);
+    assert.throws(() => Probe.createReadOnlyRobot(wire, 123, "arbitrary"), /profile/);
+});
+
+test("failed third stain read consumes its budget and returns a fixed unavailable result without retry", async () => {
+    const wire = transport();
+    const send = wire.sendMessage;
+    wire.sendMessage = async message => {
+        if (message.params[0].piid === 22) {
+            wire.calls.push(message);
+            throw new Error("PRIVATE_FIXTURE");
+        }
+        return send(message);
+    };
+    const robot = Probe.createReadOnlyRobot(wire, 123, "stain");
+    const result = await Probe.readDiagnostic(robot, "stain");
+    assert.equal(result.state, "stain_prerequisites_unavailable");
+    assert.equal(result.getPropertiesRequests, 3);
+    assert.equal(result.stainAvoidancePrerequisites.blockedReason, "ai_settings_unavailable");
+    assert.equal(JSON.stringify(result).includes("PRIVATE_FIXTURE"), false);
+    await assert.rejects(() => robot.miotHelper.readProperty(4, 22), /scope refused/);
+    assert.equal(wire.calls.length, 3);
 });
 
 test("actual CLI identity failures identify the failed check without opening a socket or printing private data", async () => {
