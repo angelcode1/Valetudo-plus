@@ -51,13 +51,48 @@ No private robot file is needed to reproduce the source comparison.
 The explicit new opt-in isolates an unverified reference protocol; it does not
 replace model capability validation. Leave it absent in a normal installation.
 
+## Preserve AI prerequisites when ordinary controls change
+
+The existing camera-obstacle, pet-obstacle and obstacle-image capabilities edit
+MIOT 4:22. The shared serializer previously reconstructed only bits 2, 4 and 16,
+discarding every other bit from the fresh response. For example, disabling camera
+obstacle detection in a synthetic value 31 produced 20 instead of 29, clearing
+bits 1 and 8 as well as the requested bit 2.
+
+The pinned reference's integer AI format assigns fluid detection to bit 8. The
+source preservation defect can therefore remove a potential avoidance
+prerequisite when changing an ordinary setting. This is not evidence of the
+current X40 bitmask, nor proof that the device supports the reference mapping.
+The ordinary obstacle-avoidance API still does not expose fluid detection.
+
+Native setters now pass the complete fresh uint32 value into the serializer,
+which preserves all bits outside the three fields it models. Each capability
+changes only its requested decoded field. No extra MIOT request, AI-feature
+enablement, StainIdentify write, logging or polling is added. Unsupported formats,
+including strings, negative or out-of-range integers, fail before a native write;
+they are not coerced to an empty bitmask. The legacy one-argument utility remains
+available for explicitly constructing a new bitmask.
+
+Nine additional tests run the production capability methods with fake native
+transport. They cover all six toggle directions, preservation of the reference
+fluid bit and uninterpreted high bits, unsupported formats and no retries after
+transport failures. This preserves the read snapshot; it does not make separate
+native read/write requests atomic or prevent another writer changing the value
+between them. Hardware state and general model support remain unverified.
+
+**Decision:** GO for source review of the preservation fix. Keep the separate
+stain opt-in absent; the fixed ordinary controls do not establish model-specific
+fluid-detection eligibility. No further robot file collection is required to
+reproduce this defect or its code-level correction.
+
 ## Reproducible code checks
 
 From a checkout with dependencies installed, under Node.js 22:
 
 ```bash
 node --test backend/test/lib/robots/dreame/DreameX40StainAvoidance_test.js \
-  backend/test/lib/robots/dreame/DreameX40QuirkUiFlow_test.js
+  backend/test/lib/robots/dreame/DreameX40QuirkUiFlow_test.js \
+  backend/test/lib/robots/dreame/DreameAISettingsPreservation_test.js
 npm test --workspace=backend
 npm run ts-check_all
 npm run lint_all

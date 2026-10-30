@@ -40,7 +40,7 @@ class DreameAICameraObstacleAvoidanceControlCapability extends ObstacleAvoidance
         await this.robot.miotHelper.writeProperty(
             this.siid,
             this.piid,
-            DreameUtils.SERIALIZE_AI_SETTINGS(deserializedRes)
+            DreameUtils.SERIALIZE_AI_SETTINGS(deserializedRes, res)
         );
     }
 
@@ -56,7 +56,7 @@ class DreameAICameraObstacleAvoidanceControlCapability extends ObstacleAvoidance
         await this.robot.miotHelper.writeProperty(
             this.siid,
             this.piid,
-            DreameUtils.SERIALIZE_AI_SETTINGS(deserializedRes)
+            DreameUtils.SERIALIZE_AI_SETTINGS(deserializedRes, res)
         );
     }
 }

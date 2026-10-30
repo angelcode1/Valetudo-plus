@@ -38,7 +38,7 @@ class DreameObstacleImagesCapability extends ObstacleImagesCapability {
         await this.robot.miotHelper.writeProperty(
             this.siid,
             this.piid,
-            DreameUtils.SERIALIZE_AI_SETTINGS(deserializedRes)
+            DreameUtils.SERIALIZE_AI_SETTINGS(deserializedRes, res)
         );
     }
 
@@ -54,7 +54,7 @@ class DreameObstacleImagesCapability extends ObstacleImagesCapability {
         await this.robot.miotHelper.writeProperty(
             this.siid,
             this.piid,
-            DreameUtils.SERIALIZE_AI_SETTINGS(deserializedRes)
+            DreameUtils.SERIALIZE_AI_SETTINGS(deserializedRes, res)
         );
     }
 
