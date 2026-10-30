@@ -1,8 +1,8 @@
 "use strict";
 
-const Quirk = require("../../core/Quirk");
 const DreameMiotServices = require("./DreameMiotServices");
-const DreameUtils = require("./DreameUtils");
+const Preflight = require("./DreameX40CleanGeniusPreflight");
+const Quirk = require("../../core/Quirk");
 
 const MIOT = DreameMiotServices.GEN2.VACUUM_2;
 const SIID = MIOT.SIID;
@@ -12,6 +12,8 @@ const PIID = MIOT.PROPERTIES.MISC_TUNABLES.PIID;
 // generic capabilities. No setting is modified on boot or when this is disabled.
 const EXPERIMENTAL_ENV = "VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS";
 const ADVANCED_ENV = "VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_ADVANCED";
+const SIGNED_ENV = "VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_SIGNED";
+const STAIN_AVOIDANCE_ENV = "VALETUDO_X40_EXPERIMENTAL_STAIN_AVOIDANCE";
 
 const SETTINGS = Object.freeze([
     Object.freeze({
@@ -19,6 +21,7 @@ const SETTINGS = Object.freeze([
         title: "EXPERIMENTAL CleanGenius",
         description: "Unverified X40 native CleanGenius mode. Manual cleaning controls may be ignored in Routine/Deep. Change only while idle.",
         key: "SmartHost",
+        signed: false,
         values: Object.freeze({off: 0, routine: 1, deep: 2})
     }),
     Object.freeze({
@@ -26,6 +29,7 @@ const SETTINGS = Object.freeze([
         title: "EXPERIMENTAL Auto Reclean",
         description: "Native SmartAutoMop setting, if exposed by the firmware. The robot must be idle to change it.",
         key: "SmartAutoMop",
+        signed: true,
         values: Object.freeze({off: 0, deep_only: 1, all_modes: 2})
     }),
     Object.freeze({
@@ -33,9 +37,22 @@ const SETTINGS = Object.freeze([
         title: "EXPERIMENTAL Auto Rewash",
         description: "Native SmartAutoWash setting, if exposed by the firmware. The robot must be idle to change it.",
         key: "SmartAutoWash",
+        signed: true,
         values: Object.freeze({off: 0, deep_only: 1, all_modes: 2})
     })
 ]);
+
+// Reference integration uses StainIdentify for stain avoidance, with 1/2
+// meaning disabled/enabled. This is not a boolean stain-identification switch.
+// Keep this protocol separate from the main mode and signed auto-mode opt-ins.
+const STAIN_AVOIDANCE = Object.freeze({
+    id: "d14996e9-e8da-4cc4-9a67-1c52b07b83c5",
+    title: "EXPERIMENTAL Stain Avoidance",
+    description: "Reference stain-avoidance setting; X40 acceptance is unverified. AI obstacle and fluid detection must already be enabled. Change only while idle. This does not enable CleanGenius or confirm stain detection.",
+    key: "StainIdentify",
+    signed: false,
+    values: Object.freeze({disabled: 1, enabled: 2})
+});
 
 function isEnabled(env = process.env) {
     return env[EXPERIMENTAL_ENV] === "1";
@@ -47,9 +64,17 @@ function isAdvancedEnabled(env = process.env) {
     return isEnabled(env) && env[ADVANCED_ENV] === "1";
 }
 
+function isSignedEnabled(env = process.env) {
+    return isAdvancedEnabled(env) && env[SIGNED_ENV] === "1";
+}
+
+function isStainAvoidanceEnabled(env = process.env) {
+    return isEnabled(env) && env[STAIN_AVOIDANCE_ENV] === "1";
+}
+
 function isIdle(robot) {
-    // Fail closed until both the mode and task status have been polled.
-    return robot.ephemeralState?.mode === 0 && robot.ephemeralState?.taskStatus === 0;
+    // Cached eligibility alone never authorizes a write. The full fresh gate follows.
+    return [0, 6].includes(robot.ephemeralState?.mode) && robot.ephemeralState?.taskStatus === 0;
 }
 
 // Diagnostic text only. Values come from the existing cached MIOT state;
@@ -81,43 +106,33 @@ function decodeValue(raw, definition) {
 }
 
 async function readSettings(robot) {
-    const value = await robot.miotHelper.readProperty(SIID, PIID);
-
-    if (typeof value !== "string") {
-        throw new Error("The X40 did not return a valid AutoSwitch settings string");
-    }
-
-    return DreameUtils.DESERIALIZE_MISC_TUNABLES(value);
+    const snapshot = await Preflight.readSettings(robot);
+    return {
+        SmartHost: snapshot.settings.cleanGenius.value,
+        SmartAutoMop: snapshot.settings.autoReclean.value,
+        SmartAutoWash: snapshot.settings.autoRewash.value,
+        StainIdentify: snapshot.settings.stainIdentification.value
+    };
 }
 
-// Never infer idleness from Gen2's constructor defaults (mode=0, taskStatus=0).
-// Verify both independently reported MIOT fields from a fresh device poll.
 async function requireFreshIdle(robot) {
-    const props = [MIOT.PROPERTIES.MODE, MIOT.PROPERTIES.TASK_STATUS].map(prop => ({
-        siid: SIID, piid: prop.PIID
-    }));
-    const observations = await robot.miotHelper.readProperties(props);
-
-    if (!Array.isArray(observations) || observations.length !== props.length ||
-        !props.every((prop, index) => {
-            const observed = observations[index];
-            return observed?.siid === prop.siid &&
-                observed?.piid === prop.piid &&
-                observed?.code === 0 &&
-                observed?.value === 0;
-        })) {
-        throw new Error("The X40 did not confirm idle mode and task status in a fresh MIOT read");
+    const fresh = await Preflight.readFresh(robot);
+    if (!fresh.activationAllowed) {
+        throw new Error(`The X40 did not confirm safe idle state in a fresh MIOT read: ${fresh.blockedReason}`);
     }
 }
 
 function createQuirks(robot, options = {}) {
-    // All three selectors share one MIOT 4:50 property; serialize UI writes.
+    // All selectors share one MIOT 4:50 property; serialize UI writes.
     // This is a manual, supervised operation. It never runs at startup.
     let changeInProgress = false;
 
-    const definitions = options.advanced === true ? SETTINGS : SETTINGS.slice(0, 1);
+    const definitions = [
+        ...(options.advanced === true ? SETTINGS : SETTINGS.slice(0, 1)),
+        ...(options.stainAvoidance === true ? [STAIN_AVOIDANCE] : [])
+    ];
     return definitions.map(definition => {
-        return new Quirk({
+        const quirk = new Quirk({
             id: definition.id,
             title: definition.title,
             description: definition.description,
@@ -131,8 +146,12 @@ function createQuirks(robot, options = {}) {
                 if (!Object.prototype.hasOwnProperty.call(definition.values, value)) {
                     throw new Error(`Invalid ${definition.key} selection: ${value}`);
                 }
-                if (!isIdle(robot)) {
+                const recovery = definition.key === "SmartHost" && value === "off";
+                if (!recovery && !isIdle(robot)) {
                     throw new Error(`The X40 must be idle before changing ${definition.key}; ${describeCachedIdleState(robot)}; no write attempted`);
+                }
+                if (definition.signed === true && options.signedProtocol !== true) {
+                    throw new Error("Signed Reclean/Rewash protocol is not opted in; no write attempted");
                 }
                 if (changeInProgress) {
                     throw new Error("Another X40 CleanGenius setting change is in progress");
@@ -147,15 +166,27 @@ function createQuirks(robot, options = {}) {
 
                     // Polls are asynchronous: a cleaning task may begin during
                     // the MIOT read. Re-check immediately before the write.
-                    if (!isIdle(robot)) {
+                    if (!recovery && !isIdle(robot)) {
                         throw new Error(`The X40 is no longer idle; ${definition.key} was not written; ${describeCachedIdleState(robot)}`);
                     }
-                    await requireFreshIdle(robot);
-                    if (!isIdle(robot)) {
+                    if (definition.key === "StainIdentify") {
+                        const prerequisites = await Preflight.readStainAvoidancePrerequisites(robot);
+                        if (!prerequisites.prerequisitesMatch) {
+                            throw new Error(`X40 stain avoidance prerequisites were not confirmed: ${prerequisites.blockedReason}; no write attempted`);
+                        }
+                    }
+                    if (!recovery) {
+                        await requireFreshIdle(robot);
+                    }
+                    if (!recovery && !isIdle(robot)) {
                         throw new Error(`The X40 is no longer idle; ${definition.key} was not written; ${describeCachedIdleState(robot)}`);
                     }
 
-                    const target = definition.values[value];
+                    // Reference protocol: disabling a positive auto mode preserves
+                    // its selection as a signed negative. Still separately opted in
+                    // and hardware-unverified. Unknown current values stay blocked.
+                    const target = definition.signed === true && value === "off" && current[definition.key] > 0 ?
+                        -current[definition.key] : definition.values[value];
                     if (current[definition.key] === target) {
                         return;
                     }
@@ -164,9 +195,7 @@ function createQuirks(robot, options = {}) {
                     await robot.miotHelper.writeProperty(
                         SIID,
                         PIID,
-                        DreameUtils.SERIALIZE_MISC_TUNABLES_SINGLE_TUNABLE({
-                            [definition.key]: target
-                        })
+                        JSON.stringify({k: definition.key, v: target})
                     );
 
                     // A MIOT transport acknowledgement is not confirmation
@@ -180,7 +209,7 @@ function createQuirks(robot, options = {}) {
                             "actual firmware setting is unverified"
                         );
                     }
-                    if (!isIdle(robot)) {
+                    if (!recovery && !isIdle(robot)) {
                         throw new Error(
                             `X40 ${definition.key} read back, but task state changed; ` +
                             "check the robot before continuing"
@@ -191,12 +220,51 @@ function createQuirks(robot, options = {}) {
                 }
             }
         });
+        // An unsupported setting must remain visible instead of being silently
+        // dropped by QuirksCapability. Never expose firmware/transport error text.
+        quirk.serialize = async () => {
+            let raw = null;
+            let value = "unavailable";
+            let reason = "settings_unavailable";
+            try {
+                const current = await readSettings(robot);
+                raw = current[definition.key];
+                try {
+                    value = decodeValue(raw, definition);
+                    reason = definition.signed === true && options.signedProtocol !== true ?
+                        "signed_protocol_not_opted_in" : null;
+                    if (reason === null && definition.key === "StainIdentify") {
+                        reason = (await Preflight.readStainAvoidancePrerequisites(robot)).blockedReason;
+                    }
+                } catch {
+                    value = "unsupported";
+                    reason = "native_value_unverified";
+                }
+            } catch {
+                // A failed read produces a disabled control, never a stale value.
+            }
+            return {
+                id: quirk.id,
+                title: quirk.title,
+                description: quirk.description,
+                options: reason ? [value] : quirk.options,
+                value: value,
+                readOnly: reason !== null,
+                rawValue: Number.isSafeInteger(raw) ? raw : null,
+                unavailableReason: reason
+            };
+        };
+        return quirk;
     });
 }
 
 module.exports = {
     EXPERIMENTAL_ENV: EXPERIMENTAL_ENV,
     ADVANCED_ENV: ADVANCED_ENV,
+    SIGNED_ENV: SIGNED_ENV,
+    STAIN_AVOIDANCE_ENV: STAIN_AVOIDANCE_ENV,
+    isStainAvoidanceEnabled: isStainAvoidanceEnabled,
+    isSignedEnabled: isSignedEnabled,
     isAdvancedEnabled: isAdvancedEnabled,
     SETTINGS: SETTINGS,
     isEnabled: isEnabled,

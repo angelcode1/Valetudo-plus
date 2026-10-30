@@ -1,7 +1,9 @@
 import React from "react";
-import {Alert, Box, Chip, Divider, Typography} from "@mui/material";
+import {Alert, Box, Button, Chip, Divider, Typography} from "@mui/material";
 import {Insights as CleanGeniusIcon} from "@mui/icons-material";
 import {
+    fetchX40CleanGeniusPreflight,
+    X40CleanGeniusPreflight,
     useRobotInformationQuery,
     useX40CleanGeniusStatusQuery,
     X40CleanGeniusReadOnlyStatus,
@@ -32,8 +34,8 @@ const DISPLAY_FIELDS: Array<{
     },
     {
         key: "stainIdentification",
-        title: "Stain Identification setting",
-        description: "Whether StainIdentify is configured on; not a live stain detection."
+        title: "Stain handling setting",
+        description: "Native StainIdentify value. The reference uses 1/2 for avoidance disabled/enabled; X40 behavior remains unverified."
     },
     {
         key: "hotWash",
@@ -73,9 +75,27 @@ const CleanGeniusStatus = (): React.ReactElement => {
         refetch
     } = useX40CleanGeniusStatusQuery(supported);
 
+    const [fresh, setFresh] = React.useState<X40CleanGeniusPreflight | null>(null);
+    const [freshBusy, setFreshBusy] = React.useState(false);
+    const [freshError, setFreshError] = React.useState(false);
+    const readFresh = async (): Promise<void> => {
+        setFresh(null);
+        setFreshError(false);
+        setFreshBusy(true);
+        try {
+            setFresh(await fetchX40CleanGeniusPreflight());
+        } catch {
+            setFreshError(true);
+        } finally {
+            setFreshBusy(false);
+        }
+    };
+
     const policy = status?.valetudoPolicy === "experimental_controls_opted_in" ?
         "Experimental writable CleanGenius quirks are opted in. This page remains read-only." :
-        "Valetudo normally disables positive SmartHost settings to protect manual controls. " +
+        status?.valetudoPolicy === "observe_only_preserve_smart_host" ?
+            "Observe-only policy preserves the native SmartHost setting. Writable controls remain separately opted in." :
+            "Valetudo normally disables positive SmartHost settings to protect manual controls. " +
         "A reported setting may not be the effective native cleaning mode.";
 
     return (
@@ -93,8 +113,8 @@ const CleanGeniusStatus = (): React.ReactElement => {
                 <Box sx={{p: 2}}>
                     <Chip label="Read-only" variant="outlined" size="small"/>
                     <Typography variant="body2" color="textSecondary" sx={{mt: 1}}>
-                        X40 Ultra native settings observed through the existing MIOT 4:50 state poll.
-                        No cleaning commands, native service calls or sensor recordings are made by this page.
+                        Cached native settings and an explicit fresh safety read are shown separately.
+                        This page does not change settings or start cleaning.
                     </Typography>
 
                     {robotInfoPending && <Typography sx={{mt: 2}}>Checking robot model…</Typography>}
@@ -107,6 +127,28 @@ const CleanGeniusStatus = (): React.ReactElement => {
 
                     {supported && (
                         <>
+                            <Box sx={{mt: 2, mb: 2}}>
+                                <Button variant="outlined" disabled={freshBusy} onClick={() => {
+                                    void readFresh();
+                                }}>
+                                    {freshBusy ? "Reading robot status…" : "Read fresh safety status"}
+                                </Button>
+                                <Typography variant="body2" sx={{mt: 1}}>
+                                    Reads current mode, task, charging, error and dock status once. No setting is changed.
+                                </Typography>
+                                {freshError && <Alert severity="warning">Fresh status is unavailable. Idleness is not confirmed.</Alert>}
+                                {fresh && (
+                                    <Alert severity={fresh.activationAllowed ? "info" : "warning"} sx={{mt: 1}}>
+                                        Mode {fresh.mode}, task {fresh.taskStatus}, charging {fresh.chargeCode},
+                                        dock {fresh.dockWashCode}, error {fresh.errorClear ? "clear" : "not clear"}.
+                                        {" "}{fresh.blockedReason === "powersave_requires_awake_idle_observation" ?
+                                            "The robot is in power save. Activation remains blocked until an awake idle state is freshly confirmed." :
+                                            fresh.blockedReason ? fresh.blockedReason.replace(/_/g, " ") :
+                                                "The status prerequisites matched at this read. This does not authorize a setting change."}
+                                        {" "}Read at {new Date(fresh.observedAt).toLocaleString()}.
+                                    </Alert>
+                                )}
+                            </Box>
                             {statusPending && !statusError &&
                                 <Typography sx={{mt: 2}}>Loading cached CleanGenius settings…</Typography>
                             }
@@ -203,7 +245,7 @@ const CleanGeniusStatus = (): React.ReactElement => {
                                             {" · "}Task status: {status.cachedIdle.taskStatus ?? "unavailable"}
                                         </Typography>
                                         <Typography variant="body2" color="textSecondary">
-                                            Cached strict guard: {status.cachedIdle.cachedGuardMatch ? "matches 0/0" : "not confirmed"}
+                                            Cached raw 0/0 pair: {status.cachedIdle.cachedGuardMatch ? "matches 0/0" : "not confirmed"}
                                             {status.cachedIdle.ageMs !== null ?
                                                 ` · ${Math.floor(status.cachedIdle.ageMs / 1000)} s old` : ""}
                                         </Typography>

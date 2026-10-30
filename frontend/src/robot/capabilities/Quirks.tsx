@@ -66,7 +66,7 @@ const QuirkControl: FunctionComponent<{ quirk: Quirk, style?: React.CSSPropertie
                         id={props.quirk.id + "-select"}
                         value={props.quirk.value}
                         onChange={handleChange}
-                        disabled={quirkValueSetting}
+                        disabled={quirkValueSetting || props.quirk.readOnly === true}
 
                     >
                         {
@@ -88,6 +88,15 @@ const QuirkControl: FunctionComponent<{ quirk: Quirk, style?: React.CSSPropertie
                         style={{marginTop: "1rem"}}
                     >
                         {props.quirk.description}
+                        {props.quirk.readOnly && (
+                            <span>
+                                {" · Read-only"}
+                                {props.quirk.rawValue !== null && props.quirk.rawValue !== undefined ?
+                                    ` · Native value: ${props.quirk.rawValue}` : ""}
+                                {props.quirk.unavailableReason ?
+                                    ` · ${props.quirk.unavailableReason.replace(/_/g, " ")}` : ""}
+                            </span>
+                        )}
                     </Typography>
                 </FormControl>
             </Paper>

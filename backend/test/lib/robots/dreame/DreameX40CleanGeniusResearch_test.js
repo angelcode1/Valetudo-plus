@@ -1,8 +1,8 @@
 "use strict";
 
 const assert = require("node:assert/strict");
-const test = require("node:test");
 const research = require("../../../../lib/robots/dreame/DreameX40CleanGeniusResearch");
+const test = require("node:test");
 
 test("experimental feature is opt-in", () => {
     assert.equal(research.isEnabled({}), false);
@@ -48,10 +48,10 @@ test("fails closed when task or mode is unknown/active", () => {
 });
 
 
-test("docked-looking cached mode remains blocked with bounded diagnostic, no MIOT calls", async () => {
+test("powersave cached mode remains blocked with bounded diagnostic, no MIOT calls", async () => {
     let calls = 0;
     const robot = {
-        ephemeralState: {mode: 6, taskStatus: 0},
+        ephemeralState: {mode: 14, taskStatus: 0},
         miotHelper: {
             readProperty: async () => {
                 calls++;
@@ -66,7 +66,7 @@ test("docked-looking cached mode remains blocked with bounded diagnostic, no MIO
     };
     await assert.rejects(
         () => research.createQuirks(robot)[0].setter("routine"),
-        /cached mode=6, taskStatus=0; no write attempted/
+        /cached mode=14, taskStatus=0; no write attempted/
     );
     assert.equal(calls, 0);
 });
@@ -99,7 +99,7 @@ test("quirk rejects active cleaning without writing", async () => {
     const robot = {
         ephemeralState: {mode: 1, taskStatus: 1},
         miotHelper: {
-            readProperties: async properties => properties.map(p => ({...p, code: 0, value: 0})),
+            readProperties: async properties => properties.map(p => ({...p, code: 0, value: p.siid === 3 ? 1 : 0})),
             readProperty: async () => JSON.stringify([{k: "SmartHost", v: 0}]),
             writeProperty: async () => {
                 writes++;
@@ -118,7 +118,7 @@ test("quirk writes one key only, verifies readback, and remains manual", async (
     const robot = {
         ephemeralState: {mode: 0, taskStatus: 0},
         miotHelper: {
-            readProperties: async properties => properties.map(p => ({...p, code: 0, value: 0})),
+            readProperties: async properties => properties.map(p => ({...p, code: 0, value: p.siid === 3 ? 1 : 0})),
             readProperty: async () => {
                 reads++;
                 return JSON.stringify([{k: "SmartHost", v: smartHost}]);
@@ -144,7 +144,7 @@ test("MIOT accepted write without matching readback is an error; no retry", asyn
     const robot = {
         ephemeralState: {mode: 0, taskStatus: 0},
         miotHelper: {
-            readProperties: async properties => properties.map(p => ({...p, code: 0, value: 0})),
+            readProperties: async properties => properties.map(p => ({...p, code: 0, value: p.siid === 3 ? 1 : 0})),
             readProperty: async () => JSON.stringify([{k: "SmartHost", v: 0}]),
             writeProperty: async () => {
                 writes++;
@@ -164,7 +164,7 @@ test("readback transport failure is surfaced without writing twice", async () =>
     const robot = {
         ephemeralState: {mode: 0, taskStatus: 0},
         miotHelper: {
-            readProperties: async properties => properties.map(p => ({...p, code: 0, value: 0})),
+            readProperties: async properties => properties.map(p => ({...p, code: 0, value: p.siid === 3 ? 1 : 0})),
             readProperty: async () => {
                 reads++;
                 if (reads === 2) {
@@ -189,7 +189,7 @@ test("state changing during initial read blocks a write", async () => {
     const robot = {
         ephemeralState: {mode: 0, taskStatus: 0},
         miotHelper: {
-            readProperties: async properties => properties.map(p => ({...p, code: 0, value: 0})),
+            readProperties: async properties => properties.map(p => ({...p, code: 0, value: p.siid === 3 ? 1 : 0})),
             readProperty: async () => {
                 robot.ephemeralState.taskStatus = 1;
                 return JSON.stringify([{k: "SmartHost", v: 0}]);
@@ -215,7 +215,7 @@ test("concurrent selector writes are blocked across all three X40 quirks", async
     const robot = {
         ephemeralState: {mode: 0, taskStatus: 0},
         miotHelper: {
-            readProperties: async properties => properties.map(p => ({...p, code: 0, value: 0})),
+            readProperties: async properties => properties.map(p => ({...p, code: 0, value: p.siid === 3 ? 1 : 0})),
             readProperty: async () => {
                 await gate;
                 return JSON.stringify([
@@ -228,7 +228,7 @@ test("concurrent selector writes are blocked across all three X40 quirks", async
             }
         }
     };
-    const quirks = research.createQuirks(robot, {advanced: true});
+    const quirks = research.createQuirks(robot, {advanced: true, signedProtocol: true});
     const first = quirks[0].setter("routine");
     await assert.rejects(
         () => quirks[2].setter("all_modes"),
@@ -244,7 +244,7 @@ test("absent setting cannot cause a write", async () => {
     const robot = {
         ephemeralState: {mode: 0, taskStatus: 0},
         miotHelper: {
-            readProperties: async properties => properties.map(p => ({...p, code: 0, value: 0})),
+            readProperties: async properties => properties.map(p => ({...p, code: 0, value: p.siid === 3 ? 1 : 0})),
             readProperty: async () => JSON.stringify([{k: "CleanRoute", v: 1}]),
             writeProperty: async () => {
                 writes++;
@@ -261,7 +261,7 @@ test("R2416 observed 4:50 sentinel values do not cause an accidental write", asy
     const robot = {
         ephemeralState: {mode: 0, taskStatus: 0},
         miotHelper: {
-            readProperties: async properties => properties.map(p => ({...p, code: 0, value: 0})),
+            readProperties: async properties => properties.map(p => ({...p, code: 0, value: p.siid === 3 ? 1 : 0})),
             // Sanitized read-only X40 observation from firmware 4.3.9_1782.
             readProperty: async () => JSON.stringify([
                 {k: "SmartHost", v: 0},
@@ -276,7 +276,7 @@ test("R2416 observed 4:50 sentinel values do not cause an accidental write", asy
         }
     };
 
-    const [cleanGenius, autoReclean, autoRewash] = research.createQuirks(robot, {advanced: true});
+    const [cleanGenius, autoReclean, autoRewash] = research.createQuirks(robot, {advanced: true, signedProtocol: true});
     assert.equal(await cleanGenius.getter(), "off");
     assert.equal(await autoRewash.getter(), "off");
 

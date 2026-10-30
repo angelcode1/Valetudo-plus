@@ -20,7 +20,7 @@ test("parses a sanitized real X40 observation without inventing meanings", () =>
     assert.deepEqual(result.settings.autoReclean, {value: -1, state: "unknown"});
     assert.deepEqual(result.settings.cleanGenius, {value: 0, state: "off"});
     assert.deepEqual(result.settings.autoRewash, {value: 0, state: "off"});
-    assert.deepEqual(result.settings.stainIdentification, {value: 1, state: "on_setting"});
+    assert.deepEqual(result.settings.stainIdentification, {value: 1, state: "mode_1_unverified"});
     assert.equal(JSON.stringify(result).includes("secret_key"), false);
     assert.equal(JSON.stringify(result).includes("MeticulousTwist"), false);
 });
