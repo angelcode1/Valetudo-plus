@@ -36,7 +36,7 @@ npm run build_x40_readonly_probe --workspace=backend
 python3 scripts/x40-readonly-probe/test_runner.py
 ```
 
-The build produces `build/x40-readonly-probe`. The package is compiled separately from the full Valetudo candidate. Its tests include actual encrypted loopback packet exchange against a fake firmware peer with fake on-device credentials, as well as scope/budget/error checks. This supplies no real hardware acceptance result.
+The build produces `build/x40-readonly-probe`. Its npm script first generates `backend/lib/res/build_metadata.json`, which the packager discovers through Logger/Tools even though the probe does not call the metadata reader. This makes the standalone build independent of an earlier full Valetudo build and prevents the missing-metadata `Cannot stat, ENOENT` warning from a fresh checkout. The CI workflow packages this standalone target before the normal frontend/backend builds. The package is compiled separately from the full Valetudo candidate. Its tests include actual encrypted loopback packet exchange against a fake firmware peer with fake on-device credentials, as well as scope/budget/error checks. This supplies no real hardware acceptance result.
 
 The identity correction passed all 164 backend tests under Node 22.17.1, backend type checking and lint (six existing warnings), and standalone ARM64 packaging. These are offline results. They do not establish which identity check failed on the owner's device, that the corrected executable runs there, or that any CleanGenius write is accepted.
 
