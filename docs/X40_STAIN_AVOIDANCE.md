@@ -37,9 +37,9 @@ No private robot file is needed to reproduce the source comparison.
   Main, advanced and signed flags alone never register it. The new flag is absent
   from the clean environment supplied by the generic UI launcher.
 - Offer `disabled` / `enabled`, mapped to 1/2. Require a current recognized 1/2
-  value, eligible cached state and the existing complete fresh idle/charging/
-  clear-error/idle-dock read for either direction. Disabling avoidance does not
-  use the SmartHost Off recovery exception.
+  value, eligible cached state, fresh reference AI obstacle/fluid flags and the
+  existing complete fresh idle/charging/clear-error/idle-dock read for either
+  direction. Disabling avoidance does not use the SmartHost Off recovery exception.
 - Reuse the existing controller and its shared write lock. Write only the
   requested StainIdentify key in MIOT 4:50, verify exact readback, and never retry
   or issue a blind rollback write. Reclean/Rewash signed transforms do not apply
@@ -50,6 +50,38 @@ No private robot file is needed to reproduce the source comparison.
 
 The explicit new opt-in isolates an unverified reference protocol; it does not
 replace model capability validation. Leave it absent in a normal installation.
+
+### Fresh AI prerequisite gate
+
+The separately registered selector now reads MIOT 4:22 after recognizing the
+StainIdentify value. Only the reference uint32 format with both obstacle bit 2
+and fluid bit 8 set matches this additional prerequisite. The reader exposes
+only those two flags and fixed status fields, never the complete AI bitmask.
+It does not enable a missing AI feature or coerce another format.
+
+| Failed prerequisite | Disabled-control reason |
+| --- | --- |
+| AI read failed | ai_settings_unavailable |
+| Unsupported or invalid AI format | ai_settings_format_unverified |
+| Obstacle detection flag absent | ai_obstacle_detection_disabled |
+| Fluid detection flag absent | ai_fluid_detection_disabled |
+
+Quirks serialization keeps a recognized native setting visible but disables its
+options with the reason above. The setter independently repeats its own AI read;
+a successful UI read is never reused as permission. Both enable and disable
+require this gate. The final fresh safety read follows the AI read, and cached
+task eligibility is rechecked before writing. A task starting during the extra
+read still blocks the operation.
+
+Only the separately opted-in stain selector gains these reads. The main mode,
+advanced auto-mode selectors, cached Status page and default launch profile do
+not. The existing Quirks refresh can read these prerequisites when that selector
+is registered; no new polling loop or automatic native write is added.
+
+Seven dedicated regression cases plus two actual UI/API bypass cases cover this
+guard. A reference-bit match remains distinct from X40 capability validation,
+firmware acceptance and real avoidance behavior. The read and write are separate
+native requests, not an atomic firmware transaction.
 
 ## Preserve AI prerequisites when ordinary controls change
 
@@ -120,8 +152,8 @@ an accepted service environment merely because the build passes.
 
 If a later owner-approved validation establishes those prerequisites, its one
 bounded attended procedure must pin a fresh starting value, require the complete
-fresh safety gate for each direction, select the other value once, capture exact
-readback and unchanged other settings, then restore the starting value with
+fresh AI prerequisite and safety gates for each direction, select the other value
+once, capture exact readback and unchanged other settings, then restore the starting value with
 another complete gate and exact readback. No cleaning task is needed to test
 setting acceptance; it would not establish avoidance behavior. On rejection,
 unknown value, mismatch or unexpected state, stop and park without retries.

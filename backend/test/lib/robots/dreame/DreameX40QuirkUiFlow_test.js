@@ -56,6 +56,12 @@ async function fixture(options) {
             readProperties: async props => props.map(p => ({...p, code: 0,
                 value: ({"4:1": 6, "4:7": 0, "3:2": 1, "4:18": "", "4:25": 0})[`${p.siid}:${p.piid}`]})),
             readProperty: async (siid, piid) => {
+                if (siid === 4 && piid === 22 && options.stainAvoidance) {
+                    if (options.aiReadFails) {
+                        throw new Error("PRIVATE_AI_TRANSPORT_FIXTURE");
+                    }
+                    return options.aiBlocked ? 2 : 10;
+                }
                 assert.deepEqual([siid, piid], [4, 50]);
                 if (writes.length && options.readbackFailure && !readbackFailed) {
                     readbackFailed = true;
@@ -136,6 +142,39 @@ async function fixture(options) {
             await new Promise(resolve => server.close(resolve));
         }
     };
+}
+
+for (const scenario of [
+    {aiBlocked: true, reason: "ai_fluid_detection_disabled"},
+    {aiReadFails: true, reason: "ai_settings_unavailable"}
+]) {
+    test(`X40 stain UI/API rejects bypassing the disabled selector: ${scenario.reason}`, {timeout: 5000}, async () => {
+        const state = await fixture({stainAvoidance: true, ...scenario});
+        const visible = () => state.query.getCurrentResult().data.find(item => item.id === state.id);
+        try {
+            assert.equal(visible().readOnly, true);
+            assert.equal(visible().unavailableReason, scenario.reason);
+            const completed = state.mutation.mutate({id: state.id, value: "enabled"}).then(
+                () => ({ok: true, error: null}), error => ({ok: false, error: error})
+            );
+            await Promise.race([
+                state.refreshStarted.promise,
+                completed.then(() => assert.fail("The command settled before requesting a settings refresh"))
+            ]);
+            assert.equal(state.mutation.getCurrentResult().isPending, true);
+            state.releaseRefresh.resolve();
+            const outcome = await completed;
+            assert.equal(outcome.ok, false);
+            assert.equal(outcome.error.message.includes(scenario.reason), true);
+            assert.equal(outcome.error.message.includes("PRIVATE_AI"), false);
+            assert.equal(visible().readOnly, true);
+            assert.equal(visible().unavailableReason, scenario.reason);
+            assert.deepEqual(state.writes, []);
+            assert.deepEqual(state.requests, ["GET", "PUT", "GET"]);
+        } finally {
+            await state.close();
+        }
+    });
 }
 
 for (const scenario of [

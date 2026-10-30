@@ -48,7 +48,7 @@ const SETTINGS = Object.freeze([
 const STAIN_AVOIDANCE = Object.freeze({
     id: "d14996e9-e8da-4cc4-9a67-1c52b07b83c5",
     title: "EXPERIMENTAL Stain Avoidance",
-    description: "Reference stain-avoidance setting; X40 acceptance is unverified. Change only while idle. This does not enable CleanGenius or confirm stain detection.",
+    description: "Reference stain-avoidance setting; X40 acceptance is unverified. AI obstacle and fluid detection must already be enabled. Change only while idle. This does not enable CleanGenius or confirm stain detection.",
     key: "StainIdentify",
     signed: false,
     values: Object.freeze({disabled: 1, enabled: 2})
@@ -169,6 +169,12 @@ function createQuirks(robot, options = {}) {
                     if (!recovery && !isIdle(robot)) {
                         throw new Error(`The X40 is no longer idle; ${definition.key} was not written; ${describeCachedIdleState(robot)}`);
                     }
+                    if (definition.key === "StainIdentify") {
+                        const prerequisites = await Preflight.readStainAvoidancePrerequisites(robot);
+                        if (!prerequisites.prerequisitesMatch) {
+                            throw new Error(`X40 stain avoidance prerequisites were not confirmed: ${prerequisites.blockedReason}; no write attempted`);
+                        }
+                    }
                     if (!recovery) {
                         await requireFreshIdle(robot);
                     }
@@ -227,6 +233,9 @@ function createQuirks(robot, options = {}) {
                     value = decodeValue(raw, definition);
                     reason = definition.signed === true && options.signedProtocol !== true ?
                         "signed_protocol_not_opted_in" : null;
+                    if (reason === null && definition.key === "StainIdentify") {
+                        reason = (await Preflight.readStainAvoidancePrerequisites(robot)).blockedReason;
+                    }
                 } catch {
                     value = "unsupported";
                     reason = "native_value_unverified";

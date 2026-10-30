@@ -1,6 +1,7 @@
 "use strict";
 
 const assert = require("node:assert/strict");
+const Preflight = require("../../../../lib/robots/dreame/DreameX40CleanGeniusPreflight");
 const Research = require("../../../../lib/robots/dreame/DreameX40CleanGeniusResearch");
 const Status = require("../../../../lib/robots/dreame/DreameX40CleanGeniusReadOnlyStatus");
 const test = require("node:test");
@@ -10,11 +11,20 @@ function fixture(options = {}) {
         ...options.settings};
     const state = {"4:1": 6, "4:7": 0, "3:2": 1, "4:18": "", "4:25": 0, ...options.state};
     const writes = [];
+    const reads = [];
+    const ai = {value: 10};
     const robot = {
         ephemeralState: {mode: 6, taskStatus: 0},
         miotHelper: {
-            readProperties: async props => props.map(p => ({...p, code: 0, value: state[`${p.siid}:${p.piid}`]})),
+            readProperties: async props => {
+                reads.push("fresh_safety");
+                return props.map(p => ({...p, code: 0, value: state[`${p.siid}:${p.piid}`]}));
+            },
             readProperty: async (siid, piid) => {
+                reads.push(`${siid}:${piid}`);
+                if (siid === 4 && piid === 22) {
+                    return ai.value;
+                }
                 assert.deepEqual([siid, piid], [4, 50]);
                 return JSON.stringify(Object.entries(settings).map(([k, v]) => ({k: k, v: v})));
             },
@@ -26,7 +36,7 @@ function fixture(options = {}) {
         }
     };
     const quirks = Research.createQuirks(robot, {stainAvoidance: true});
-    return {robot: robot, quirks: quirks, stain: quirks[1], settings: settings, writes: writes};
+    return {robot: robot, quirks: quirks, stain: quirks[1], settings: settings, writes: writes, reads: reads, ai: ai};
 }
 
 test("stain avoidance requires main and separate exact opt-ins, never advanced alone", () => {
@@ -152,4 +162,101 @@ test("stain and CleanGenius share the same in-flight write lock", async () => {
     }
     await pending;
     assert.deepEqual(writes, [[4, 50, '{"k":"StainIdentify","v":2}']]);
+});
+
+test("fresh stain prerequisites expose only the reference obstacle/fluid flags, never the full AI bitmask", async () => {
+    for (const raw of [10, 0x800001ff]) {
+        const {robot, ai, reads, writes} = fixture();
+        ai.value = raw;
+        const result = await Preflight.readStainAvoidancePrerequisites(robot);
+        assert.equal(result.readOnly, true);
+        assert.equal(result.obstacleDetection, true);
+        assert.equal(result.fluidDetection, true);
+        assert.equal(result.prerequisitesMatch, true);
+        assert.equal(result.blockedReason, null);
+        assert.equal(Object.hasOwn(result, "rawValue"), false);
+        assert.deepEqual(reads, ["4:22"]);
+        assert.equal(writes.length, 0);
+    }
+});
+
+test("both stain directions fail closed when reference AI prerequisites are absent or unsupported", async () => {
+    for (const [raw, reason] of [
+        [0, "ai_obstacle_detection_disabled"], [8, "ai_obstacle_detection_disabled"],
+        [2, "ai_fluid_detection_disabled"], [null, "ai_settings_format_unverified"],
+        ["10", "ai_settings_format_unverified"], [-1, "ai_settings_format_unverified"],
+        [0x100000000, "ai_settings_format_unverified"], [undefined, "ai_settings_format_unverified"]
+    ]) {
+        for (const value of ["enabled", "disabled"]) {
+            const {stain, ai, writes} = fixture({settings: {StainIdentify: value === "enabled" ? 1 : 2}});
+            ai.value = raw;
+            const visible = await stain.serialize();
+            assert.equal(visible.readOnly, true);
+            assert.equal(visible.unavailableReason, reason);
+            assert.equal(visible.value, value === "enabled" ? "disabled" : "enabled");
+            await assert.rejects(() => stain.setter(value), error => error.message.includes(reason));
+            assert.equal(writes.length, 0);
+        }
+    }
+});
+
+test("unavailable AI reads use a fixed blocked reason without private errors or retries", async () => {
+    const {stain, robot, writes} = fixture();
+    const read = robot.miotHelper.readProperty;
+    let attempts = 0;
+    robot.miotHelper.readProperty = async (siid, piid) => {
+        if (piid === 22) {
+            attempts++;
+            throw new Error("PRIVATE_AI_TRANSPORT_FIXTURE");
+        }
+        return read(siid, piid);
+    };
+    const visible = await stain.serialize();
+    assert.equal(visible.readOnly, true);
+    assert.equal(visible.unavailableReason, "ai_settings_unavailable");
+    assert.equal(JSON.stringify(visible).includes("PRIVATE_AI"), false);
+    await assert.rejects(() => stain.setter("enabled"), error => {
+        assert.equal(error.message.includes("PRIVATE_AI"), false);
+        return error.message.includes("ai_settings_unavailable");
+    });
+    assert.equal(attempts, 2); // One explicit serialize and one explicit setter.
+    assert.equal(writes.length, 0);
+});
+
+test("a successful UI prerequisite read never authorizes the subsequent setter", async () => {
+    const {stain, ai, writes} = fixture();
+    assert.equal((await stain.serialize()).readOnly, false);
+    ai.value = 2;
+    await assert.rejects(() => stain.setter("enabled"), /ai_fluid_detection_disabled/);
+    assert.equal(writes.length, 0);
+    ai.value = 10;
+    assert.equal((await stain.serialize()).readOnly, false);
+});
+
+test("stain obtains fresh AI prerequisites before its final fresh safety gate and one-key write", async () => {
+    const {stain, reads, writes} = fixture();
+    await stain.setter("enabled");
+    assert.deepEqual(reads, ["4:50", "4:22", "fresh_safety", "4:50"]);
+    assert.deepEqual(writes, [[4, 50, '{"k":"StainIdentify","v":2}']]);
+});
+
+test("a task starting while AI prerequisites are read still prevents a stain write", async () => {
+    const {stain, robot, writes} = fixture();
+    const read = robot.miotHelper.readProperty;
+    robot.miotHelper.readProperty = async (siid, piid) => {
+        if (piid === 22) {
+            robot.ephemeralState.taskStatus = 1;
+        }
+        return read(siid, piid);
+    };
+    await assert.rejects(() => stain.setter("enabled"), /no longer idle/);
+    assert.equal(writes.length, 0);
+});
+
+test("ordinary CleanGenius controls do not acquire AI-setting reads", async () => {
+    const {robot, reads} = fixture();
+    const main = Research.createQuirks(robot)[0];
+    await main.serialize();
+    await main.setter("routine");
+    assert.equal(reads.includes("4:22"), false);
 });

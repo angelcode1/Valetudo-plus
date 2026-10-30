@@ -63,4 +63,36 @@ async function readSettings(robot) {
     };
 }
 
-module.exports = {readFresh: readFresh, readSettings: readSettings};
+async function readStainAvoidancePrerequisites(robot) {
+    // Reference integer AI protocol, not a proof of model capability. Never
+    // write AI flags to satisfy this gate or expose the complete AI bitmask.
+    const result = {
+        source: "native_miot_direct_ai_settings",
+        readOnly: true,
+        observedAt: null,
+        obstacleDetection: null,
+        fluidDetection: null,
+        prerequisitesMatch: false,
+        blockedReason: "ai_settings_unavailable"
+    };
+    let raw;
+    try {
+        raw = await robot.miotHelper.readProperty(4, 22);
+    } catch {
+        return result;
+    }
+    result.observedAt = new Date().toISOString();
+    if (!Number.isSafeInteger(raw) || raw < 0 || raw > 0xffffffff) {
+        result.blockedReason = "ai_settings_format_unverified";
+        return result;
+    }
+    result.obstacleDetection = (raw & 2) !== 0;
+    result.fluidDetection = (raw & 8) !== 0;
+    result.blockedReason = !result.obstacleDetection ? "ai_obstacle_detection_disabled" :
+        !result.fluidDetection ? "ai_fluid_detection_disabled" : null;
+    result.prerequisitesMatch = result.blockedReason === null;
+    return result;
+}
+
+module.exports = {readFresh: readFresh, readSettings: readSettings,
+    readStainAvoidancePrerequisites: readStainAvoidancePrerequisites};

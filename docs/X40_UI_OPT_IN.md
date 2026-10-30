@@ -58,7 +58,7 @@ acceptance or a recommendation to enable additional protocol flags.
 | --- | --- | --- |
 | CleanGenius Off / Routine / Deep | Guarded SmartHost selector under Options → Robot → Quirks | Main opt-in required; exact readback confirms only the requested setting |
 | Auto Reclean / Auto Rewash | Additional experimental quirks | Advanced opt-in required for registration, signed opt-in for writes; unknown or negative current values remain blocked |
-| Stain handling / avoidance | Read-only status field; separate experimental Stain Avoidance quirk | Separate stain opt-in required; reference 1/2 mapping is not a boolean identification switch or X40 hardware acceptance |
+| Stain handling / avoidance | Read-only status field; separate experimental Stain Avoidance quirk | Separate stain opt-in and fresh AI obstacle/fluid flags required; reference 1/2 mapping is not a boolean identification switch or X40 hardware acceptance |
 | Mop wash temperature | Existing Options → Robot → Mop Wash Temperature control | X40's V2 capability exposes Cold, Warm, Hot and Scalding; setting it does not prove a wash occurred |
 | HotWash flag | Read-only CleanGenius Status field from MIOT 4:50 | Separate from the V2 heater temperature property; it cannot establish the selected temperature |
 
