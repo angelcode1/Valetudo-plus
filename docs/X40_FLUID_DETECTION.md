@@ -70,6 +70,19 @@ npm test --workspace=backend
 npm run build:aarch64
 ```
 
+Apply the repository's postinstall patch before packaging. If dependencies were
+restored without install scripts, run `npm run postinstall` from the repository
+root. The binary build checks the router dependency used by Express and refuses
+Unicode property escapes that the embedded Node runtime cannot compile.
+
+CI starts the packaged AArch64 executable with the mock robot under QEMU and
+checks the authenticated HTTP version endpoint. To run the same check on Linux
+with `qemu-aarch64` installed:
+
+```sh
+python3 util/smoke_test_aarch64.py build/aarch64/valetudo --commit "$(git rev-parse HEAD)"
+```
+
 The suite exercises the Quirks UI/API contract with a fake robot and the
 production transport with a loopback peer. Live acceptance requires a
 separate supervised trial.

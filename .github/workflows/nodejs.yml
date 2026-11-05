@@ -34,6 +34,10 @@
               { 'run': 'npm run build --workspace=backend' },
               { 'run': 'npm test --workspace=backend', 'env': { 'CI': true } },
               {
+                'name': 'Smoke test packaged AArch64 HTTP startup',
+                'run': 'sudo apt-get update && sudo apt-get install -y --no-install-recommends qemu-user && python3 util/smoke_test_aarch64.py build/aarch64/valetudo --commit "$(git rev-parse HEAD)"',
+              },
+              {
                 'name': 'Upload validated X40 AArch64 candidate',
                 'if': "github.event_name == 'push' && github.ref == 'refs/heads/master'",
                 'uses': 'actions/upload-artifact@v7',
