@@ -3,7 +3,10 @@
 const DreameMiotServices = require("./DreameMiotServices");
 const FluidDetection = require("./DreameX40FluidDetection");
 const Preflight = require("./DreameX40CleanGeniusPreflight");
+const MiioErrorResponseRobotFirmwareError = require("../../miio/MiioErrorResponseRobotFirmwareError");
+const MiioTimeoutError = require("../../miio/MiioTimeoutError");
 const Quirk = require("../../core/Quirk");
+const RobotFirmwareError = require("../../core/RobotFirmwareError");
 
 const MIOT = DreameMiotServices.GEN2.VACUUM_2;
 const SIID = MIOT.SIID;
@@ -198,6 +201,7 @@ function createQuirks(robot, options = {}) {
                     }
 
                     // Never send a whole AutoSwitch blob or retry on error.
+                    let writeFailure;
                     try {
                         await robot.miotHelper.writeProperty(
                             SIID,
@@ -205,8 +209,23 @@ function createQuirks(robot, options = {}) {
                             JSON.stringify({k: definition.key, v: target}),
                             {retry: false, interface: "local", strict: true, timeout: 3000}
                         );
-                    } catch {
-                        throw new Error(`X40 ${definition.key} write unavailable; actual firmware setting is unverified`);
+                    } catch (error) {
+                        if (definition.key !== "SmartHost") {
+                            throw new Error(`X40 ${definition.key} write unavailable; actual firmware setting is unverified`);
+                        }
+                        if (error?.code === "MIIO_STAMP_UNAVAILABLE") {
+                            throw new Error("X40 SmartHost write was not sent because the local timestamp was unavailable");
+                        }
+                        if (error instanceof MiioTimeoutError ||
+                            (error instanceof MiioErrorResponseRobotFirmwareError && error.message === "user ack timeout")) {
+                            writeFailure = "write timed out";
+                        } else if (error instanceof RobotFirmwareError) {
+                            throw new Error("X40 SmartHost write was rejected by firmware");
+                        } else if (error?.code === "MIOT_RESPONSE_INVALID") {
+                            writeFailure = "write response was invalid";
+                        } else {
+                            writeFailure = "write unavailable";
+                        }
                     }
 
                     // A MIOT transport acknowledgement is not confirmation
@@ -217,9 +236,15 @@ function createQuirks(robot, options = {}) {
                     try {
                         observed = await readSettings(robot);
                     } catch {
+                        if (writeFailure) {
+                            throw new Error(`X40 SmartHost ${writeFailure}; native readback unavailable`);
+                        }
                         throw new Error(`X40 ${definition.key} readback unavailable; actual firmware setting is unverified`);
                     }
                     if (observed[definition.key] !== target) {
+                        if (writeFailure) {
+                            throw new Error(`X40 SmartHost ${writeFailure}; native readback did not match`);
+                        }
                         throw new Error(
                             `X40 ${definition.key} readback mismatch after write; ` +
                             "actual firmware setting is unverified"

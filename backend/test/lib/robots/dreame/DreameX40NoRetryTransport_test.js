@@ -11,6 +11,7 @@ const MiioTimeoutError = require("../../../../lib/miio/MiioTimeoutError");
 const MiioValetudoRobot = require("../../../../lib/robots/MiioValetudoRobot");
 const Research = require("../../../../lib/robots/dreame/DreameX40CleanGeniusResearch");
 const RetryWrapper = require("../../../../lib/miio/RetryWrapper");
+const RobotFirmwareError = require("../../../../lib/core/RobotFirmwareError");
 const Semaphore = require("semaphore");
 const test = require("node:test");
 const {once} = require("node:events");
@@ -49,7 +50,8 @@ test("an invalid stamp refuses a no-retry request before transmission or handsha
         assert.fail("No packet may be sent");
     }});
     transport.retryHandshakeHelper = async () => assert.fail("No handshake recovery may run");
-    await assert.rejects(() => transport.sendMessage({method: "set_properties"}, {retry: false}), MiioTimeoutError);
+    await assert.rejects(() => transport.sendMessage({method: "set_properties"}, {retry: false}),
+        {code: "MIIO_STAMP_UNAVAILABLE"});
 });
 
 test("an opted-in read prepares a missing stamp with one local handshake and one encrypted request", {timeout: 5000}, async () => {
@@ -140,16 +142,18 @@ test("MIOT helper forwards explicit local no-retry options and strictly validate
         ["set_properties", {retry: false, timeout: 20, interface: "local"}]]);
     // The strict identity policy is opted in, preserving legacy helper behavior.
     assert.equal(await helper.readProperty(4, 22), 10);
+    robot.sendCommand = async () => [{siid: 4, piid: 50, code: -4004}];
+    await assert.rejects(() => helper.writeProperty(4, 50, "", options), RobotFirmwareError);
 });
 
-for (const kind of ["mode", "fluid"]) {
-    test(`real ${kind} controller/helper/transport sends one encrypted write when its acknowledgement is lost`, {timeout: 10000}, async () => {
+for (const kind of ["off", "off_not_applied", "off_rejected", "fluid"]) {
+    test(`real ${kind} controller/helper/transport handles a lost or rejected acknowledgement without replay`, {timeout: 10000}, async () => {
         const token = Buffer.alloc(16, 0x42);
         const codec = new Codec({token: token});
         codec.updateStamp(100);
         const server = dgram.createSocket("udp4");
         const client = dgram.createSocket("udp4");
-        const settings = {SmartHost: 0, SmartAutoMop: -1, SmartAutoWash: 0, StainIdentify: 1, HotWash: 1};
+        const settings = {SmartHost: 1, SmartAutoMop: -1, SmartAutoWash: 0, StainIdentify: 1, HotWash: 1};
         let ai = 2;
         let writes = 0;
         let cloudCalls = 0;
@@ -172,14 +176,18 @@ for (const kind of ["mode", "fluid"]) {
                 } else {
                     assert.equal(delta.piid, 50);
                     const setting = JSON.parse(delta.value);
-                    settings[setting.k] = setting.v;
+                    assert.deepEqual(setting, {k: "SmartHost", v: 0});
+                    if (kind === "off") {
+                        settings[setting.k] = setting.v;
+                    }
                 }
-                // Apply the first write, then deliberately lose its ACK. An
-                // erroneous replay would receive a reply and fail the test.
-                if (writes === 1) {
+                // Deliberately drop the first ACK in the timeout cases. Any
+                // replay would receive a reply and fail the write count check.
+                if (writes === 1 && kind !== "off_rejected") {
                     return;
                 }
-                result = msg.params.map(p => ({did: p.did, siid: p.siid, piid: p.piid, code: 0}));
+                result = msg.params.map(p => ({did: p.did, siid: p.siid, piid: p.piid,
+                    code: kind === "off_rejected" ? -4004 : 0}));
             }
             server.send(codec.encodeOutgoingMiioPacket({id: msg.id, result: result}, 123), peer.port, peer.address);
         });
@@ -201,15 +209,22 @@ for (const kind of ["mode", "fluid"]) {
             const quirks = Research.createQuirks(robot, {fluidDetection: kind === "fluid",
                 fluidDetectionModel: "dreame.vacuum.r2416"});
             const control = quirks[kind === "fluid" ? 1 : 0];
-            await assert.rejects(() => control.setter(kind === "fluid" ? "enabled" : "routine"), error => {
-                assert.equal(error.message.includes("PRIVATE_CLOUD"), false);
-                assert.equal(error.message.includes("\"did\""), false);
-                return /write.*unavailable/.test(error.message);
-            });
+            if (kind === "off") {
+                await control.setter("off");
+            } else {
+                const expectedErrors = {
+                    fluid: "X40 fluid detection: ai_write_unavailable_native_state_unverified",
+                    off_not_applied: "X40 SmartHost write timed out; native readback did not match",
+                    off_rejected: "X40 SmartHost write was rejected by firmware"
+                };
+                await assert.rejects(() => control.setter(kind === "fluid" ? "enabled" : "off"), {
+                    message: expectedErrors[kind]
+                });
+            }
             assert.equal(writes, 1);
             assert.equal(cloudCalls, 0);
             const visible = await control.serialize();
-            assert.equal(visible.value, kind === "fluid" ? "enabled" : "routine");
+            assert.equal(visible.value, kind === "fluid" ? "enabled" : (kind === "off" ? "off" : "routine"));
             assert.equal(writes, 1);
         } finally {
             await Promise.all([new Promise(resolve => client.close(resolve)), new Promise(resolve => server.close(resolve))]);

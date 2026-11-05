@@ -201,6 +201,8 @@ class RetryWrapper {
                         reject(err); //Throw this further up if it's not a timeout
                     }
                 });
+            } else if (options.retry === false) {
+                reject(Object.assign(new RetryWrapperSurrenderError(msg), {code: "MIIO_STAMP_UNAVAILABLE"}));
             } else {
                 doRetry();
             }

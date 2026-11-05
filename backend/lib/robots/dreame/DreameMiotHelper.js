@@ -1,10 +1,9 @@
 const RobotFirmwareError = require("../../core/RobotFirmwareError");
 const {sleep} = require("../../utils/misc");
 
-function strictResponseMatches(properties, response) {
+function responseIdentitiesMatch(properties, response) {
     return Array.isArray(response) && response.length === properties.length &&
-        properties.every(p => response.filter(row => row?.siid === p.siid && row?.piid === p.piid).length === 1) &&
-        response.every(row => row?.code === 0);
+        properties.every(p => response.filter(row => row?.siid === p.siid && row?.piid === p.piid).length === 1);
 }
 
 class DreameMiotHelper {
@@ -40,7 +39,8 @@ class DreameMiotHelper {
             ...(options.prepareStamp === true ? {prepareStamp: true} : {})
         } : undefined);
 
-        if (options?.strict === true && !strictResponseMatches(properties, res)) {
+        if (options?.strict === true && (!responseIdentitiesMatch(properties, res) ||
+            res.some(row => row.code !== 0))) {
             throw Object.assign(new Error("Received invalid property response"), {code: "MIOT_RESPONSE_INVALID"});
         }
         if (res && res.length === properties.length) {
@@ -92,8 +92,9 @@ class DreameMiotHelper {
             };
         }), options ? {retry: options.retry, timeout: options.timeout, interface: options.interface} : undefined);
 
-        if (options?.strict === true && !strictResponseMatches(properties, res)) {
-            throw new Error("Received invalid property response");
+        if (options?.strict === true && (!responseIdentitiesMatch(properties, res) ||
+            res.some(row => !Number.isSafeInteger(row.code)))) {
+            throw Object.assign(new Error("Received invalid property response"), {code: "MIOT_RESPONSE_INVALID"});
         }
         if (res && res.length === properties.length) {
             const errorItem = res.find(r => r.code !== 0);
