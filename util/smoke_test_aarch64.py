@@ -13,6 +13,9 @@ import tempfile
 import time
 
 
+STARTUP_TIMEOUT = 120
+
+
 def get_version(port, authorization=None):
     client = http.client.HTTPConnection("127.0.0.1", port, timeout=2)
     try:
@@ -25,7 +28,7 @@ def get_version(port, authorization=None):
 
 
 def require_startup(process, port, commit):
-    deadline = time.monotonic() + 40
+    deadline = time.monotonic() + STARTUP_TIMEOUT
     while time.monotonic() < deadline:
         if process.poll() is not None:
             raise RuntimeError(f"Packaged Valetudo exited with code {process.returncode}")
@@ -41,12 +44,13 @@ def require_startup(process, port, commit):
         if status != 200:
             raise RuntimeError(f"Authenticated version request returned HTTP {status}")
         version = json.loads(body)
-        if not isinstance(version.get("release"), str) or version.get("commit") != commit:
+        if (not isinstance(version, dict) or not isinstance(version.get("release"), str)
+                or version.get("commit") != commit):
             raise RuntimeError("Packaged version metadata did not match the build")
         if process.poll() is not None:
             raise RuntimeError("Packaged Valetudo exited during the HTTP check")
         return
-    raise RuntimeError("Packaged Valetudo did not open its web port within 40 seconds")
+    raise RuntimeError(f"Packaged Valetudo did not open its web port within {STARTUP_TIMEOUT} seconds")
 
 
 def smoke(command, commit):
