@@ -294,6 +294,20 @@ export interface TimerProperties {
     supportedPreActions: Array<ValetudoTimerPreActionType>
 }
 
+export interface DelayedStartRequest {
+    delay: number;
+    action: Timer["action"];
+    pre_actions?: Timer["pre_actions"];
+}
+
+export interface DelayedStartInformation {
+    pending: {
+        remaining: number;
+        action: Timer["action"];
+        pre_actions?: Timer["pre_actions"];
+    } | null;
+}
+
 export interface MQTTConfiguration {
     enabled: boolean;
     connection: {
@@ -704,7 +718,7 @@ export interface CleanRouteControlProperties {
     oneTime: Array<CleanRoute>,
 }
 
-export type MopDockMopDryingDuration = "2h" | "3h" | "4h" | "cold";
+export type MopDockMopDryingDuration = "2h" | "3h" | "4h" | "5h" | "quiet" | "cold";
 
 export interface MopDockMopDryingTimePayload {
     duration: MopDockMopDryingDuration
