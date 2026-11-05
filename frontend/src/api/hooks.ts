@@ -40,6 +40,9 @@ import {
     fetchSystemHostInfo,
     fetchSystemRuntimeInfo,
     fetchTimerInformation,
+    fetchDelayedStart,
+    sendDelayedStart,
+    deleteDelayedStart,
     fetchTimerProperties,
     fetchTotalStatistics,
     fetchTotalStatisticsProperties,
@@ -199,6 +202,8 @@ import {
     Point,
     SetLogLevelRequest,
     Timer,
+    DelayedStartInformation,
+    DelayedStartRequest,
     UpdaterConfiguration,
     ValetudoCustomizations,
     ValetudoEventInteractionContext,
@@ -243,6 +248,7 @@ enum QueryKey {
     NTPClientConfiguration = "ntp_client_configuration",
     Timers = "timers",
     TimerProperties = "timer_properties",
+    DelayedStart = "delayed_start",
     ValetudoEvents = "valetudo_events",
     Log = "log",
     LogLevel = "log_level",
@@ -1094,6 +1100,48 @@ export const useTimerDeletionMutation = () => {
             return deleteTimer(timerId).then(fetchTimerInformation);
         },
         onError: useOnSettingsChangeError("Timer")
+    });
+};
+
+export const useDelayedStartQuery = () => {
+    return useQuery({
+        queryKey: [QueryKey.DelayedStart],
+        queryFn: fetchDelayedStart,
+
+        refetchInterval: (query) => {
+            const pending = query.state.data?.pending;
+            if (!pending) {
+                return 60_000;
+            }
+
+            // Only derived from the fetched data, as a changing value restarts the interval on every render
+            return pending.remaining > 0 ? Math.min(pending.remaining * 1000 + 1_000, 60_000) : 5_000;
+        }
+    });
+};
+
+export const useDelayedStartMutation = () => {
+    return useValetudoFetchingMutation({
+        queryKey: [QueryKey.DelayedStart],
+        mutationFn: (request: DelayedStartRequest) => {
+            return sendDelayedStart(request);
+        },
+        onError: useOnSettingsChangeError("Delayed start")
+    });
+};
+
+export const useDelayedStartCancelMutation = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: () => {
+            return deleteDelayedStart().then(fetchDelayedStart).then((state) => {
+                queryClient.setQueryData<DelayedStartInformation>([QueryKey.DelayedStart], state, {
+                    updatedAt: Date.now(),
+                });
+            });
+        },
+        onError: useOnSettingsChangeError("Delayed start")
     });
 };
 
