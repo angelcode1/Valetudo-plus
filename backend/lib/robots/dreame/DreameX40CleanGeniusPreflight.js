@@ -11,8 +11,11 @@ const FIELDS = Object.freeze([
     {siid: 4, piid: 25} // Dock activity
 ]);
 
-async function readFresh(robot) {
-    const values = await robot.miotHelper.readProperties(FIELDS.map(p => ({...p})));
+function getStatusProperties() {
+    return FIELDS.map(p => ({...p}));
+}
+
+function parseFreshResponse(values) {
     if (!Array.isArray(values) || values.length !== FIELDS.length ||
         !FIELDS.every(p => values.filter(v => v?.siid === p.siid && v?.piid === p.piid).length === 1) ||
         values.some(v => v?.code !== 0)) {
@@ -53,8 +56,24 @@ async function readFresh(robot) {
     };
 }
 
+async function readFresh(robot) {
+    let values;
+    try {
+        values = await robot.miotHelper.readProperties(getStatusProperties(),
+            {retry: false, interface: "local", strict: true, timeout: 3000});
+    } catch {
+        throw new Error("X40 fresh MIOT read unavailable");
+    }
+    return parseFreshResponse(values);
+}
+
 async function readSettings(robot) {
-    const raw = await robot.miotHelper.readProperty(4, 50);
+    let raw;
+    try {
+        raw = await robot.miotHelper.readProperty(4, 50, {retry: false, interface: "local", strict: true, timeout: 3000});
+    } catch {
+        throw new Error("X40 native settings unavailable");
+    }
     return {
         source: "native_miot_direct_settings",
         readOnly: true,
@@ -77,7 +96,7 @@ async function readStainAvoidancePrerequisites(robot) {
     };
     let raw;
     try {
-        raw = await robot.miotHelper.readProperty(4, 22);
+        raw = await robot.miotHelper.readProperty(4, 22, {retry: false, interface: "local", strict: true, timeout: 3000});
     } catch {
         return result;
     }
@@ -95,4 +114,5 @@ async function readStainAvoidancePrerequisites(robot) {
 }
 
 module.exports = {readFresh: readFresh, readSettings: readSettings,
-    readStainAvoidancePrerequisites: readStainAvoidancePrerequisites};
+    readStainAvoidancePrerequisites: readStainAvoidancePrerequisites,
+    getStatusProperties: getStatusProperties, parseFreshResponse: parseFreshResponse};

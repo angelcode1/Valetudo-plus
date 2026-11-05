@@ -2,6 +2,7 @@ const Logger = require("../../Logger");
 
 const UINT8_MASK = 0b00000000000000000000000011111111;
 const AI_SETTINGS_MASK = 0b00010110;
+const AI_SETTINGS_OPERATIONS = new WeakSet();
 
 /**
  * Dreame stores all three configurables of their mop docks in a single PIID as one int
@@ -18,6 +19,25 @@ const AI_SETTINGS_MASK = 0b00010110;
  */
 
 class DreameUtils {
+    /**
+     * Fail instead of interleaving local read/modify/write operations on 4:22.
+     * External firmware writers remain outside this process-local lock.
+     * @param {object} robot
+     * @param {() => Promise<void>} operation
+     * @returns {Promise<void>}
+     */
+    static async WITH_AI_SETTINGS_LOCK(robot, operation) {
+        if (AI_SETTINGS_OPERATIONS.has(robot)) {
+            throw new Error("Another AI settings change is in progress");
+        }
+        AI_SETTINGS_OPERATIONS.add(robot);
+        try {
+            await operation();
+        } finally {
+            AI_SETTINGS_OPERATIONS.delete(robot);
+        }
+    }
+
     /**
      *
      * @param {number} input

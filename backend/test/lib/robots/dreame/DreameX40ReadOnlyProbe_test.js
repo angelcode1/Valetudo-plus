@@ -145,7 +145,7 @@ test("probe consumes failed request budget without retrying", async () => {
         sends++; throw new Error("transport unavailable");
     };
     await assert.rejects(() => Probe.readDiagnostic(robot), /unavailable/);
-    await assert.rejects(() => Probe.readDiagnostic(robot), /scope refused/);
+    await assert.rejects(() => Probe.readDiagnostic(robot), /fresh MIOT read unavailable/);
     assert.equal(sends, 1);
 });
 

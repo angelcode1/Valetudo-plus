@@ -33,32 +33,36 @@ class DreamePetObstacleAvoidanceControlCapability extends PetObstacleAvoidanceCo
      * @returns {Promise<void>}
      */
     async enable() {
-        const res = await this.robot.miotHelper.readProperty(this.siid, this.piid);
-        const deserializedRes = DreameUtils.DESERIALIZE_AI_SETTINGS(res);
+        return DreameUtils.WITH_AI_SETTINGS_LOCK(this.robot, async () => {
+            const res = await this.robot.miotHelper.readProperty(this.siid, this.piid);
+            const deserializedRes = DreameUtils.DESERIALIZE_AI_SETTINGS(res);
 
-        deserializedRes.petObstacleDetection = true;
+            deserializedRes.petObstacleDetection = true;
 
-        await this.robot.miotHelper.writeProperty(
-            this.siid,
-            this.piid,
-            DreameUtils.SERIALIZE_AI_SETTINGS(deserializedRes, res)
-        );
+            await this.robot.miotHelper.writeProperty(
+                this.siid,
+                this.piid,
+                DreameUtils.SERIALIZE_AI_SETTINGS(deserializedRes, res)
+            );
+        });
     }
 
     /**
      * @returns {Promise<void>}
      */
     async disable() {
-        const res = await this.robot.miotHelper.readProperty(this.siid, this.piid);
-        const deserializedRes = DreameUtils.DESERIALIZE_AI_SETTINGS(res);
+        return DreameUtils.WITH_AI_SETTINGS_LOCK(this.robot, async () => {
+            const res = await this.robot.miotHelper.readProperty(this.siid, this.piid);
+            const deserializedRes = DreameUtils.DESERIALIZE_AI_SETTINGS(res);
 
-        deserializedRes.petObstacleDetection = false;
+            deserializedRes.petObstacleDetection = false;
 
-        await this.robot.miotHelper.writeProperty(
-            this.siid,
-            this.piid,
-            DreameUtils.SERIALIZE_AI_SETTINGS(deserializedRes, res)
-        );
+            await this.robot.miotHelper.writeProperty(
+                this.siid,
+                this.piid,
+                DreameUtils.SERIALIZE_AI_SETTINGS(deserializedRes, res)
+            );
+        });
     }
 }
 

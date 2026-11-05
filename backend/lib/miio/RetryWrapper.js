@@ -99,6 +99,7 @@ class RetryWrapper {
      * @param {object} options
      * @param {number=} options.retries
      * @param {number=} options.timeout custom timeout in milliseconds
+     * @param {boolean=} options.retry false refuses replay or handshake recovery for this request
      * @returns {Promise<object>}
      */
     sendMessage(msg, options = {}) {
@@ -122,6 +123,7 @@ class RetryWrapper {
      * @param {object} options
      * @param {number=} options.retries
      * @param {number=} options.timeout custom timeout in milliseconds
+     * @param {boolean=} options.retry false permits at most one message delivery
      * @return {Promise<object>}
      */
     sendMessageHelper(msg, options) {
@@ -131,6 +133,10 @@ class RetryWrapper {
                 RetryWrapper.sendMessageHelperHelper(msg, options, resolve, reject)
              */
             const doRetry = () => {
+                if (options.retry === false) {
+                    reject(new RetryWrapperSurrenderError(msg));
+                    return;
+                }
                 this.retryHandshakeHelper(msg, options).then(() => {
                     this.sendMessageHelper(msg, options).then(response => {
                         resolve(response);

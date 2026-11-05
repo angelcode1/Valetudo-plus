@@ -1,6 +1,12 @@
 const RobotFirmwareError = require("../../core/RobotFirmwareError");
 const {sleep} = require("../../utils/misc");
 
+function strictResponseMatches(properties, response) {
+    return Array.isArray(response) && response.length === properties.length &&
+        properties.every(p => response.filter(row => row?.siid === p.siid && row?.piid === p.piid).length === 1) &&
+        response.every(row => row?.code === 0);
+}
+
 class DreameMiotHelper {
     /**
      * @param {object} options
@@ -14,17 +20,25 @@ class DreameMiotHelper {
 
     /**
      * @param {Array<{siid: number, piid: number}>} properties
+     * @param {object} [options]
+     * @param {boolean} [options.retry]
+     * @param {boolean} [options.strict] Require complete unique successful property identities
+     * @param {number} [options.timeout]
+     * @param {"local"|"cloud"} [options.interface]
      * @returns {Promise<Array<*>>}
      */
-    async readProperties(properties) {
+    async readProperties(properties, options) {
         const res = await this.robot.sendCommand("get_properties", properties.map(p => {
             return {
                 did: this.robot.deviceId,
                 siid: p.siid,
                 piid: p.piid
             };
-        }));
+        }), options ? {retry: options.retry, timeout: options.timeout, interface: options.interface} : undefined);
 
+        if (options?.strict === true && !strictResponseMatches(properties, res)) {
+            throw new Error("Received invalid property response");
+        }
         if (res && res.length === properties.length) {
             return res;
         } else {
@@ -35,10 +49,15 @@ class DreameMiotHelper {
     /**
      * @param {number} siid
      * @param {number} piid
+     * @param {object} [options]
+     * @param {boolean} [options.retry]
+     * @param {boolean} [options.strict]
+     * @param {number} [options.timeout]
+     * @param {"local"|"cloud"} [options.interface]
      * @returns {Promise<*>}
      */
-    async readProperty(siid, piid) {
-        const res = await this.readProperties([{ siid: siid, piid: piid }]);
+    async readProperty(siid, piid, options) {
+        const res = await this.readProperties([{ siid: siid, piid: piid }], options);
 
         if (res[0].code === 0) {
             return res[0].value;
@@ -51,6 +70,10 @@ class DreameMiotHelper {
      * @param {Array<{siid: number, piid: number, value: *}>} properties
      * @param {object} [options]
      * @param {number|null} [options.postWriteDelay]
+     * @param {boolean} [options.retry]
+     * @param {boolean} [options.strict]
+     * @param {number} [options.timeout]
+     * @param {"local"|"cloud"} [options.interface]
      * @returns {Promise<void>}
      */
     async writeProperties(properties, options) {
@@ -62,8 +85,11 @@ class DreameMiotHelper {
                 piid: p.piid,
                 value: p.value
             };
-        }));
+        }), options ? {retry: options.retry, timeout: options.timeout, interface: options.interface} : undefined);
 
+        if (options?.strict === true && !strictResponseMatches(properties, res)) {
+            throw new Error("Received invalid property response");
+        }
         if (res && res.length === properties.length) {
             const errorItem = res.find(r => r.code !== 0);
             if (errorItem) {
@@ -85,6 +111,10 @@ class DreameMiotHelper {
      * @param {*} value
      * @param {object} [options]
      * @param {number|null} [options.postWriteDelay]
+     * @param {boolean} [options.retry]
+     * @param {boolean} [options.strict]
+     * @param {number} [options.timeout]
+     * @param {"local"|"cloud"} [options.interface]
      * @returns {Promise<void>}
      */
     async writeProperty(siid, piid, value, options) {

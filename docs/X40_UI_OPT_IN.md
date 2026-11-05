@@ -18,6 +18,7 @@ The CleanGenius Status page supplies observations; it does not register controls
 | Main opt-in plus `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_ADVANCED=1` | Registers additional experimental Reclean/Rewash controls |
 | Advanced controls without `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_SIGNED=1` | Keeps their writes disabled |
 | Main opt-in plus `VALETUDO_X40_EXPERIMENTAL_STAIN_AVOIDANCE=1` | Registers a separate experimental stain-avoidance selector using reference values 1/2; hardware acceptance remains unverified |
+| Main opt-in plus `VALETUDO_X40_EXPERIMENTAL_FLUID_DETECTION=1` | Registers a separate experimental fluid-detection selector |
 
 Default behavior remains off. The main opt-in is a code-level permission to show
 manual controls, not a command to select a native mode or start cleaning.
@@ -59,6 +60,7 @@ acceptance or a recommendation to enable additional protocol flags.
 | CleanGenius Off / Routine / Deep | Guarded SmartHost selector under Options → Robot → Quirks | Main opt-in required; exact readback confirms only the requested setting |
 | Auto Reclean / Auto Rewash | Additional experimental quirks | Advanced opt-in required for registration, signed opt-in for writes; unknown or negative current values remain blocked |
 | Stain handling / avoidance | Read-only status field; separate experimental Stain Avoidance quirk | Separate stain opt-in and fresh AI obstacle/fluid flags required; reference 1/2 mapping is not a boolean identification switch or X40 hardware acceptance |
+| Fluid detection | Separate [experimental Fluid Detection quirk](X40_FLUID_DETECTION.md) | R2416, R2416a and R2416c only. Both directions require fresh idle checks and AI obstacle detection enabled. Firmware acceptance remains unverified |
 | Mop wash temperature | Existing Options → Robot → Mop Wash Temperature control | X40's V2 capability exposes Cold, Warm, Hot and Scalding; setting it does not prove a wash occurred |
 | HotWash flag | Read-only CleanGenius Status field from MIOT 4:50 | Separate from the V2 heater temperature property; it cannot establish the selected temperature |
 
@@ -78,7 +80,8 @@ source-level scope decision.
 The [stain-avoidance implementation notes](X40_STAIN_AVOIDANCE.md) explain the
 reference mapping, corrected observation labels and separate validation boundary.
 The generic guarded launcher uses a clean environment and does not set the new
-stain opt-in, so its normal candidate profile still exposes only the main mode.
+stain or fluid opt-ins, so its normal candidate profile still exposes only the
+main mode.
 
 ## Source references
 

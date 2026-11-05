@@ -1,6 +1,7 @@
 "use strict";
 
 const DreameMiotServices = require("./DreameMiotServices");
+const FluidDetection = require("./DreameX40FluidDetection");
 const Preflight = require("./DreameX40CleanGeniusPreflight");
 const Quirk = require("../../core/Quirk");
 
@@ -14,6 +15,7 @@ const EXPERIMENTAL_ENV = "VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS";
 const ADVANCED_ENV = "VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_ADVANCED";
 const SIGNED_ENV = "VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_SIGNED";
 const STAIN_AVOIDANCE_ENV = "VALETUDO_X40_EXPERIMENTAL_STAIN_AVOIDANCE";
+const FLUID_DETECTION_ENV = "VALETUDO_X40_EXPERIMENTAL_FLUID_DETECTION";
 
 const SETTINGS = Object.freeze([
     Object.freeze({
@@ -72,6 +74,10 @@ function isStainAvoidanceEnabled(env = process.env) {
     return isEnabled(env) && env[STAIN_AVOIDANCE_ENV] === "1";
 }
 
+function isFluidDetectionEnabled(env = process.env) {
+    return isEnabled(env) && env[FLUID_DETECTION_ENV] === "1";
+}
+
 function isIdle(robot) {
     // Cached eligibility alone never authorizes a write. The full fresh gate follows.
     return [0, 6].includes(robot.ephemeralState?.mode) && robot.ephemeralState?.taskStatus === 0;
@@ -123,7 +129,7 @@ async function requireFreshIdle(robot) {
 }
 
 function createQuirks(robot, options = {}) {
-    // All selectors share one MIOT 4:50 property; serialize UI writes.
+    // Serialize experimental operations across 4:50 and the optional 4:22 editor.
     // This is a manual, supervised operation. It never runs at startup.
     let changeInProgress = false;
 
@@ -131,7 +137,7 @@ function createQuirks(robot, options = {}) {
         ...(options.advanced === true ? SETTINGS : SETTINGS.slice(0, 1)),
         ...(options.stainAvoidance === true ? [STAIN_AVOIDANCE] : [])
     ];
-    return definitions.map(definition => {
+    const quirks = definitions.map(definition => {
         const quirk = new Quirk({
             id: definition.id,
             title: definition.title,
@@ -192,17 +198,27 @@ function createQuirks(robot, options = {}) {
                     }
 
                     // Never send a whole AutoSwitch blob or retry on error.
-                    await robot.miotHelper.writeProperty(
-                        SIID,
-                        PIID,
-                        JSON.stringify({k: definition.key, v: target})
-                    );
+                    try {
+                        await robot.miotHelper.writeProperty(
+                            SIID,
+                            PIID,
+                            JSON.stringify({k: definition.key, v: target}),
+                            {retry: false, interface: "local", strict: true, timeout: 3000}
+                        );
+                    } catch {
+                        throw new Error(`X40 ${definition.key} write unavailable; actual firmware setting is unverified`);
+                    }
 
                     // A MIOT transport acknowledgement is not confirmation
                     // that the new setting has actually persisted.
                     // If readback fails, the write may still have applied;
                     // do not retry automatically or attempt blind rollback.
-                    const observed = await readSettings(robot);
+                    let observed;
+                    try {
+                        observed = await readSettings(robot);
+                    } catch {
+                        throw new Error(`X40 ${definition.key} readback unavailable; actual firmware setting is unverified`);
+                    }
                     if (observed[definition.key] !== target) {
                         throw new Error(
                             `X40 ${definition.key} readback mismatch after write; ` +
@@ -256,6 +272,24 @@ function createQuirks(robot, options = {}) {
         };
         return quirk;
     });
+    if (options.fluidDetection === true) {
+        quirks.push(FluidDetection.createQuirk(robot, {
+            model: options.fluidDetectionModel,
+            isIdle: isIdle,
+            withLock: async operation => {
+                if (changeInProgress) {
+                    throw new Error("Another X40 CleanGenius setting change is in progress");
+                }
+                changeInProgress = true;
+                try {
+                    await operation();
+                } finally {
+                    changeInProgress = false;
+                }
+            }
+        }));
+    }
+    return quirks;
 }
 
 module.exports = {
@@ -263,6 +297,8 @@ module.exports = {
     ADVANCED_ENV: ADVANCED_ENV,
     SIGNED_ENV: SIGNED_ENV,
     STAIN_AVOIDANCE_ENV: STAIN_AVOIDANCE_ENV,
+    FLUID_DETECTION_ENV: FLUID_DETECTION_ENV,
+    isFluidDetectionEnabled: isFluidDetectionEnabled,
     isStainAvoidanceEnabled: isStainAvoidanceEnabled,
     isSignedEnabled: isSignedEnabled,
     isAdvancedEnabled: isAdvancedEnabled,

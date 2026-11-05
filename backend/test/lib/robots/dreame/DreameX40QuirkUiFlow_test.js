@@ -48,21 +48,25 @@ async function fixture(options) {
     const refreshStarted = deferred();
     const releaseRefresh = deferred();
     const key = options.stainAvoidance ? "StainIdentify" : "SmartHost";
-    let current = options.stainAvoidance ? 1 : 0;
+    let current = options.fluidDetection ? 2 : options.stainAvoidance ? 1 : 0;
     let readbackFailed = false;
     const robot = {
         ephemeralState: {mode: options.blocked ? 14 : 6, taskStatus: 0},
         miotHelper: {
             readProperties: async props => props.map(p => ({...p, code: 0,
-                value: ({"4:1": 6, "4:7": 0, "3:2": 1, "4:18": "", "4:25": 0})[`${p.siid}:${p.piid}`]})),
+                value: p.siid === 4 && p.piid === 22 && options.fluidDetection ? current :
+                    ({"4:1": 6, "4:7": 0, "3:2": 1, "4:18": "", "4:25": 0})[`${p.siid}:${p.piid}`]})),
             readProperty: async (siid, piid) => {
+                if (siid === 4 && piid === 50 && options.fluidDetection) {
+                    return '[{"k":"SmartHost","v":0}]';
+                }
                 if (siid === 4 && piid === 22 && options.stainAvoidance) {
                     if (options.aiReadFails) {
                         throw new Error("PRIVATE_AI_TRANSPORT_FIXTURE");
                     }
                     return options.aiBlocked ? 2 : 10;
                 }
-                assert.deepEqual([siid, piid], [4, 50]);
+                assert.deepEqual([siid, piid], [4, options.fluidDetection ? 22 : 50]);
                 if (writes.length && options.readbackFailure && !readbackFailed) {
                     readbackFailed = true;
                     throw new Error("Simulated post-write readback unavailable");
@@ -70,15 +74,16 @@ async function fixture(options) {
                 if (readbackFailed && options.nativeRefreshFailure) {
                     throw new Error("Simulated native settings unavailable");
                 }
-                return JSON.stringify([{k: key, v: current}]);
+                return options.fluidDetection ? current : JSON.stringify([{k: key, v: current}]);
             },
             writeProperty: async (siid, piid, value) => {
                 writes.push([siid, piid, value]);
-                current = JSON.parse(value).v;
+                current = options.fluidDetection ? value : JSON.parse(value).v;
             }
         }
     };
-    const quirks = Research.createQuirks(robot, {stainAvoidance: options.stainAvoidance === true});
+    const quirks = Research.createQuirks(robot, {stainAvoidance: options.stainAvoidance === true,
+        fluidDetection: options.fluidDetection === true, fluidDetectionModel: "dreame.vacuum.r2416"});
     const capability = new QuirksCapability({robot: robot, quirks: quirks});
     const router = new QuirksRouter({capability: capability, validator: (req, res, next) => next()});
     const app = express();
@@ -125,7 +130,7 @@ async function fixture(options) {
         }
     });
     return {
-        id: quirks[options.stainAvoidance ? 1 : 0].id,
+        id: quirks[options.stainAvoidance || options.fluidDetection ? 1 : 0].id,
         mutation: mutation,
         query: query,
         errors: errors,
@@ -183,13 +188,13 @@ for (const scenario of [
     {name: "failed HTTP refresh sets the query error flag instead of confirming cached settings", readbackFailure: true, httpRefreshFailure: true},
     {name: "blocked activation refreshes Off without sending any native write", blocked: true},
     {name: "successful change remains pending until its displayed settings refresh finishes"}
-].flatMap(scenario => [scenario, {...scenario, stainAvoidance: true}])) {
-    test(`X40 ${scenario.stainAvoidance ? "stain" : "mode"} UI/API flow: ${scenario.name}`, {timeout: 5000}, async () => {
+].flatMap(scenario => [scenario, {...scenario, stainAvoidance: true}, {...scenario, fluidDetection: true}])) {
+    test(`X40 ${scenario.fluidDetection ? "fluid" : scenario.stainAvoidance ? "stain" : "mode"} UI/API flow: ${scenario.name}`, {timeout: 5000}, async () => {
         const state = await fixture(scenario);
-        const before = scenario.stainAvoidance ? "disabled" : "off";
-        const after = scenario.stainAvoidance ? "enabled" : "routine";
-        const rawBefore = scenario.stainAvoidance ? 1 : 0;
-        const rawAfter = scenario.stainAvoidance ? 2 : 1;
+        const before = scenario.stainAvoidance || scenario.fluidDetection ? "disabled" : "off";
+        const after = scenario.stainAvoidance || scenario.fluidDetection ? "enabled" : "routine";
+        const rawBefore = scenario.fluidDetection ? null : scenario.stainAvoidance ? 1 : 0;
+        const rawAfter = scenario.fluidDetection ? null : scenario.stainAvoidance ? 2 : 1;
         const visibleSetting = result => result.data.find(item => item.id === state.id);
         try {
             assert.equal(visibleSetting(state.query.getCurrentResult()).value, before);
@@ -209,7 +214,7 @@ for (const scenario of [
             assert.equal(state.errors.length, expectedError ? 1 : 0);
             assert.equal(state.mutation.getCurrentResult().status, expectedError ? "error" : "success");
             assert.deepEqual(state.requests, ["GET", "PUT", "GET"]);
-            assert.deepEqual(state.writes, scenario.blocked ? [] : [[4, 50, JSON.stringify({
+            assert.deepEqual(state.writes, scenario.blocked ? [] : scenario.fluidDetection ? [[4, 22, 10]] : [[4, 50, JSON.stringify({
                 k: scenario.stainAvoidance ? "StainIdentify" : "SmartHost", v: rawAfter
             })]]);
 

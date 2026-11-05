@@ -30,32 +30,36 @@ class DreameObstacleImagesCapability extends ObstacleImagesCapability {
      * @returns {Promise<void>}
      */
     async enable() {
-        const res = await this.robot.miotHelper.readProperty(this.siid, this.piid);
-        const deserializedRes = DreameUtils.DESERIALIZE_AI_SETTINGS(res);
+        return DreameUtils.WITH_AI_SETTINGS_LOCK(this.robot, async () => {
+            const res = await this.robot.miotHelper.readProperty(this.siid, this.piid);
+            const deserializedRes = DreameUtils.DESERIALIZE_AI_SETTINGS(res);
 
-        deserializedRes.obstacleImages = true;
+            deserializedRes.obstacleImages = true;
 
-        await this.robot.miotHelper.writeProperty(
-            this.siid,
-            this.piid,
-            DreameUtils.SERIALIZE_AI_SETTINGS(deserializedRes, res)
-        );
+            await this.robot.miotHelper.writeProperty(
+                this.siid,
+                this.piid,
+                DreameUtils.SERIALIZE_AI_SETTINGS(deserializedRes, res)
+            );
+        });
     }
 
     /**
      * @returns {Promise<void>}
      */
     async disable() {
-        const res = await this.robot.miotHelper.readProperty(this.siid, this.piid);
-        const deserializedRes = DreameUtils.DESERIALIZE_AI_SETTINGS(res);
+        return DreameUtils.WITH_AI_SETTINGS_LOCK(this.robot, async () => {
+            const res = await this.robot.miotHelper.readProperty(this.siid, this.piid);
+            const deserializedRes = DreameUtils.DESERIALIZE_AI_SETTINGS(res);
 
-        deserializedRes.obstacleImages = false;
+            deserializedRes.obstacleImages = false;
 
-        await this.robot.miotHelper.writeProperty(
-            this.siid,
-            this.piid,
-            DreameUtils.SERIALIZE_AI_SETTINGS(deserializedRes, res)
-        );
+            await this.robot.miotHelper.writeProperty(
+                this.siid,
+                this.piid,
+                DreameUtils.SERIALIZE_AI_SETTINGS(deserializedRes, res)
+            );
+        });
     }
 
     /*

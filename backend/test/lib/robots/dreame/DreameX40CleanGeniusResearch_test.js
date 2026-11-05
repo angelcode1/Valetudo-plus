@@ -133,7 +133,8 @@ test("quirk writes one key only, verifies readback, and remains manual", async (
     await quirk.setter("routine");
     assert.equal(reads, 2);
     assert.equal(smartHost, 1);
-    assert.deepEqual(writes, [[4, 50, '{"k":"SmartHost","v":1}']]);
+    assert.deepEqual(writes, [[4, 50, '{"k":"SmartHost","v":1}',
+        {retry: false, interface: "local", strict: true, timeout: 3000}]]);
 
     await quirk.setter("routine");
     assert.equal(writes.length, 1, "already applied: no additional write");
@@ -314,7 +315,7 @@ test("unavailable fresh status aborts without modifying the robot", async () => 
         miotHelper: {
             readProperty: async () => JSON.stringify([{k: "SmartHost", v: 0}]),
             readProperties: async () => {
-                throw new Error("get_properties unavailable");
+                throw new Error("get_properties unavailable PRIVATE_TRANSPORT_FIXTURE");
             },
             writeProperty: async () => {
                 writes++;
@@ -323,7 +324,7 @@ test("unavailable fresh status aborts without modifying the robot", async () => 
     };
     await assert.rejects(
         () => research.createQuirks(robot)[0].setter("routine"),
-        /get_properties unavailable/
+        error => error.message === "X40 fresh MIOT read unavailable"
     );
     assert.equal(writes, 0);
 });

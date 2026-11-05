@@ -359,11 +359,15 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
         this.x40PollHealth = {state: "not_started", lastAttemptAtMs: null};
         this.allowExperimentalCleanGenius = X40CleanGeniusResearch.isEnabled();
         this.allowCleanGeniusObserveOnly = process.env.VALETUDO_X40_CLEANGENIUS_OBSERVE_ONLY === "1";
+        const fluidDetection = X40CleanGeniusResearch.isFluidDetectionEnabled();
         const experimentalQuirks = this.allowExperimentalCleanGenius ?
             X40CleanGeniusResearch.createQuirks(this, {
                 advanced: X40CleanGeniusResearch.isAdvancedEnabled(),
                 signedProtocol: X40CleanGeniusResearch.isSignedEnabled(),
-                stainAvoidance: X40CleanGeniusResearch.isStainAvoidanceEnabled()
+                stainAvoidance: X40CleanGeniusResearch.isStainAvoidanceEnabled(),
+                fluidDetection: fluidDetection,
+                fluidDetectionModel: fluidDetection ?
+                    MiioValetudoRobot.READ_DEVICE_CONF(DreameValetudoRobot.DEVICE_CONF_PATH)?.model : undefined
             }) : [];
 
         this.registerCapability(new QuirksCapability({
