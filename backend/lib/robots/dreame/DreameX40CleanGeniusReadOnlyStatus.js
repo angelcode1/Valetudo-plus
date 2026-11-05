@@ -11,7 +11,9 @@ const DEFINITIONS = Object.freeze({
     SmartHost: Object.freeze({name: "cleanGenius", known: Object.freeze({0: "off", 1: "mode_1_unverified", 2: "mode_2_unverified"})}),
     SmartAutoMop: Object.freeze({name: "autoReclean", known: Object.freeze({0: "off", 1: "mode_1_unverified", 2: "mode_2_unverified"})}),
     SmartAutoWash: Object.freeze({name: "autoRewash", known: Object.freeze({0: "off", 1: "mode_1_unverified", 2: "mode_2_unverified"})}),
-    StainIdentify: Object.freeze({name: "stainIdentification", known: Object.freeze({0: "off", 1: "on_setting"})}),
+    // Retain the API field name for compatibility, but do not interpret the
+    // reference 1/2 avoidance protocol as a verified boolean identification flag.
+    StainIdentify: Object.freeze({name: "stainIdentification", known: Object.freeze({1: "mode_1_unverified", 2: "mode_2_unverified"})}),
     HotWash: Object.freeze({name: "hotWash", known: Object.freeze({0: "off", 1: "on_setting"})})
 });
 const MAX_PAYLOAD_LENGTH = 32768;
@@ -95,7 +97,8 @@ function buildStatus(observation, options = {}) {
         ageMs: ageMs,
         stale: stale,
         valetudoPolicy: options.experimentalEnabled === true ?
-            "experimental_controls_opted_in" : "auto_disable_smart_host_when_positive",
+            "experimental_controls_opted_in" : (options.observeOnly === true ?
+                "observe_only_preserve_smart_host" : "auto_disable_smart_host_when_positive"),
         // The native controller may have been commanded off after this poll;
         // these are observed settings, not a verified effective cleaning mode.
         settings: ageMs === null ? unavailableFields() : (observation?.fields ?? unavailableFields()),

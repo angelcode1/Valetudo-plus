@@ -615,7 +615,10 @@ export interface Quirk {
     options: Array<string>,
     title: string,
     description: string,
-    value: string
+    value: string,
+    readOnly?: boolean,
+    rawValue?: number | null,
+    unavailableReason?: string | null
 }
 
 export interface SetQuirkValueCommand {
@@ -772,7 +775,7 @@ export interface X40CleanGeniusReadOnlyStatus {
     observedAt: string | null;
     ageMs: number | null;
     stale: boolean;
-    valetudoPolicy: "auto_disable_smart_host_when_positive" | "experimental_controls_opted_in";
+    valetudoPolicy: "auto_disable_smart_host_when_positive" | "experimental_controls_opted_in" | "observe_only_preserve_smart_host";
     settings: {
         cleanGenius: X40CleanGeniusSetting;
         autoReclean: X40CleanGeniusSetting;
@@ -784,4 +787,17 @@ export interface X40CleanGeniusReadOnlyStatus {
     dockWashActivity: X40DockWashActivity;
     cachedIdle: X40CachedIdleStatus;
     pollHealth: X40StatePollHealth;
+}
+
+export interface X40CleanGeniusPreflight {
+    source: "native_miot_direct_preflight";
+    readOnly: true;
+    observedAt: string;
+    mode: number;
+    taskStatus: number;
+    chargeCode: number;
+    errorClear: boolean;
+    dockWashCode: number;
+    activationAllowed: boolean;
+    blockedReason: string | null;
 }

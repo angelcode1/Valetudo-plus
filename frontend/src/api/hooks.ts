@@ -1589,8 +1589,11 @@ export const useSetQuirkValueMutation = () => {
     return useMutation({
         mutationFn: sendSetQuirkValueCommand,
         onError: useOnCommandError(Capability.Quirks),
-        onSuccess: () => {
-            refetchQuirksState().catch(() => {/*intentional*/});
+        onSettled: async () => {
+            // A native write can apply even when its acknowledgement/readback
+            // fails. Keep this control pending until fresh values or an error
+            // replace the previous display; never resend the setting command.
+            await refetchQuirksState().catch(() => {/*intentional*/});
         }
     });
 };

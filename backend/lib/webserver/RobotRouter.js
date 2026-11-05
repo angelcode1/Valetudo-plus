@@ -53,6 +53,26 @@ class RobotRouter {
             res.json(statusRobot.getCleanGeniusReadOnlyStatus());
         });
 
+        // Direct X40 reads, separate from the passive cache and normal parser.
+        const freshRoute = (path, method) => {
+            this.router.get(path, async (req, res) => {
+                if (typeof this.robot[method] !== "function") {
+                    return res.sendStatus(404);
+                }
+                res.set("Cache-Control", "no-store");
+                try {
+                    res.json(await this.robot[method]());
+                } catch {
+                    // Never return firmware/transport errors or credentials.
+                    res.status(502).json({error: "Fresh X40 observation unavailable"});
+                }
+            });
+        };
+        freshRoute("/clean-genius/native-settings", "getCleanGeniusNativeSettingsFreshReadOnly");
+        freshRoute("/clean-genius/preflight", "getCleanGeniusPreflightReadOnly");
+        // Retain the installed v74 GET URL; no corresponding writer is exposed.
+        freshRoute("/clean-genius/smart-host-test/preflight", "getCleanGeniusPreflightReadOnly");
+
         this.router.get("/state", async (req, res) => {
             try {
                 const polledState = await this.robot.pollState();

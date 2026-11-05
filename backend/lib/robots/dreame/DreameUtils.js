@@ -1,6 +1,8 @@
 const Logger = require("../../Logger");
 
 const UINT8_MASK = 0b00000000000000000000000011111111;
+const AI_SETTINGS_MASK = 0b00010110;
+const AI_SETTINGS_OPERATIONS = new WeakSet();
 
 /**
  * Dreame stores all three configurables of their mop docks in a single PIID as one int
@@ -17,6 +19,25 @@ const UINT8_MASK = 0b00000000000000000000000011111111;
  */
 
 class DreameUtils {
+    /**
+     * Fail instead of interleaving local read/modify/write operations on 4:22.
+     * External firmware writers remain outside this process-local lock.
+     * @param {object} robot
+     * @param {() => Promise<void>} operation
+     * @returns {Promise<void>}
+     */
+    static async WITH_AI_SETTINGS_LOCK(robot, operation) {
+        if (AI_SETTINGS_OPERATIONS.has(robot)) {
+            throw new Error("Another AI settings change is in progress");
+        }
+        AI_SETTINGS_OPERATIONS.add(robot);
+        try {
+            await operation();
+        } finally {
+            AI_SETTINGS_OPERATIONS.delete(robot);
+        }
+    }
+
     /**
      *
      * @param {number} input
@@ -107,16 +128,24 @@ class DreameUtils {
 
     /**
      * @param {AI_SETTINGS} input
+     * @param {number} [originalValue] Fresh uint32 bitmask whose other fields must be retained
      * @return {number}
      */
-    static SERIALIZE_AI_SETTINGS(input) {
-        let serializedValue = 0;
+    static SERIALIZE_AI_SETTINGS(input, originalValue) {
+        // The legacy one-argument utility builds a new bitmask. Callers that
+        // edit a native setting pass the complete fresh value instead. Reject
+        // unsupported formats rather than coercing strings/objects into zero.
+        const original = arguments.length > 1 ? originalValue : 0;
+        if (!Number.isSafeInteger(original) || original < 0 || original > 0xffffffff) {
+            throw new Error("Unsupported AI settings bitmask");
+        }
+        let serializedValue = original & ~AI_SETTINGS_MASK;
 
         serializedValue |= input.obstacleDetection ? 0b00000010 : 0;
         serializedValue |= input.obstacleImages ? 0b00000100 : 0;
         serializedValue |= input.petObstacleDetection ? 0b00010000 : 0;
 
-        return serializedValue;
+        return serializedValue >>> 0;
     }
 }
 

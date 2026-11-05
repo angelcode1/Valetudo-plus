@@ -316,5 +316,167 @@
         }
       }
     }
+  },
+  "/api/v2/robot/clean-genius/native-settings": {
+    "get": {
+      "tags": [
+        "Robot"
+      ],
+      "summary": "Read fresh X40 observations without state parsing or writes",
+      "responses": {
+        "200": {
+          "description": "Read-only observations; not write authorization",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string"
+                  },
+                  "readOnly": {
+                    "type": "boolean"
+                  },
+                  "observedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "settings": {
+                    "type": "object",
+                    "description": "Only cleanGenius, autoReclean, autoRewash, stainIdentification, hotWash; each has value (integer or null) and state (known interpretation or unknown/unavailable)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Unsupported robot"
+        },
+        "502": {
+          "description": "Fresh observation unavailable"
+        }
+      }
+    }
+  },
+  "/api/v2/robot/clean-genius/preflight": {
+    "get": {
+      "tags": [
+        "Robot"
+      ],
+      "summary": "Read fresh X40 observations without state parsing or writes",
+      "responses": {
+        "200": {
+          "description": "Read-only observations; not write authorization",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string"
+                  },
+                  "readOnly": {
+                    "type": "boolean"
+                  },
+                  "observedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "mode": {
+                    "type": "integer"
+                  },
+                  "taskStatus": {
+                    "type": "integer"
+                  },
+                  "chargeCode": {
+                    "type": "integer"
+                  },
+                  "dockWashCode": {
+                    "type": "integer"
+                  },
+                  "errorClear": {
+                    "type": "boolean"
+                  },
+                  "activationAllowed": {
+                    "type": "boolean"
+                  },
+                  "blockedReason": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Unsupported robot"
+        },
+        "502": {
+          "description": "Fresh observation unavailable"
+        }
+      }
+    }
+  },
+  "/api/v2/robot/clean-genius/smart-host-test/preflight": {
+    "get": {
+      "tags": [
+        "Robot"
+      ],
+      "summary": "Read fresh X40 observations without state parsing or writes",
+      "responses": {
+        "200": {
+          "description": "Read-only observations; not write authorization",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string"
+                  },
+                  "readOnly": {
+                    "type": "boolean"
+                  },
+                  "observedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "mode": {
+                    "type": "integer"
+                  },
+                  "taskStatus": {
+                    "type": "integer"
+                  },
+                  "chargeCode": {
+                    "type": "integer"
+                  },
+                  "dockWashCode": {
+                    "type": "integer"
+                  },
+                  "errorClear": {
+                    "type": "boolean"
+                  },
+                  "activationAllowed": {
+                    "type": "boolean"
+                  },
+                  "blockedReason": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": {
+          "description": "Unsupported robot"
+        },
+        "502": {
+          "description": "Fresh observation unavailable"
+        }
+      }
+    }
   }
 }
