@@ -440,6 +440,7 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
             }),
             dockWashActivity: X40DockWashReadOnlyStatus.buildStatus(this.x40DockWashObservation, nowMs),
             cachedIdle: X40CachedIdleReadOnlyStatus.buildStatus(this.x40CachedIdleObservation, nowMs),
+            experimentalSetterIdleEligible: X40CleanGeniusResearch.isIdle(this),
             // No robot I/O. Deliberately show poll success separately from the
             // two cached observation validity/freshness states.
             pollHealth: {

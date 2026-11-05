@@ -29,9 +29,9 @@ function validateAI(raw) {
 async function readAI(robot) {
     let raw;
     try {
-        raw = await robot.miotHelper.readProperty(SIID, PIID, {retry: false, interface: "local", strict: true, timeout: 3000});
-    } catch {
-        throw new FluidError("ai_settings_unavailable");
+        raw = await robot.miotHelper.readProperty(SIID, PIID, Preflight.READ_OPTIONS);
+    } catch (error) {
+        throw new FluidError(Preflight.readFailureReason(error, "ai_settings_unavailable"));
     }
     return validateAI(raw);
 }
@@ -43,7 +43,7 @@ async function readFreshSafetyAndAI(robot) {
     try {
         values = await robot.miotHelper.readProperties([
             ...Preflight.getStatusProperties(), {siid: SIID, piid: PIID}
-        ], {retry: false, interface: "local", strict: true, timeout: 3000});
+        ], Preflight.READ_OPTIONS);
     } catch {
         throw new FluidError("fresh_safety_not_confirmed");
     }

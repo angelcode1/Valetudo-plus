@@ -44,11 +44,19 @@ comes from reference source. Firmware write acceptance remains unverified.
   prerequisites remain separate.
 
 The manual X40 experimental reads and writes select the local transport
-with a three-second timeout per transmission. This path refuses an invalid
-timestamp and does not recover the handshake to replay the request. A lost
-acknowledgement can follow an applied write. An error leaves the setting
-unverified, and the UI refresh makes a separate read. Normal miIO callers
-retain their retry policy.
+with a three-second timeout per property request. A read may wait up to
+1.5 seconds for the local timestamp. It joins the initial handshake if
+one is in progress, or sends one handshake header if the timestamp is stale.
+There is no replay of the property request, and writes do not prepare or
+recover a handshake. A lost acknowledgement can follow an applied write.
+An error leaves the setting unverified, and the UI refresh makes a separate
+read. Normal miIO callers retain their retry policy.
+
+The control reports fixed reasons for an unavailable timestamp, a timed-out
+read, an invalid property response and an unrecognized firmware value.
+The read-only status endpoint also exposes whether the cached setter idle
+guard currently matches. A fresh safety observation is still required before
+a write.
 
 Earlier controller-only tests verified one helper invocation. The production
 transport could still resend it after a timeout. Encrypted loopback tests for

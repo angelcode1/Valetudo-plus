@@ -22,6 +22,7 @@ class DreameMiotHelper {
      * @param {Array<{siid: number, piid: number}>} properties
      * @param {object} [options]
      * @param {boolean} [options.retry]
+     * @param {boolean} [options.prepareStamp]
      * @param {boolean} [options.strict] Require complete unique successful property identities
      * @param {number} [options.timeout]
      * @param {"local"|"cloud"} [options.interface]
@@ -34,10 +35,13 @@ class DreameMiotHelper {
                 siid: p.siid,
                 piid: p.piid
             };
-        }), options ? {retry: options.retry, timeout: options.timeout, interface: options.interface} : undefined);
+        }), options ? {
+            retry: options.retry, timeout: options.timeout, interface: options.interface,
+            ...(options.prepareStamp === true ? {prepareStamp: true} : {})
+        } : undefined);
 
         if (options?.strict === true && !strictResponseMatches(properties, res)) {
-            throw new Error("Received invalid property response");
+            throw Object.assign(new Error("Received invalid property response"), {code: "MIOT_RESPONSE_INVALID"});
         }
         if (res && res.length === properties.length) {
             return res;
@@ -51,6 +55,7 @@ class DreameMiotHelper {
      * @param {number} piid
      * @param {object} [options]
      * @param {boolean} [options.retry]
+     * @param {boolean} [options.prepareStamp]
      * @param {boolean} [options.strict]
      * @param {number} [options.timeout]
      * @param {"local"|"cloud"} [options.interface]

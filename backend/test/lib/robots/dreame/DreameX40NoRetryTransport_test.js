@@ -2,6 +2,7 @@
 
 const assert = require("node:assert/strict");
 const Codec = require("../../../../lib/miio/Codec");
+const createMiioHeader = require("../../../../lib/miio/MiioHeader");
 const dgram = require("node:dgram");
 const DreameMiotHelper = require("../../../../lib/robots/dreame/DreameMiotHelper");
 const Logger = require("../../../../lib/Logger");
@@ -49,6 +50,80 @@ test("an invalid stamp refuses a no-retry request before transmission or handsha
     }});
     transport.retryHandshakeHelper = async () => assert.fail("No handshake recovery may run");
     await assert.rejects(() => transport.sendMessage({method: "set_properties"}, {retry: false}), MiioTimeoutError);
+});
+
+test("an opted-in read prepares a missing stamp with one local handshake and one encrypted request", {timeout: 5000}, async () => {
+    const token = Buffer.alloc(16, 0x42);
+    const codec = new Codec({token: token});
+    codec.updateStamp(100);
+    const server = dgram.createSocket("udp4");
+    const client = dgram.createSocket("udp4");
+    const traffic = [];
+    server.on("message", (packet, peer) => {
+        const decoded = codec.decodeIncomingMiioPacket(packet);
+        if (decoded.msg === null) {
+            traffic.push("handshake");
+            server.send(createMiioHeader({timestamp: 100}), peer.port, peer.address);
+        } else {
+            traffic.push(decoded.msg.method);
+            const result = [{siid: 4, piid: 50, code: 0, value: '[{"k":"SmartHost","v":0}]'}];
+            server.send(codec.encodeOutgoingMiioPacket({id: decoded.msg.id, result: result}, 123), peer.port, peer.address);
+        }
+    });
+    try {
+        server.bind(0, "127.0.0.1");
+        client.bind(0, "127.0.0.1");
+        await Promise.all([once(server, "listening"), once(client, "listening")]);
+        const socket = new MiioSocket({socket: client, token: token, deviceId: 123,
+            rinfo: {address: "127.0.0.1", port: server.address().port}, name: "fixture", isCloudSocket: false});
+        const transport = wrapper(socket);
+        socket.registerOnEmptyPacketHook(transport.checkHandshakeCompleted.bind(transport));
+        const robot = Object.create(MiioValetudoRobot.prototype);
+        Object.defineProperty(robot, "deviceId", {value: 123});
+        Object.assign(robot, {localSocket: transport, dummyCloud: {miioSocket: {
+            connected: true, sendMessage: () => assert.fail("Read may not fall back to cloud")
+        }}});
+        robot.miotHelper = new DreameMiotHelper({robot: robot});
+        const mode = Research.createQuirks(robot)[0];
+        const observed = await mode.serialize();
+        assert.equal(observed.value, "off");
+        assert.deepEqual(traffic, ["handshake", "get_properties"]);
+    } finally {
+        await Promise.all([new Promise(resolve => client.close(resolve)), new Promise(resolve => server.close(resolve))]);
+    }
+});
+
+test("timestamp preparation stays bounded and serializes only a fixed reason if no reply arrives", {timeout: 5000}, async () => {
+    const transport = wrapper({codec: {stamp: {isValid: () => false}},
+        sendMessage: () => assert.fail("No property message may be sent")});
+    let handshakes = 0;
+    transport.sendHandshake = () => handshakes++;
+    const mode = Research.createQuirks({miotHelper: {
+        readProperty: (siid, piid, options) => transport.sendMessage({method: "get_properties"}, options)
+    }})[0];
+    const observed = await mode.serialize();
+    assert.equal(observed.value, "unavailable");
+    assert.equal(observed.readOnly, true);
+    assert.equal(observed.unavailableReason, "local_stamp_unavailable");
+    assert.equal(handshakes, 1);
+    assert.equal(transport.onStampReady, undefined);
+    await assert.rejects(() => transport.sendMessage({method: "set_properties"},
+        {retry: false, prepareStamp: true}), MiioTimeoutError);
+    assert.equal(handshakes, 1);
+});
+
+test("opted-in reads can wait for an existing handshake without sending a second one", async () => {
+    let valid = false;
+    const transport = wrapper({codec: {stamp: {isValid: () => valid}},
+        sendMessage: async () => ({ok: true})});
+    transport.state = "handshaking";
+    transport.sendHandshake = () => assert.fail("The initial handshake already owns the send");
+    const pending = transport.sendMessage({method: "get_properties"}, {retry: false, prepareStamp: true});
+    setImmediate(() => {
+        valid = true;
+        transport.checkHandshakeCompleted({stamp: 100});
+    });
+    assert.deepEqual(await pending, {ok: true});
 });
 
 test("MIOT helper forwards explicit local no-retry options and strictly validates property identities", async () => {

@@ -1,6 +1,22 @@
 "use strict";
 
+const MiioTimeoutError = require("../../miio/MiioTimeoutError");
 const Settings = require("./DreameX40CleanGeniusReadOnlyStatus");
+
+const READ_OPTIONS = Object.freeze({retry: false, interface: "local", strict: true, timeout: 3000, prepareStamp: true});
+
+function readFailureReason(error, fallback) {
+    if (error?.code === "MIIO_STAMP_UNAVAILABLE") {
+        return "local_stamp_unavailable";
+    }
+    if (error instanceof MiioTimeoutError) {
+        return "local_read_timeout";
+    }
+    if (error?.code === "MIOT_RESPONSE_INVALID") {
+        return "invalid_miot_response";
+    }
+    return fallback;
+}
 
 // Fixed MIOT allowlist. These direct reads never invoke pollState/state parsing.
 const FIELDS = Object.freeze([
@@ -60,7 +76,7 @@ async function readFresh(robot) {
     let values;
     try {
         values = await robot.miotHelper.readProperties(getStatusProperties(),
-            {retry: false, interface: "local", strict: true, timeout: 3000});
+            READ_OPTIONS);
     } catch {
         throw new Error("X40 fresh MIOT read unavailable");
     }
@@ -70,9 +86,11 @@ async function readFresh(robot) {
 async function readSettings(robot) {
     let raw;
     try {
-        raw = await robot.miotHelper.readProperty(4, 50, {retry: false, interface: "local", strict: true, timeout: 3000});
-    } catch {
-        throw new Error("X40 native settings unavailable");
+        raw = await robot.miotHelper.readProperty(4, 50, READ_OPTIONS);
+    } catch (error) {
+        throw Object.assign(new Error("X40 native settings unavailable"), {
+            reason: readFailureReason(error, "settings_unavailable")
+        });
     }
     return {
         source: "native_miot_direct_settings",
@@ -96,7 +114,7 @@ async function readStainAvoidancePrerequisites(robot) {
     };
     let raw;
     try {
-        raw = await robot.miotHelper.readProperty(4, 22, {retry: false, interface: "local", strict: true, timeout: 3000});
+        raw = await robot.miotHelper.readProperty(4, 22, READ_OPTIONS);
     } catch {
         return result;
     }
@@ -115,4 +133,5 @@ async function readStainAvoidancePrerequisites(robot) {
 
 module.exports = {readFresh: readFresh, readSettings: readSettings,
     readStainAvoidancePrerequisites: readStainAvoidancePrerequisites,
-    getStatusProperties: getStatusProperties, parseFreshResponse: parseFreshResponse};
+    getStatusProperties: getStatusProperties, parseFreshResponse: parseFreshResponse,
+    READ_OPTIONS: READ_OPTIONS, readFailureReason: readFailureReason};

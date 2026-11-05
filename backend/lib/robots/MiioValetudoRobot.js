@@ -348,6 +348,7 @@ class MiioValetudoRobot extends ValetudoRobot {
      * @param {object} options
      * @param {number=} options.retries
      * @param {boolean=} options.retry false disables local transport replay
+     * @param {boolean=} options.prepareStamp allow bounded timestamp preparation before a no-retry local property read
      * @param {number=} options.timeout custom timeout in milliseconds
      * @param {"local"|"cloud"=} options.interface
      * @returns {Promise<Array|object|string>}

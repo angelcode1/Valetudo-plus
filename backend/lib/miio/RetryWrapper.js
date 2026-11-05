@@ -24,6 +24,8 @@ class RetryWrapper {
         this.tokenProvider = tokenProvider;
 
         this.mutex = Semaphore(1);
+        /** @type {(() => void)|undefined} */
+        this.onStampReady = undefined;
 
         this.handshake().then(() => {
             Logger.trace(`Initial handshake successful. Stamp ${this.miioSocket.codec.stamp.val}`);
@@ -42,6 +44,9 @@ class RetryWrapper {
             this.state = STATES.CONNECTED;
 
             Logger.debug(`<<= ${this.miioSocket.name}: handshake complete. Stamp ${this.miioSocket.codec.stamp.val}`);
+        }
+        if (msg.stamp > 0 && this.miioSocket.codec.stamp.isValid()) {
+            this.onStampReady?.();
         }
     }
 
@@ -90,6 +95,39 @@ class RetryWrapper {
     }
 
     /**
+     * Prepare a stale local timestamp before an explicitly opted-in read.
+     * Join the initial handshake if it is already in progress. Otherwise send
+     * one handshake header and never replay the subsequent property request.
+     * @private
+     * @returns {Promise<void>}
+     */
+    prepareReadStamp() {
+        if (this.miioSocket.codec.stamp.isValid()) {
+            return Promise.resolve();
+        }
+        return new Promise((resolve, reject) => {
+            const finish = () => {
+                clearTimeout(timer);
+                this.onStampReady = undefined;
+                if (this.miioSocket.codec.stamp.isValid()) {
+                    resolve();
+                } else {
+                    reject(Object.assign(new Error("Local MIIO timestamp unavailable"), {code: "MIIO_STAMP_UNAVAILABLE"}));
+                }
+            };
+            const timer = setTimeout(finish, 1500);
+            this.onStampReady = finish;
+            if (this.state !== STATES.HANDSHAKING) {
+                try {
+                    this.sendHandshake();
+                } catch {
+                    finish();
+                }
+            }
+        });
+    }
+
+    /**
      * Sends a message on the MiioSocket.
      * Performs multiple retries on timeout and also does a handshake if this wasn't yet done on the connection.
      *
@@ -100,12 +138,15 @@ class RetryWrapper {
      * @param {number=} options.retries
      * @param {number=} options.timeout custom timeout in milliseconds
      * @param {boolean=} options.retry false refuses replay or handshake recovery for this request
+     * @param {boolean=} options.prepareStamp allow bounded timestamp preparation before a no-retry property read
      * @returns {Promise<object>}
      */
     sendMessage(msg, options = {}) {
         return new Promise((resolve, reject) => {
             this.mutex.take(() => {
-                this.sendMessageHelper(msg, options).then(response => {
+                const ready = options.retry === false && options.prepareStamp === true && msg?.method === "get_properties" ?
+                    this.prepareReadStamp() : Promise.resolve();
+                ready.then(() => this.sendMessageHelper(msg, options)).then(response => {
                     this.mutex.leave();
 
                     resolve(response);

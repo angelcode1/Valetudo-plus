@@ -256,8 +256,9 @@ function createQuirks(robot, options = {}) {
                     value = "unsupported";
                     reason = "native_value_unverified";
                 }
-            } catch {
-                // A failed read produces a disabled control, never a stale value.
+            } catch (error) {
+                // Only the fixed reason assigned by the fresh settings reader.
+                reason = error?.reason ?? reason;
             }
             return {
                 id: quirk.id,
