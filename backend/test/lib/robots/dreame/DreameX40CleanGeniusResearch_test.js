@@ -281,9 +281,10 @@ test("R2416 observed 4:50 sentinel values do not cause an accidental write", asy
     assert.equal(await cleanGenius.getter(), "off");
     assert.equal(await autoRewash.getter(), "off");
 
-    // -1 is not an established reclean mode. The control must fail closed.
-    await assert.rejects(() => autoReclean.getter(), /Unsupported SmartAutoMop value: -1/);
-    await assert.rejects(() => autoReclean.setter("all_modes"), /Unsupported SmartAutoMop value: -1/);
+    // Reference signed protocol: -1 is Off with a remembered mode. Reading it
+    // and selecting Off again must not write. -7 is another key's value.
+    assert.equal(await autoReclean.getter(), "off");
+    await autoReclean.setter("off");
     assert.equal(writes, 0);
 });
 

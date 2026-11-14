@@ -107,13 +107,20 @@ fi
 
 # Enabling the manual UI control does not command SmartHost or start cleaning.
 # Preserve the profile's ordinary integrations/timers; it is not a trial profile.
+# Secondary controls need their own release-bound marker in the state directory.
+# The caller's environment is never inherited.
+opt() {
+    if marker "$1"; then echo 1; else echo 0; fi
+}
 exec env -i PATH=/usr/sbin:/usr/bin:/sbin:/bin HOME=/root \
     VALETUDO_CONFIG_PATH="$state_dir/config.json" \
     VALETUDO_DATA_PATH="$state_dir/data" \
     VALETUDO_LOG_PATH="$state_dir/valetudo.log" \
     VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=1 \
     VALETUDO_X40_CLEANGENIUS_OBSERVE_ONLY=1 \
-    VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_ADVANCED=0 \
-    VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_SIGNED=0 \
+    VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_ADVANCED="$(opt advanced)" \
+    VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_SIGNED="$(opt signed)" \
+    VALETUDO_X40_EXPERIMENTAL_FLUID_DETECTION="$(opt fluid-detection)" \
+    VALETUDO_X40_EXPERIMENTAL_STAIN_AVOIDANCE="$(opt stain-avoidance)" \
     VALETUDO_X40_NATIVE_SMARTHOST_TEST=0 \
     "$state_dir/valetudo"

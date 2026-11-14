@@ -129,17 +129,47 @@ test("signed off delta preserves positive selection and verifies exact negative 
             assert.deepEqual(writes, [[4, 50, JSON.stringify({k: key, v: -mode})]]);
             assert.equal(settings[key], -mode);
             const visible = await quirk.serialize();
-            assert.equal(visible.readOnly, true);
-            assert.equal(visible.value, "unsupported");
+            assert.equal(visible.readOnly, false);
+            assert.equal(visible.value, "off");
             assert.equal(visible.rawValue, -mode);
-            await assert.rejects(() => quirk.setter("all_modes"), /Unsupported/);
+            await quirk.setter("off");
             assert.equal(writes.length, 1);
         }
     }
 });
 
+test("remembered-off negative enables with one positive write and exact readback", async () => {
+    for (const key of ["SmartAutoMop", "SmartAutoWash"]) {
+        for (const [remembered, selection, target] of [[-1, "deep_only", 1], [-1, "all_modes", 2], [-2, "deep_only", 1]]) {
+            const {robot, writes, settings} = fixture({settings: {[key]: remembered}});
+            const quirk = Research.createQuirks(robot, {advanced: true, signedProtocol: true})[key === "SmartAutoMop" ? 1 : 2];
+            await quirk.setter(selection);
+            assert.deepEqual(writes, [[4, 50, JSON.stringify({k: key, v: target})]]);
+            assert.equal(settings[key], target);
+            assert.equal(await quirk.getter(), selection);
+        }
+    }
+});
+
+test("remembered-off negative stays blocked without signed opt-in, idle state or readback", async () => {
+    const unsigned = fixture();
+    await assert.rejects(() => Research.createQuirks(unsigned.robot, {advanced: true})[1].setter("deep_only"), /not opted in/);
+    assert.equal(unsigned.writes.length, 0);
+
+    const busy = fixture({task: 1});
+    await assert.rejects(() => Research.createQuirks(busy.robot, {advanced: true, signedProtocol: true})[1].setter("deep_only"), /idle/);
+    assert.equal(busy.writes.length, 0);
+
+    const lost = fixture();
+    lost.robot.miotHelper.writeProperty = async (siid, piid, value) => {
+        lost.writes.push([siid, piid, value]);
+    };
+    await assert.rejects(() => Research.createQuirks(lost.robot, {advanced: true, signedProtocol: true})[1].setter("deep_only"), /readback mismatch/);
+    assert.equal(lost.writes.length, 1);
+});
+
 test("unknown values remain visible/read-only and never become authorization to write", async () => {
-    for (const value of [-2, -1, 77, null]) {
+    for (const value of [-3, 77, null]) {
         const {robot, writes} = fixture({settings: {SmartAutoMop: value}});
         const quirk = Research.createQuirks(robot, {advanced: true, signedProtocol: true})[1];
         const visible = await quirk.serialize();

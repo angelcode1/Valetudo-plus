@@ -3,7 +3,8 @@
 Set both `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS=1` and
 `VALETUDO_X40_EXPERIMENTAL_FLUID_DETECTION=1` in the Valetudo process environment
 to register **Options → Robot → Quirks → EXPERIMENTAL Fluid Detection**.
-The guarded launcher does not set the fluid opt-in. Registration sends no
+The guarded launcher sets the fluid opt-in only when its state directory has a
+release-bound `fluid-detection` marker. Registration sends no
 write. The control offers **Disabled** and **Enabled**.
 
 ## Model and property mapping

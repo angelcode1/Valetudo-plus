@@ -5,6 +5,7 @@ const FluidDetection = require("./DreameX40FluidDetection");
 const Preflight = require("./DreameX40CleanGeniusPreflight");
 const MiioErrorResponseRobotFirmwareError = require("../../miio/MiioErrorResponseRobotFirmwareError");
 const MiioTimeoutError = require("../../miio/MiioTimeoutError");
+const Logger = require("../../Logger");
 const Quirk = require("../../core/Quirk");
 const RobotFirmwareError = require("../../core/RobotFirmwareError");
 
@@ -103,6 +104,12 @@ function describeCachedIdleState(robot) {
 }
 
 function decodeValue(raw, definition) {
+    // Reference protocol: a signed auto mode stores Off as the negative of the
+    // remembered positive selection. Only those exact negatives read as off.
+    if (definition.signed === true && Number.isSafeInteger(raw) && raw < 0 &&
+        Object.values(definition.values).includes(-raw)) {
+        return "off";
+    }
     const matchingName = Object.keys(definition.values).find(name => {
         return definition.values[name] === raw;
     });
@@ -192,10 +199,12 @@ function createQuirks(robot, options = {}) {
                     }
 
                     // Reference protocol: disabling a positive auto mode preserves
-                    // its selection as a signed negative. Still separately opted in
-                    // and hardware-unverified. Unknown current values stay blocked.
-                    const target = definition.signed === true && value === "off" && current[definition.key] > 0 ?
-                        -current[definition.key] : definition.values[value];
+                    // its selection as a signed negative, and an already negative
+                    // (remembered off) value is left alone. Enabling writes the
+                    // requested positive value. Still separately opted in and
+                    // hardware-unverified. Unknown current values stay blocked.
+                    const target = definition.signed === true && value === "off" ?
+                        -Math.abs(current[definition.key]) : definition.values[value];
                     if (current[definition.key] === target) {
                         return;
                     }
@@ -318,7 +327,72 @@ function createQuirks(robot, options = {}) {
     return quirks;
 }
 
+/**
+ * The vendor app turns CleanGenius off for a zone cleanup and restores the
+ * previous mode afterwards. Runs only when the opted-in SmartHost control exists
+ * and reads back a positive mode. Both writes go through the guarded selector.
+ * @param {object} robot
+ * @param {object} smartHost The SmartHost quirk returned by createQuirks
+ * @param {{start: (options: object) => Promise<void>}} zoneCleaning
+ * @returns {() => void} Call after each parsed state update
+ */
+function suspendDuringZoneCleaning(robot, smartHost, zoneCleaning) {
+    let pending = null;
+    const select = smartHost.setter;
+    const start = zoneCleaning.start.bind(zoneCleaning);
+
+    // A manual selection always replaces a remembered automatic restore.
+    smartHost.setter = async value => {
+        pending = null;
+        await select(value);
+    };
+    zoneCleaning.start = async options => {
+        let current = "off";
+        try {
+            current = await smartHost.getter();
+        } catch {
+            // Unreadable or unrecognized: start as before, without any write.
+        }
+        if (current !== "off") {
+            // A failure here leaves the cleanup unstarted and the mode unverified.
+            await select("off");
+            pending = {value: current, started: false};
+        }
+        try {
+            await start(options);
+        } catch (error) {
+            if (pending) {
+                pending.started = true;
+            }
+            throw error;
+        }
+    };
+
+    return () => {
+        if (!pending) {
+            return;
+        }
+        if (!isIdle(robot)) {
+            pending.started = true;
+            return;
+        }
+        // Wait, without robot I/O, for a docked idle robot and an idle dock.
+        if (!pending.started || robot.ephemeralState.mode !== 6 ||
+            robot.x40DockWashObservation?.value?.raw !== 0) {
+            return;
+        }
+        // Exactly one attempt. The selector repeats its complete fresh gate;
+        // on any refusal or failure CleanGenius stays off until reselected.
+        const value = pending.value;
+        pending = null;
+        select(value).catch(() => {
+            Logger.warn("X40 CleanGenius was not restored after zone cleaning; check the selector");
+        });
+    };
+}
+
 module.exports = {
+    suspendDuringZoneCleaning: suspendDuringZoneCleaning,
     EXPERIMENTAL_ENV: EXPERIMENTAL_ENV,
     ADVANCED_ENV: ADVANCED_ENV,
     SIGNED_ENV: SIGNED_ENV,

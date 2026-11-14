@@ -34,8 +34,8 @@ No private robot file is needed to reproduce the source comparison.
   reference mapping without calling either value a verified detection state.
 - Register **EXPERIMENTAL Stain Avoidance** only when the main CleanGenius opt-in
   and `VALETUDO_X40_EXPERIMENTAL_STAIN_AVOIDANCE` are both exactly `1`.
-  Main, advanced and signed flags alone never register it. The new flag is absent
-  from the clean environment supplied by the generic UI launcher.
+  Main, advanced and signed flags alone never register it. The generic UI
+  launcher sets it only for a release-bound `stain-avoidance` marker.
 - Offer `disabled` / `enabled`, mapped to 1/2. Require a current recognized 1/2
   value, eligible cached state, fresh reference AI obstacle/fluid flags and the
   existing complete fresh idle/charging/clear-error/idle-dock read for either
