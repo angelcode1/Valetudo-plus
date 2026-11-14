@@ -369,6 +369,11 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
                 fluidDetectionModel: fluidDetection ?
                     MiioValetudoRobot.READ_DEVICE_CONF(DreameValetudoRobot.DEVICE_CONF_PATH)?.model : undefined
             }) : [];
+        if (this.allowExperimentalCleanGenius) {
+            this.x40AfterStateUpdate = X40CleanGeniusResearch.suspendDuringZoneCleaning(
+                this, experimentalQuirks[0], this.capabilities[capabilities.DreameZoneCleaningCapability.TYPE]
+            );
+        }
 
         this.registerCapability(new QuirksCapability({
             robot: this,
@@ -505,7 +510,7 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
         }
 
         // Filter out everything that might confuse the regular state parsing
-        return super.parseAndUpdateState(data.filter(e => {
+        const result = super.parseAndUpdateState(data.filter(e => {
             return (
                 !(
                     e.siid === DreameGen2ValetudoRobot.MIOT_SERVICES.VACUUM_2.SIID &&
@@ -513,6 +518,8 @@ class DreameX40UltraValetudoRobot extends DreameGen4ValetudoRobot {
                 )
             );
         }));
+        this.x40AfterStateUpdate?.();
+        return result;
     }
 
     getStatePropertiesToPoll() {

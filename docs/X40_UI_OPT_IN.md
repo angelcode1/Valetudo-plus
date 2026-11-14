@@ -17,6 +17,7 @@ The CleanGenius Status page supplies observations; it does not register controls
 | `VALETUDO_X40_CLEANGENIUS_OBSERVE_ONLY=1` without the main opt-in | Preserves positive SmartHost observations without registering writable experimental controls |
 | Main opt-in plus `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_ADVANCED=1` | Registers additional experimental Reclean/Rewash controls |
 | Advanced controls without `VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_SIGNED=1` | Keeps their writes disabled |
+| Advanced controls with the signed opt-in | Reads `-1`/`-2` as Off with a remembered mode; enabling writes the selected positive value once |
 | Main opt-in plus `VALETUDO_X40_EXPERIMENTAL_STAIN_AVOIDANCE=1` | Registers a separate experimental stain-avoidance selector using reference values 1/2; hardware acceptance remains unverified |
 | Main opt-in plus `VALETUDO_X40_EXPERIMENTAL_FLUID_DETECTION=1` | Registers a separate experimental fluid-detection selector |
 
@@ -41,7 +42,26 @@ Activation requires both eligible cached state and a complete fresh native
 safety read. Powersave mode 14 remains blocked. Off recovery instead requires
 a recognized fresh SmartHost value; it does not depend on activation eligibility.
 Operations are serialized, single-key and never automatically retried. Unknown
-or negative advanced values do not authorize a write.
+advanced values, including negatives other than `-1`/`-2`, do not authorize a
+write.
+
+## Zone cleaning while CleanGenius is on
+
+The pinned reference integration turns CleanGenius off before a zone cleanup
+and restores the previous mode when the cleanup ends. With the main opt-in, the
+X40 zone cleaning control does the same through the guarded selector:
+
+- A fresh read decides. Off, unreadable or unrecognized settings start the
+  cleanup exactly as before, with no write.
+- Routine or Deep is switched off with one write and exact readback before the
+  start action. If that fails, the cleanup is not started.
+- After the cleanup has been observed and the robot is docked, idle and the
+  dock is idle, the previous mode is selected once. That selection repeats the
+  complete fresh safety gate. A refusal or failure leaves CleanGenius off.
+- A manual selection, or a Valetudo restart, discards the remembered mode.
+
+This is fake-helper tested and hardware unverified. Segment and full cleanups
+are not changed.
 
 The frontend refreshes Quirks after successful and failed mutations and keeps
 the changed control pending until refresh settles. A failed command may follow
@@ -58,7 +78,7 @@ acceptance or a recommendation to enable additional protocol flags.
 | Setting | UI and implementation | Remaining boundary |
 | --- | --- | --- |
 | CleanGenius Off / Routine / Deep | Guarded SmartHost selector under Options → Robot → Quirks | Main opt-in required; exact readback confirms only the requested setting |
-| Auto Reclean / Auto Rewash | Additional experimental quirks | Advanced opt-in required for registration, signed opt-in for writes; unknown or negative current values remain blocked |
+| Auto Reclean / Auto Rewash | Additional experimental quirks | Advanced opt-in required for registration, signed opt-in for writes; `-1`/`-2` read as Off, other unknown values remain blocked |
 | Stain handling / avoidance | Read-only status field; separate experimental Stain Avoidance quirk | Separate stain opt-in and fresh AI obstacle/fluid flags required; reference 1/2 mapping is not a boolean identification switch or X40 hardware acceptance |
 | Fluid detection | Separate [experimental Fluid Detection quirk](X40_FLUID_DETECTION.md) | R2416, R2416a and R2416c only. Both directions require fresh idle checks and AI obstacle detection enabled. Firmware acceptance remains unverified |
 | Mop wash temperature | Existing Options → Robot → Mop Wash Temperature control | X40's V2 capability exposes Cold, Warm, Hot and Scalding; setting it does not prove a wash occurred |
@@ -79,9 +99,8 @@ source-level scope decision.
 
 The [stain-avoidance implementation notes](X40_STAIN_AVOIDANCE.md) explain the
 reference mapping, corrected observation labels and separate validation boundary.
-The generic guarded launcher uses a clean environment and does not set the new
-stain or fluid opt-ins, so its normal candidate profile still exposes only the
-main mode.
+The generic guarded launcher uses a clean environment. Without the markers
+described below, its candidate profile exposes only the main mode.
 
 ## Source references
 
@@ -108,8 +127,13 @@ The state directory must contain a matching `release` marker. A matching
 original. Candidate files are `valetudo`, `config.json` and `data` inside that
 directory. Config/data are deployment inputs, not generated or modified by the
 launcher. The candidate runs in a clean environment with the main UI opt-in,
-observe-only preservation and explicit zero advanced/signed/test flags. Fallback
+observe-only preservation and an explicit zero test flag. Fallback
 uses the original config/data environment with the main opt-in disabled.
+
+Each secondary control needs its own marker file in the state directory,
+containing the release identifier like `enabled`: `fluid-detection`,
+`stain-avoidance`, `advanced` and `signed`. A missing or mismatching marker
+yields `0`. The caller's environment is never inherited.
 
 Without a matching `accepted` marker, the candidate gets one boot attempt. A
 detached watchdog must report readiness before the candidate starts. At 900

@@ -34,7 +34,9 @@ function fixture(t) {
         " \"$VALETUDO_X40_CLEANGENIUS_OBSERVE_ONLY\"" +
         " \"${VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_ADVANCED-unset}\"" +
         " \"${VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_SIGNED-unset}\"" +
-        " \"${VALETUDO_X40_NATIVE_SMARTHOST_TEST-unset}\" > " + quote(output) + "\n";
+        " \"${VALETUDO_X40_NATIVE_SMARTHOST_TEST-unset}\"" +
+        " \"${VALETUDO_X40_EXPERIMENTAL_FLUID_DETECTION-unset}\"" +
+        " \"${VALETUDO_X40_EXPERIMENTAL_STAIN_AVOIDANCE-unset}\" > " + quote(output) + "\n";
     fs.writeFileSync(original, app("original"), {mode: 0o700});
     fs.writeFileSync(candidate, app("candidate"), {mode: 0o700});
     const hasher = path.join(root, "hash.js");
@@ -62,7 +64,9 @@ function fixture(t) {
         VALETUDO_X40_CLEANGENIUS_OBSERVE_ONLY: "1",
         VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_ADVANCED: "1",
         VALETUDO_X40_EXPERIMENTAL_CLEANGENIUS_SIGNED: "1",
-        VALETUDO_X40_NATIVE_SMARTHOST_TEST: "1"};
+        VALETUDO_X40_NATIVE_SMARTHOST_TEST: "1",
+        VALETUDO_X40_EXPERIMENTAL_FLUID_DETECTION: "1",
+        VALETUDO_X40_EXPERIMENTAL_STAIN_AVOIDANCE: "1"};
     return {root: root, state: state, original: original, candidate: candidate, release: release, candidateSha: candidateSha, originalSha: originalSha, env: env,
         mark: name => fs.writeFileSync(path.join(state, name), release + "\n"),
         exists: name => fs.existsSync(path.join(state, name)),
@@ -82,7 +86,7 @@ test("X40 launch: no enable marker keeps the original default-off environment", 
     fs.unlinkSync(path.join(f.state, "enabled"));
     assert.equal(f.run().status, 0);
     assert.deepEqual(f.read(), ["original", f.env.VALETUDO_CONFIG_PATH, f.env.VALETUDO_DATA_PATH,
-        "0", "1", "unset", "unset", "unset"]);
+        "0", "1", "unset", "unset", "unset", "1", "1"]);
     assert.equal(f.exists("boot-attempt"), false);
 });
 
@@ -91,8 +95,23 @@ test("X40 launch: accepted release exposes only the main control in its own prof
     f.mark("accepted");
     assert.equal(f.run().status, 0);
     assert.deepEqual(f.read(), ["candidate", path.join(f.state, "config.json"), path.join(f.state, "data"),
-        "1", "1", "0", "0", "0"]);
+        "1", "1", "0", "0", "0", "0", "0"]);
     assert.equal(f.exists("watch.ready"), false);
+});
+
+test("X40 launch: secondary controls need their own release-bound markers", t => {
+    const f = fixture(t);
+    f.mark("accepted");
+    f.mark("fluid-detection");
+    fs.writeFileSync(path.join(f.state, "stain-avoidance"), "another-release\n");
+    assert.equal(f.run().status, 0);
+    assert.deepEqual(f.read().slice(3), ["1", "1", "0", "0", "0", "1", "0"]);
+
+    f.mark("stain-avoidance");
+    f.mark("advanced");
+    f.mark("signed");
+    assert.equal(f.run().status, 0);
+    assert.deepEqual(f.read().slice(3), ["1", "1", "1", "1", "0", "1", "1"]);
 });
 
 test("X40 launch: absent release metadata falls back to the pinned original", t => {
